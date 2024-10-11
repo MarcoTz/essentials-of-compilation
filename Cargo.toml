@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "main",
+    "chapter1"
+]
+
+resolver = "2"
+default-members = ["main"]

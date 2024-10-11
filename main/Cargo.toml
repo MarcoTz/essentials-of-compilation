@@ -1,0 +1,11 @@
+[package]
+name = "essentials-main"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "essentials"
+path = "src/main.rs"
+
+[dependencies]
+chapter1 = {path="../chapter1"}
