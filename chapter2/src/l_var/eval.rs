@@ -5,6 +5,15 @@ use super::{
 use crate::{BinOp, UnaryOp};
 use std::{collections::HashMap, io::stdin};
 
+fn get_input() -> i64 {
+    let mut inp: String = String::default();
+    stdin().read_line(&mut inp).unwrap_or_default();
+    match inp.trim_end().parse::<i64>() {
+        Ok(i) => i,
+        Err(_) => get_input(),
+    }
+}
+
 pub type Env = HashMap<String, i64>;
 pub enum EvalRes {
     Num { i: i64, env: Env },
@@ -15,16 +24,7 @@ pub fn interp_exp(exp: Exp, env: &Env) -> Result<i64, Error> {
     match exp {
         Exp::Name(name) => env.get(&name).cloned().ok_or(Error::VarNotFound { name }),
         Exp::Constant(i) => Ok(i),
-        Exp::InputInt => {
-            let mut inp: String = String::default();
-            stdin().read_line(&mut inp).unwrap_or_default();
-            let mut res = inp.trim_end().parse::<i64>();
-            while res.is_err() {
-                stdin().read_line(&mut inp).unwrap_or_default();
-                res = inp.trim_end().parse::<i64>();
-            }
-            Ok(res.unwrap())
-        }
+        Exp::InputInt => Ok(get_input()),
         Exp::UnaryOp { op, exp } => {
             let res = interp_exp(*exp, env)?;
             match op {
