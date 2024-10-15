@@ -15,6 +15,18 @@ pub enum Exp {
     },
 }
 
+impl From<i64> for Exp {
+    fn from(i: i64) -> Exp {
+        Exp::Constant(i)
+    }
+}
+
+impl From<String> for Exp {
+    fn from(st: String) -> Exp {
+        Exp::Name(st)
+    }
+}
+
 pub enum Stmt {
     Assign { name: Var, exp: Exp },
     Print(Exp),
