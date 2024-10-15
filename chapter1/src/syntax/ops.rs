@@ -24,3 +24,29 @@ impl fmt::Display for BinOp {
         }
     }
 }
+
+#[cfg(test)]
+mod ops_test {
+    use super::{BinOp, UnaryOp};
+
+    #[test]
+    fn display_unary() {
+        let result = format!("{}", UnaryOp::Neg);
+        let expected = "-";
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn display_add() {
+        let result = format!("{}", BinOp::Add);
+        let expected = "+";
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn display_sub() {
+        let result = format!("{}", BinOp::Sub);
+        let expected = "-";
+        assert_eq!(result, expected)
+    }
+}
