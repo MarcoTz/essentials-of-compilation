@@ -32,6 +32,12 @@ impl Exp {
     }
 }
 
+impl From<i32> for Exp {
+    fn from(i: i32) -> Exp {
+        Exp::Constant(i)
+    }
+}
+
 #[cfg(test)]
 mod exp_tests {
     use super::{BinOp, Exp, UnaryOp};

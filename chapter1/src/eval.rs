@@ -50,3 +50,60 @@ pub fn interp_lint(m: Module) -> Vec<i32> {
     }
     results
 }
+
+#[cfg(test)]
+mod eval_tests {
+    use super::{interp_exp, interp_lint, interp_stmt, BinOp, Exp, Stmt, UnaryOp};
+
+    #[test]
+    fn eval_const() {
+        let result = interp_exp(1.into());
+        let expected = 1;
+        assert_eq!(result, expected)
+    }
+    #[test]
+    fn eval_unary() {
+        let result = interp_exp(Exp::UnaryOp {
+            exp: Box::new(1.into()),
+            op: UnaryOp::Neg,
+        });
+        let expected = -1;
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn eval_bin() {
+        let result = interp_exp(Exp::BinOp {
+            exp1: Box::new(2.into()),
+            op: BinOp::Add,
+            exp2: Box::new(3.into()),
+        });
+        let expected = 5;
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn eval_print() {
+        let result = interp_stmt(Stmt::Print(1.into()));
+        let expected = None;
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn eval_exp() {
+        let result = interp_stmt(Stmt::Exp(2.into()));
+        let expected = Some(2);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn eval_mod() {
+        let result = interp_lint(vec![
+            Stmt::Print(1.into()),
+            Stmt::Exp(2.into()),
+            Stmt::Exp(3.into()),
+        ]);
+        let expected = vec![2, 3];
+        assert_eq!(result, expected)
+    }
+}
