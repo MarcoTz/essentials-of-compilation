@@ -1,4 +1,4 @@
-use super::{BinOp, UnaryOp, Var};
+use crate::{BinOp, UnaryOp, Var};
 
 pub enum Exp {
     Name(Var),

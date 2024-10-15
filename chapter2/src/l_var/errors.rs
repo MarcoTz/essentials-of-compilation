@@ -1,13 +1,9 @@
-use super::{
-    remove_complex_operands::{Exp, Stmt},
-    Var,
-};
+use crate::Var;
 use std::fmt;
+
 #[derive(Debug)]
 pub enum Error {
     VarNotFound { name: Var },
-    NotAnExpression(Stmt),
-    NotAnAtom(Exp),
 }
 
 impl fmt::Display for Error {
@@ -16,8 +12,6 @@ impl fmt::Display for Error {
             Error::VarNotFound { name } => {
                 write!(f, "Could not find variable {name} in environemnt.")
             }
-            Error::NotAnExpression(st) => write!(f, "Statement {st} is not an expression."),
-            Error::NotAnAtom(exp) => write!(f, "Expression {exp} is not an atom."),
         }
     }
 }

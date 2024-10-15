@@ -1,8 +1,8 @@
 use super::{
     errors::Error,
-    syntax::{Exp, Module},
-    BinOp, Stmt, UnaryOp,
+    syntax::{Exp, Module, Stmt},
 };
+use crate::{BinOp, UnaryOp};
 use std::{collections::HashMap, io::stdin};
 
 pub type Env = HashMap<String, i64>;
