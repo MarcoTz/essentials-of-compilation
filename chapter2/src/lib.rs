@@ -1,6 +1,8 @@
 pub mod l_var;
 pub mod l_var_reduced;
 pub mod reduce;
+pub mod x86_int;
+pub mod x86_var;
 
 use std::fmt;
 
