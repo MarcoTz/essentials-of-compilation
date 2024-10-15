@@ -1,18 +1,15 @@
-use super::{
-    exp::Exp,
-    functions::{Call, StmtFunction},
-};
+use super::exp::Exp;
 use std::fmt;
 
 pub enum Stmt {
-    Call(Call<StmtFunction>),
+    Print(Exp),
     Exp(Exp),
 }
 
 impl fmt::Display for Stmt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Stmt::Call(call) => call.fmt(f),
+            Stmt::Print(exp) => write!(f, "print({exp})"),
             Stmt::Exp(e) => e.fmt(f),
         }
     }
@@ -21,10 +18,7 @@ impl fmt::Display for Stmt {
 impl Stmt {
     pub fn is_stmt(&self) -> bool {
         match self {
-            Stmt::Call(Call {
-                name: StmtFunction::Print,
-                args,
-            }) => args.len() == 1 && args.first().map(|e| e.is_exp()).unwrap_or(false),
+            Stmt::Print(exp) => exp.is_exp(),
             Stmt::Exp(e) => e.is_exp(),
         }
     }
