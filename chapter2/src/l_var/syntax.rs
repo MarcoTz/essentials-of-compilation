@@ -14,9 +14,13 @@ pub enum Exp {
         exp2: Box<Exp>,
     },
 }
+
 pub enum Stmt {
-    Assign { var: Var, exp: Exp },
+    Assign { name: Var, exp: Exp },
     Print(Exp),
     Exp(Exp),
 }
-pub type Module = Vec<Stmt>;
+
+pub struct Module {
+    pub stmts: Vec<Stmt>,
+}

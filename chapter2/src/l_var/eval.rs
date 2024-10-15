@@ -44,9 +44,9 @@ pub fn interp_exp(exp: Exp, env: &Env) -> Result<i64, Error> {
 
 pub fn interp_stmt(stmt: Stmt, env: &mut Env) -> Result<EvalRes, Error> {
     match stmt {
-        Stmt::Assign { var, exp } => {
+        Stmt::Assign { name, exp } => {
             let res = interp_exp(exp, env)?;
-            env.insert(var, res);
+            env.insert(name, res);
             Ok(EvalRes::Unit(env.clone()))
         }
         Stmt::Print(exp) => {
@@ -67,7 +67,7 @@ pub fn interp_stmt(stmt: Stmt, env: &mut Env) -> Result<EvalRes, Error> {
 pub fn interp_lvar(m: Module) -> Result<Vec<EvalRes>, Error> {
     let mut results = vec![];
     let mut env = HashMap::new();
-    for stmt in m.into_iter() {
+    for stmt in m.stmts.into_iter() {
         let res = interp_stmt(stmt, &mut env)?;
         results.push(res)
     }

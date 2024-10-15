@@ -1,5 +1,5 @@
 use super::{Atm, Stmt};
-use crate::{BinOp, UnaryOp};
+use crate::{BinOp, UnaryOp, Var};
 use std::fmt;
 
 #[derive(Debug, Clone)]
@@ -24,5 +24,16 @@ impl fmt::Display for Exp {
 impl From<Exp> for Stmt {
     fn from(exp: Exp) -> Stmt {
         Stmt::Exp(exp)
+    }
+}
+
+impl Exp {
+    pub fn occurs(&self, var: &Var) -> bool {
+        match self {
+            Exp::Atm(atm) => atm.occurs(var),
+            Exp::InputInt => false,
+            Exp::UnaryOp { op: _, exp } => exp.occurs(var),
+            Exp::BinOp { exp1, op: _, exp2 } => exp1.occurs(var) || exp2.occurs(var),
+        }
     }
 }
