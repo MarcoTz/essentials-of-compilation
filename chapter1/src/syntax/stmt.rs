@@ -15,11 +15,29 @@ impl fmt::Display for Stmt {
     }
 }
 
-impl Stmt {
-    pub fn is_stmt(&self) -> bool {
-        match self {
-            Stmt::Print(exp) => exp.is_exp(),
-            Stmt::Exp(e) => e.is_exp(),
-        }
+#[cfg(test)]
+mod stmt_tests {
+    use super::{Exp, Stmt};
+
+    fn example_print() -> Stmt {
+        Stmt::Print(Exp::Constant(1))
+    }
+
+    fn example_exp() -> Stmt {
+        Stmt::Exp(Exp::Constant(1))
+    }
+
+    #[test]
+    fn display_print() {
+        let result = format!("{}", example_print());
+        let expected = "print(1)";
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn display_exp() {
+        let result = format!("{}", example_exp());
+        let expected = "1";
+        assert_eq!(result, expected)
     }
 }
