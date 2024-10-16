@@ -4,50 +4,43 @@ use crate::{
     l_var_reduced::{Atm, Exp, Stmt},
 };
 
+fn exp_to_atm(exp: Exp, st: &mut ReduceState) -> Atm {
+    match exp.as_atm() {
+        Some(at) => at,
+        None => {
+            let new_name = st.fresh_var();
+            let assign = Stmt::Assign {
+                name: new_name.clone(),
+                exp,
+            };
+            st.add_stmt(assign);
+            Atm::Name(new_name)
+        }
+    }
+}
 impl Reduce for FullExp {
     type Target = Exp;
     fn reduce(self, st: &mut ReduceState) -> Self::Target {
         match self {
             FullExp::Name(name) => Atm::Name(name).into(),
             FullExp::Constant(i) => Atm::Constant(i).into(),
-            FullExp::InputInt => Exp::InputInt.into(),
+            FullExp::InputInt => Exp::InputInt,
             FullExp::UnaryOp { exp, op } => {
                 let exp_red = exp.reduce(st);
-                let new_name = st.fresh_var();
-                let assign = Stmt::Assign {
-                    name: new_name.clone(),
-                    exp: exp_red,
-                };
-                let atm = Atm::Name(new_name);
-                st.add_stmt(assign);
-                Exp::UnaryOp { op, exp: atm }.into()
+                let atm = exp_to_atm(exp_red, st);
+                Exp::UnaryOp { op, exp: atm }
             }
             FullExp::BinOp { exp1, op, exp2 } => {
                 let exp1_red = exp1.reduce(st);
                 let exp2_red = exp2.reduce(st);
-
-                let new_name1 = st.fresh_var();
-                let assign1 = Stmt::Assign {
-                    name: new_name1.clone(),
-                    exp: exp1_red,
-                };
-                st.add_stmt(assign1);
-                let atm1 = Atm::Name(new_name1);
-
-                let new_name2 = st.fresh_var();
-                let assign2 = Stmt::Assign {
-                    name: new_name2.clone(),
-                    exp: exp2_red,
-                };
-                st.add_stmt(assign2);
-                let atm2 = Atm::Name(new_name2);
+                let atm1 = exp_to_atm(exp1_red, st);
+                let atm2 = exp_to_atm(exp2_red, st);
 
                 Exp::BinOp {
                     op,
                     exp1: atm1,
                     exp2: atm2,
                 }
-                .into()
             }
         }
     }
@@ -55,7 +48,7 @@ impl Reduce for FullExp {
 
 #[cfg(test)]
 mod exp_tests {
-    use super::{Exp, FullExp, Reduce, ReduceState, Stmt};
+    use super::{Exp, FullExp, Reduce, ReduceState};
     use crate::{BinOp, UnaryOp};
 
     #[test]
@@ -93,17 +86,11 @@ mod exp_tests {
         .reduce(&mut st);
         let expected = Exp::UnaryOp {
             op: UnaryOp::Neg,
-            exp: "x0".to_owned().into(),
+            exp: 1.into(),
         }
         .into();
-        let mut new_st = ReduceState::default();
-        new_st.num_vars = 1;
-        new_st.add_stmt(Stmt::Assign {
-            name: "x0".to_owned(),
-            exp: Exp::Atm(1.into()),
-        });
         assert_eq!(result, expected);
-        assert_eq!(st, new_st)
+        assert_eq!(st, ReduceState::default())
     }
 
     #[test]
@@ -117,19 +104,11 @@ mod exp_tests {
         .reduce(&mut st);
         let expected = Exp::BinOp {
             op: BinOp::Add,
-            exp1: "x0".to_owned().into(),
-            exp2: "x1".to_owned().into(),
+            exp1: 1.into(),
+            exp2: 2.into(),
         };
         let mut new_st = ReduceState::default();
-        new_st.num_vars = 2;
-        new_st.add_stmt(Stmt::Assign {
-            name: "x0".to_owned(),
-            exp: Exp::Atm(1.into()),
-        });
-        new_st.add_stmt(Stmt::Assign {
-            name: "x1".to_owned(),
-            exp: Exp::Atm(2.into()),
-        });
+        new_st.num_vars = 0;
         assert_eq!(result, expected);
         assert_eq!(st, new_st)
     }

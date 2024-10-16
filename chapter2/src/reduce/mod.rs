@@ -2,21 +2,13 @@ use super::l_var_reduced::Stmt;
 use crate::Var;
 
 pub mod exp;
+pub mod prog;
 pub mod stmt;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub struct ReduceState {
     previous_prog: Vec<Stmt>,
     num_vars: usize,
-}
-
-impl Default for ReduceState {
-    fn default() -> ReduceState {
-        ReduceState {
-            previous_prog: vec![],
-            num_vars: 0,
-        }
-    }
 }
 
 impl ReduceState {

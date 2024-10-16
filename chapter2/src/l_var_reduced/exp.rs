@@ -36,6 +36,13 @@ impl Exp {
             Exp::BinOp { exp1, op: _, exp2 } => exp1.occurs(var) || exp2.occurs(var),
         }
     }
+
+    pub fn as_atm(&self) -> Option<Atm> {
+        match self {
+            Exp::Atm(at) => Some(at.clone()),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -114,5 +121,19 @@ mod exp_tests {
         }
         .occurs(&"x".to_owned());
         assert!(!result)
+    }
+
+    #[test]
+    fn atm_as_atm() {
+        let result = Exp::Atm(1.into()).as_atm();
+        let expected = Some(1.into());
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn input_as_atm() {
+        let result = Exp::InputInt.as_atm();
+        let expected = None;
+        assert_eq!(result, expected)
     }
 }
