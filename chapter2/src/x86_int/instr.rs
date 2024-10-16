@@ -1,21 +1,19 @@
-use super::Arg;
 use std::fmt;
-
 pub type Label = String;
 
-pub enum Instr {
-    AddQ(Arg, Arg),
-    SubQ(Arg, Arg),
-    Negq(Arg),
-    MovQ(Arg, Arg),
+pub enum Instr<T> {
+    AddQ(T, T),
+    SubQ(T, T),
+    Negq(T),
+    MovQ(T, T),
     CallQ(Label, i64),
-    PushQ(Arg),
-    PopQ(Arg),
+    PushQ(T),
+    PopQ(T),
     RetQ,
     Jump(Label),
 }
 
-impl fmt::Display for Instr {
+impl<T: fmt::Display> fmt::Display for Instr<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Instr::AddQ(a1, a2) => write!(f, "addq {a1} {a2}"),
@@ -33,7 +31,8 @@ impl fmt::Display for Instr {
 
 #[cfg(test)]
 mod instr_tests {
-    use super::{Arg, Instr};
+    use super::Instr;
+    use crate::x86_int::Arg;
 
     #[test]
     fn display_addq() {
@@ -74,7 +73,7 @@ mod instr_tests {
 
     #[test]
     fn display_callq() {
-        let result = format!("{}", Instr::CallQ("hello".to_owned(), 4));
+        let result = format!("{}", Instr::CallQ::<Instr<Arg>>("hello".to_owned(), 4));
         let expected = "callq hello";
         assert_eq!(result, expected)
     }
@@ -95,14 +94,14 @@ mod instr_tests {
 
     #[test]
     fn display_retq() {
-        let result = format!("{}", Instr::RetQ);
+        let result = format!("{}", Instr::RetQ::<Instr<Arg>>);
         let expected = "retq";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_jump() {
-        let result = format!("{}", Instr::Jump("exit".to_owned()));
+        let result = format!("{}", Instr::Jump::<Instr<Arg>>("exit".to_owned()));
         let expected = "jump exit";
         assert_eq!(result, expected)
     }
