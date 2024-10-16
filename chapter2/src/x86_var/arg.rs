@@ -2,6 +2,7 @@ use super::Reg;
 use crate::Var;
 use std::fmt;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Arg {
     Intermediate(i64),
     Reg(Reg),

@@ -1,10 +1,11 @@
 use std::fmt;
 pub type Label = String;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Instr<T> {
     AddQ(T, T),
     SubQ(T, T),
-    Negq(T),
+    NegQ(T),
     MovQ(T, T),
     CallQ(Label, i64),
     PushQ(T),
@@ -18,7 +19,7 @@ impl<T: fmt::Display> fmt::Display for Instr<T> {
         match self {
             Instr::AddQ(a1, a2) => write!(f, "addq {a1} {a2}"),
             Instr::SubQ(a1, a2) => write!(f, "subq {a1} {a2}"),
-            Instr::Negq(a) => write!(f, "negq {a}"),
+            Instr::NegQ(a) => write!(f, "negq {a}"),
             Instr::MovQ(a1, a2) => write!(f, "movq {a1} {a2}"),
             Instr::CallQ(l, _) => write!(f, "callq {l}"),
             Instr::PushQ(a) => write!(f, "pushq {a}"),
@@ -56,7 +57,7 @@ mod instr_tests {
 
     #[test]
     fn display_negq() {
-        let result = format!("{}", Instr::Negq(Arg::Intermediate(3)));
+        let result = format!("{}", Instr::NegQ(Arg::Intermediate(3)));
         let expected = "negq $3";
         assert_eq!(result, expected)
     }

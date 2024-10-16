@@ -1,6 +1,9 @@
-use super::l_var_reduced::Stmt;
-use super::x86_var::{Arg, Instr};
+pub mod atm;
+pub mod exp;
+pub mod prog;
+pub mod stmt;
 
-pub fn select_instruction(_stmt: Stmt) -> Instr<Arg> {
-    todo!()
+pub trait SelectInstructions {
+    type Target;
+    fn select_instructions(self) -> Self::Target;
 }
