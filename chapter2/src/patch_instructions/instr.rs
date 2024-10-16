@@ -4,7 +4,7 @@ use crate::x86_int::{Arg, Instr, Reg};
 impl PatchInstructions for Instr<Arg> {
     type Target = Vec<Instr<Arg>>;
     fn patch(self) -> Self::Target {
-        let max_intermediate = (2 as i64).pow(16);
+        let max_intermediate = 2_i64.pow(16);
         match self {
             Instr::AddQ(Arg::Deref(Reg::Rbp, offset1), Arg::Deref(Reg::Rbp, offset2)) => {
                 vec![

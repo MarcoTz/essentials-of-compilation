@@ -1,23 +1,23 @@
 use super::SelectInstructions;
 use crate::{
     l_var_reduced::Exp,
-    x86_var::{Arg, Instr, Prog, Reg},
+    x86_var::{Arg, Instr, Reg},
     BinOp, UnaryOp,
 };
 
 impl SelectInstructions for Exp {
-    type Target = Prog;
+    type Target = Vec<Instr<Arg>>;
     fn select_instructions(self) -> Self::Target {
         match self {
             Exp::Atm(at) => vec![at.select_instructions()],
             Exp::InputInt => vec![Instr::CallQ("read_int".to_owned(), 0)],
             Exp::UnaryOp { op, exp } => {
                 let exp_instr = exp.select_instructions();
-                let mut new_prog = vec![exp_instr];
+                let mut new_instrs = vec![exp_instr];
                 match op {
                     UnaryOp::Neg => {
-                        new_prog.push(Instr::NegQ(Arg::Reg(Reg::Rax)));
-                        new_prog
+                        new_instrs.push(Instr::NegQ(Arg::Reg(Reg::Rax)));
+                        new_instrs
                     }
                 }
             }

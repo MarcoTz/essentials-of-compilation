@@ -1,25 +1,25 @@
 use super::SelectInstructions;
 use crate::{
     l_var_reduced::Stmt,
-    x86_var::{Arg, Instr, Prog, Reg},
+    x86_var::{Arg, Instr, Reg},
 };
 
 impl SelectInstructions for Stmt {
-    type Target = Prog;
+    type Target = Vec<Instr<Arg>>;
     fn select_instructions(self) -> Self::Target {
         match self {
             Stmt::Print(at) => {
                 let atm_instr = at.select_instructions();
-                let mut prog = vec![atm_instr];
-                prog.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)));
-                prog.push(Instr::CallQ("print_int".to_owned(), 0));
-                prog
+                let mut instrs = vec![atm_instr];
+                instrs.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)));
+                instrs.push(Instr::CallQ("print_int".to_owned(), 0));
+                instrs
             }
             Stmt::Exp(exp) => exp.select_instructions(),
             Stmt::Assign { name, exp } => {
-                let mut prog = exp.select_instructions();
-                prog.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var(name)));
-                prog
+                let mut instrs = exp.select_instructions();
+                instrs.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var(name)));
+                instrs
             }
         }
     }
