@@ -1,3 +1,4 @@
+pub mod assign_homes;
 pub mod l_var;
 pub mod l_var_reduced;
 pub mod reduce;

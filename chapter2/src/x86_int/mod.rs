@@ -6,4 +6,8 @@ pub use arg::Arg;
 pub use instr::Instr;
 pub use reg::Reg;
 
-pub type Prog = Vec<Instr<Arg>>;
+#[derive(Debug, PartialEq, Eq)]
+pub struct Prog {
+    pub instrs: Vec<Instr<Arg>>,
+    pub stack_space: usize,
+}
