@@ -1,6 +1,7 @@
 pub mod assign_homes;
 pub mod l_var;
 pub mod l_var_reduced;
+pub mod patch_instructions;
 pub mod reduce;
 pub mod select_instructions;
 pub mod x86_int;
