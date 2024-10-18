@@ -113,7 +113,7 @@ impl Instr<Arg> {
                 if *i > max_immediate {
                     vec![
                         Instr::MovQ(Arg::Immediate(*i), Arg::Reg(Reg::Rax)),
-                        self.set_arg2(Arg::Reg(Reg::Rax)).unwrap(),
+                        self.set_arg1(Arg::Reg(Reg::Rax)).unwrap(),
                     ]
                 } else {
                     vec![self]

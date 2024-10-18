@@ -12,6 +12,7 @@ impl AssignHomes for x86_var::Arg {
                 None => {
                     st.stack_size += 8;
                     let offset = -(st.stack_size as i64);
+                    st.stack_vars.insert(v, offset);
                     x86_int::Arg::Deref(Reg::Rbp, offset)
                 }
                 Some(offset) => x86_int::Arg::Deref(Reg::Rbp, offset.to_owned()),

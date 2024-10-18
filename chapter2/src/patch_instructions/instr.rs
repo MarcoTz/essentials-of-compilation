@@ -36,7 +36,7 @@ mod instr_tests {
     }
 
     #[test]
-    fn add_stack_intermediate() {
+    fn add_stack_immediate() {
         let result =
             Instr::AddQ(Arg::Immediate((2 as i64).pow(18)), Arg::Deref(Reg::Rbp, -8)).patch();
         let expected = vec![

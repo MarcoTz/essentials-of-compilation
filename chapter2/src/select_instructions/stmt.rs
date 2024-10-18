@@ -12,7 +12,7 @@ impl SelectInstructions for Stmt {
                 let atm_instr = at.select_instructions();
                 let mut instrs = vec![atm_instr];
                 instrs.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)));
-                instrs.push(Instr::CallQ("print_int".to_owned(), 0));
+                instrs.push(Instr::CallQ("print_int".to_owned(), 1));
                 instrs
             }
             Stmt::Exp(exp) => exp.select_instructions(),
@@ -36,7 +36,7 @@ mod stmt_tests {
         let expected = vec![
             Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
             Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)),
-            Instr::CallQ("print_int".to_owned(), 0),
+            Instr::CallQ("print_int".to_owned(), 1),
         ];
         assert_eq!(result, expected)
     }
