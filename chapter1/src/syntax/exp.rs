@@ -1,4 +1,4 @@
-use super::{BinOp, UnaryOp};
+use super::{BinOp, Stmt, UnaryOp};
 use std::fmt;
 
 pub enum Exp {
@@ -35,6 +35,12 @@ impl Exp {
 impl From<i32> for Exp {
     fn from(i: i32) -> Exp {
         Exp::Constant(i)
+    }
+}
+
+impl From<Exp> for Stmt {
+    fn from(e: Exp) -> Stmt {
+        Stmt::Exp(e)
     }
 }
 

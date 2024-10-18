@@ -33,7 +33,8 @@ pub fn interp_exp(e: Exp) -> i32 {
 pub fn interp_stmt(st: Stmt) -> Option<i32> {
     match st {
         Stmt::Print(arg) => {
-            println!("{}", arg);
+            let arg_res = interp_exp(arg);
+            println!("{}", arg_res);
             None
         }
         Stmt::Exp(e) => Some(interp_exp(e)),
