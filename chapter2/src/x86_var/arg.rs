@@ -4,7 +4,7 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Arg {
-    Intermediate(i64),
+    Immediate(i64),
     Reg(Reg),
     Deref(Reg, i64),
     Var(Var),
@@ -13,7 +13,7 @@ pub enum Arg {
 impl fmt::Display for Arg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Arg::Intermediate(i) => write!(f, "${i}"),
+            Arg::Immediate(i) => write!(f, "${i}"),
             Arg::Reg(reg) => write!(f, "%{reg}"),
             Arg::Deref(reg, i) => write!(f, "{i}(%{reg})"),
             Arg::Var(var) => write!(f, "_{var}"),
@@ -27,7 +27,7 @@ mod arg_tests {
 
     #[test]
     fn display_int() {
-        let result = format!("{}", Arg::Intermediate(1));
+        let result = format!("{}", Arg::Immediate(1));
         let expected = "$1";
         assert_eq!(result, expected)
     }

@@ -8,7 +8,7 @@ impl SelectInstructions for Atm {
     type Target = Instr<Arg>;
     fn select_instructions(self) -> Self::Target {
         match self {
-            Atm::Constant(i) => Instr::MovQ(Arg::Intermediate(i), Arg::Reg(Reg::Rax)),
+            Atm::Constant(i) => Instr::MovQ(Arg::Immediate(i), Arg::Reg(Reg::Rax)),
             Atm::Name(name) => Instr::MovQ(Arg::Var(name), Arg::Reg(Reg::Rax)),
         }
     }
@@ -21,7 +21,7 @@ mod atm_tests {
     #[test]
     fn select_constant() {
         let result = Atm::Constant(1).select_instructions();
-        let expected = Instr::MovQ(Arg::Intermediate(1), Arg::Reg(Reg::Rax));
+        let expected = Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax));
         assert_eq!(result, expected)
     }
 

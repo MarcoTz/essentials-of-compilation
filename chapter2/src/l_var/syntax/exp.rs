@@ -1,3 +1,4 @@
+use super::Stmt;
 use crate::{BinOp, UnaryOp, Var};
 use std::fmt;
 
@@ -25,6 +26,12 @@ impl From<i64> for Exp {
 impl From<String> for Exp {
     fn from(st: String) -> Exp {
         Exp::Name(st)
+    }
+}
+
+impl From<Exp> for Stmt {
+    fn from(e: Exp) -> Stmt {
+        Stmt::Exp(e)
     }
 }
 

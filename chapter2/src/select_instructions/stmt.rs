@@ -34,7 +34,7 @@ mod stmt_tests {
     fn select_print() {
         let result = Stmt::Print(2.into()).select_instructions();
         let expected = vec![
-            Instr::MovQ(Arg::Intermediate(2), Arg::Reg(Reg::Rax)),
+            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
             Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)),
             Instr::CallQ("print_int".to_owned(), 0),
         ];
@@ -56,7 +56,7 @@ mod stmt_tests {
         }
         .select_instructions();
         let expected = vec![
-            Instr::MovQ(Arg::Intermediate(2), Arg::Reg(Reg::Rax)),
+            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
             Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var("x".to_owned())),
         ];
         assert_eq!(result, expected)

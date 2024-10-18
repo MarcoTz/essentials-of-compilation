@@ -44,7 +44,7 @@ mod exp_tests {
     #[test]
     fn select_atom() {
         let result = Exp::Atm(1.into()).select_instructions();
-        let expected = vec![Instr::MovQ(Arg::Intermediate(1), Arg::Reg(Reg::Rax))];
+        let expected = vec![Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax))];
         assert_eq!(result, expected)
     }
 
@@ -63,7 +63,7 @@ mod exp_tests {
         }
         .select_instructions();
         let expected = vec![
-            Instr::MovQ(Arg::Intermediate(2), Arg::Reg(Reg::Rax)),
+            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
             Instr::NegQ(Arg::Reg(Reg::Rax)),
         ];
         assert_eq!(result, expected)
@@ -78,9 +78,9 @@ mod exp_tests {
         }
         .select_instructions();
         let expected = vec![
-            Instr::MovQ(Arg::Intermediate(1), Arg::Reg(Reg::Rax)),
+            Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax)),
             Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rbx)),
-            Instr::MovQ(Arg::Intermediate(2), Arg::Reg(Reg::Rax)),
+            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
             Instr::AddQ(Arg::Reg(Reg::Rbx), Arg::Reg(Reg::Rax)),
         ];
         assert_eq!(result, expected)

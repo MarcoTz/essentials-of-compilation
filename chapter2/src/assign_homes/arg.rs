@@ -5,7 +5,7 @@ impl AssignHomes for x86_var::Arg {
     type Target = x86_int::Arg;
     fn assign_homes(self, st: &mut AssignState) -> Self::Target {
         match self {
-            x86_var::Arg::Intermediate(i) => x86_int::Arg::Intermediate(i),
+            x86_var::Arg::Immediate(i) => x86_int::Arg::Immediate(i),
             x86_var::Arg::Reg(reg) => x86_int::Arg::Reg(reg),
             x86_var::Arg::Deref(reg, offset) => x86_int::Arg::Deref(reg, offset),
             x86_var::Arg::Var(v) => match st.stack_vars.get(&v) {
@@ -26,8 +26,8 @@ mod arg_tests {
 
     #[test]
     fn assign_int() {
-        let result = x86_var::Arg::Intermediate(1).assign_homes(&mut AssignState::default());
-        let expected = x86_int::Arg::Intermediate(1);
+        let result = x86_var::Arg::Immediate(1).assign_homes(&mut AssignState::default());
+        let expected = x86_int::Arg::Immediate(1);
         assert_eq!(result, expected)
     }
 

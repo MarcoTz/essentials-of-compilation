@@ -56,7 +56,7 @@ mod prog_tests {
             "{}",
             Prog {
                 instrs: vec![
-                    Instr::MovQ(Arg::Intermediate(1), Arg::Reg(Reg::Rax)),
+                    Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax)),
                     Instr::CallQ("print_int".to_owned(), 0),
                     Instr::Jump("start".to_owned())
                 ],

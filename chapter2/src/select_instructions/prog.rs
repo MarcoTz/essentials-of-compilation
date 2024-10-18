@@ -57,9 +57,9 @@ mod prog_tests {
         let expected = Prog {
             labels: HashMap::from([("main".to_owned(), 0)]),
             instrs: vec![
-                Instr::MovQ(Arg::Intermediate(4), Arg::Reg(Reg::Rax)),
+                Instr::MovQ(Arg::Immediate(4), Arg::Reg(Reg::Rax)),
                 Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var("x".to_owned())),
-                Instr::MovQ(Arg::Intermediate(2), Arg::Reg(Reg::Rax)),
+                Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
                 Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var("y".to_owned())),
                 Instr::MovQ(Arg::Var("x".to_owned()), Arg::Reg(Reg::Rax)),
                 Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rbx)),

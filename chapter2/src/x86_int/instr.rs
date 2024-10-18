@@ -1,3 +1,4 @@
+use super::{Arg, Reg};
 use std::fmt;
 pub type Label = String;
 
@@ -30,6 +31,108 @@ impl<T: fmt::Display> fmt::Display for Instr<T> {
     }
 }
 
+impl<T: Clone> Instr<T> {
+    pub fn get_args(&self) -> Vec<T> {
+        match self {
+            Instr::AddQ(a, b) => vec![a.clone(), b.clone()],
+            Instr::SubQ(a, b) => vec![a.clone(), b.clone()],
+            Instr::NegQ(a) => vec![a.clone()],
+            Instr::MovQ(a, b) => vec![a.clone(), b.clone()],
+            Instr::CallQ(_, _) => vec![],
+            Instr::PushQ(a) => vec![a.clone()],
+            Instr::PopQ(a) => vec![a.clone()],
+            Instr::RetQ => vec![],
+            Instr::Jump(_) => vec![],
+        }
+    }
+
+    pub fn set_arg(self, new_arg: T, index: usize) -> Option<Self> {
+        if index == 0 {
+            self.set_arg1(new_arg)
+        } else if index == 1 {
+            self.set_arg2(new_arg)
+        } else {
+            None
+        }
+    }
+
+    pub fn set_arg1(self, new_arg: T) -> Option<Self> {
+        match self {
+            Instr::AddQ(_, a) => Some(Instr::AddQ(new_arg, a)),
+            Instr::SubQ(_, a) => Some(Instr::SubQ(new_arg, a)),
+            Instr::NegQ(_) => Some(Instr::NegQ(new_arg)),
+            Instr::MovQ(_, a) => Some(Instr::MovQ(new_arg, a)),
+            Instr::CallQ(_, _) => None,
+            Instr::PushQ(_) => Some(Instr::PushQ(new_arg)),
+            Instr::PopQ(_) => Some(Instr::PopQ(new_arg)),
+            Instr::RetQ => None,
+            Instr::Jump(_) => None,
+        }
+    }
+
+    pub fn set_arg2(self, new_arg: T) -> Option<Self> {
+        match self {
+            Instr::AddQ(a, _) => Some(Instr::AddQ(a, new_arg)),
+            Instr::SubQ(a, _) => Some(Instr::SubQ(a, new_arg)),
+            Instr::NegQ(_) => None,
+            Instr::MovQ(a, _) => Some(Instr::MovQ(a, new_arg)),
+            Instr::CallQ(_, _) => None,
+            Instr::PushQ(_) => None,
+            Instr::PopQ(_) => None,
+            Instr::RetQ => None,
+            Instr::Jump(_) => None,
+        }
+    }
+}
+
+impl Instr<Arg> {
+    pub fn double_deref(&self) -> bool {
+        matches!(
+            self,
+            Instr::AddQ(Arg::Deref(_, _), Arg::Deref(_, _))
+                | Instr::SubQ(Arg::Deref(_, _), Arg::Deref(_, _))
+                | Instr::MovQ(Arg::Deref(_, _), Arg::Deref(_, _))
+        )
+    }
+
+    pub fn remove_double_deref(self) -> Vec<Instr<Arg>> {
+        if self.double_deref() {
+            vec![
+                Instr::MovQ(self.get_args().remove(0), Arg::Reg(Reg::Rax)),
+                self.set_arg1(Arg::Reg(Reg::Rax)).unwrap(),
+            ]
+        } else {
+            vec![self]
+        }
+    }
+
+    pub fn remove_max_immediate(self, max_immediate: i64) -> Vec<Instr<Arg>> {
+        let args = self.get_args();
+        match (args.get(0), args.get(1)) {
+            (Some(Arg::Immediate(i)), Some(Arg::Deref(_, _))) => {
+                if *i > max_immediate {
+                    vec![
+                        Instr::MovQ(Arg::Immediate(*i), Arg::Reg(Reg::Rax)),
+                        self.set_arg2(Arg::Reg(Reg::Rax)).unwrap(),
+                    ]
+                } else {
+                    vec![self]
+                }
+            }
+            (Some(Arg::Deref(_, _)), Some(Arg::Immediate(i))) => {
+                if *i > max_immediate {
+                    vec![
+                        Instr::MovQ(Arg::Immediate(*i), Arg::Reg(Reg::Rax)),
+                        self.set_arg2(Arg::Reg(Reg::Rax)).unwrap(),
+                    ]
+                } else {
+                    vec![self]
+                }
+            }
+            (_, _) => vec![self],
+        }
+    }
+}
 #[cfg(test)]
 mod instr_tests {
     use super::Instr;
@@ -37,37 +140,28 @@ mod instr_tests {
 
     #[test]
     fn display_addq() {
-        let result = format!(
-            "{}",
-            Instr::AddQ(Arg::Intermediate(1), Arg::Intermediate(2))
-        );
+        let result = format!("{}", Instr::AddQ(Arg::Immediate(1), Arg::Immediate(2)));
         let expected = "addq $1 $2";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_subq() {
-        let result = format!(
-            "{}",
-            Instr::SubQ(Arg::Intermediate(5), Arg::Intermediate(3))
-        );
+        let result = format!("{}", Instr::SubQ(Arg::Immediate(5), Arg::Immediate(3)));
         let expected = "subq $5 $3";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_negq() {
-        let result = format!("{}", Instr::NegQ(Arg::Intermediate(3)));
+        let result = format!("{}", Instr::NegQ(Arg::Immediate(3)));
         let expected = "negq $3";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_movq() {
-        let result = format!(
-            "{}",
-            Instr::MovQ(Arg::Intermediate(4), Arg::Intermediate(3))
-        );
+        let result = format!("{}", Instr::MovQ(Arg::Immediate(4), Arg::Immediate(3)));
         let expected = "movq $4 $3";
         assert_eq!(result, expected)
     }
@@ -81,14 +175,14 @@ mod instr_tests {
 
     #[test]
     fn display_pushq() {
-        let result = format!("{}", Instr::PushQ(Arg::Intermediate(3)));
+        let result = format!("{}", Instr::PushQ(Arg::Immediate(3)));
         let expected = "pushq $3";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_popq() {
-        let result = format!("{}", Instr::PopQ(Arg::Intermediate(2)));
+        let result = format!("{}", Instr::PopQ(Arg::Immediate(2)));
         let expected = "popq $2";
         assert_eq!(result, expected)
     }

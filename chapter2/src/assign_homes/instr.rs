@@ -25,21 +25,21 @@ mod instr_tests {
 
     #[test]
     fn assign_no_var() {
-        let result = Instr::AddQ(x86_var::Arg::Intermediate(1), x86_var::Arg::Reg(Reg::Rdi))
+        let result = Instr::AddQ(x86_var::Arg::Immediate(1), x86_var::Arg::Reg(Reg::Rdi))
             .assign_homes(&mut AssignState::default());
-        let expected = Instr::AddQ(x86_int::Arg::Intermediate(1), x86_int::Arg::Reg(Reg::Rdi));
+        let expected = Instr::AddQ(x86_int::Arg::Immediate(1), x86_int::Arg::Reg(Reg::Rdi));
         assert_eq!(result, expected)
     }
 
     #[test]
     fn assign_var() {
         let result = Instr::AddQ(
-            x86_var::Arg::Intermediate(1),
+            x86_var::Arg::Immediate(1),
             x86_var::Arg::Var("x".to_owned()),
         )
         .assign_homes(&mut AssignState::default());
         let expected = Instr::AddQ(
-            x86_int::Arg::Intermediate(1),
+            x86_int::Arg::Immediate(1),
             x86_int::Arg::Deref(Reg::Rbp, -8),
         );
         assert_eq!(result, expected)
