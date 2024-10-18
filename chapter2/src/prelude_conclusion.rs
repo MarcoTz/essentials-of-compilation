@@ -1,9 +1,9 @@
 use super::x86_int::Prog;
 use std::{collections::HashMap, env::consts::OS};
 
-pub fn generate_prelude_conclusion(prog: &mut Prog) {
+pub fn generate_prelude_conclusion(prog: Prog) -> Prog {
     if OS != "macos" {
-        return;
+        return prog;
     }
 
     let mut new_labels = HashMap::new();
@@ -11,5 +11,9 @@ pub fn generate_prelude_conclusion(prog: &mut Prog) {
     for (lb, pos) in prog.labels.iter() {
         new_labels.insert(lb.clone(), *pos);
     }
-    prog.labels = new_labels;
+    Prog {
+        instrs: prog.instrs,
+        stack_space: prog.stack_space,
+        labels: new_labels,
+    }
 }
