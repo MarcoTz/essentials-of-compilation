@@ -11,6 +11,10 @@ name = "chapter2"
 version = "0.1.0"
 
 [[package]]
+name = "chapter3"
+version = "0.1.0"
+
+[[package]]
 name = "essentials-main"
 version = "0.1.0"
 dependencies = [

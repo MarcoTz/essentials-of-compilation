@@ -108,7 +108,7 @@ impl Instr<Arg> {
 
     pub fn remove_max_immediate(self, max_immediate: i64) -> Vec<Instr<Arg>> {
         let args = self.get_args();
-        match (args.get(0), args.get(1)) {
+        match (args.first(), args.get(1)) {
             (Some(Arg::Immediate(i)), Some(Arg::Deref(_, _))) => {
                 if *i > max_immediate {
                     vec![
