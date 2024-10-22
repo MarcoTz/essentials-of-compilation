@@ -25,7 +25,7 @@ pub fn parse_module(src: String) -> Result<Module, Error> {
 #[cfg(test)]
 mod module_test {
     use super::parse_module;
-    use crate::l_int::syntax::{
+    use crate::syntax::{
         exp::Exp,
         ops::{BinOp, UnaryOp},
         stmt::Stmt,

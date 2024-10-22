@@ -1,5 +1,5 @@
 use super::{errors::Error, expr::parse_exp, tokens::Token};
-use crate::l_int::syntax::{Exp, Module, Stmt};
+use crate::syntax::Stmt;
 use std::collections::VecDeque;
 
 pub fn parse_stmt(tokens: &mut VecDeque<Token>) -> Result<Stmt, Error> {
@@ -31,8 +31,8 @@ pub fn parse_stmt(tokens: &mut VecDeque<Token>) -> Result<Stmt, Error> {
 
 #[cfg(test)]
 mod stmt_tests {
-    use super::{parse_stmt, Exp, Stmt, Token};
-    use crate::l_int::parser::digits::Digit;
+    use super::{parse_stmt, Stmt, Token};
+    use crate::{parser::digits::Digit, syntax::Exp};
     use std::collections::VecDeque;
 
     #[test]

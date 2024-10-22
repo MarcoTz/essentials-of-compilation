@@ -1,5 +1,5 @@
 use super::{digits::Digit, errors::Error, ops::Op, tokens::Token};
-use crate::l_int::syntax::{BinOp, Exp, UnaryOp};
+use crate::syntax::{BinOp, Exp, UnaryOp};
 use std::collections::VecDeque;
 
 pub fn parse_exp(tokens: &mut VecDeque<Token>) -> Result<Exp, Error> {
