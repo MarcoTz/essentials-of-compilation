@@ -10,3 +10,5 @@ path = "src/main.rs"
 [dependencies]
 chapter1 = {path="../chapter1"}
 chapter2 = {path="../chapter2"}
+chapter3 = {path="../chapter3"}
+chapter4 = {path="../chapter4"}

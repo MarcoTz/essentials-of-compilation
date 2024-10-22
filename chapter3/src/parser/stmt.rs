@@ -6,7 +6,7 @@ pub fn parse_stmt(tokens: &mut VecDeque<Token>) -> Result<Stmt, Error> {
     match tokens.pop_front() {
         None => Err(Error::UnexpectedEndOfInput),
         Some(Token::Print) => {
-            let _ = if let Some(Token::BrackO) = tokens.pop_front() {
+            if let Some(Token::BrackO) = tokens.pop_front() {
                 Ok(())
             } else {
                 Err(Error::BracketMismatch)
@@ -14,7 +14,7 @@ pub fn parse_stmt(tokens: &mut VecDeque<Token>) -> Result<Stmt, Error> {
 
             let exp = parse_exp(tokens)?;
 
-            let _ = if let Some(Token::BrackC) = tokens.pop_front() {
+            if let Some(Token::BrackC) = tokens.pop_front() {
                 Ok(())
             } else {
                 Err(Error::BracketMismatch)
