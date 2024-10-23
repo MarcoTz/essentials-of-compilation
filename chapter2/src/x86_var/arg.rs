@@ -2,7 +2,7 @@ use super::Reg;
 use crate::Var;
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Hash, Clone, Debug, PartialEq, Eq)]
 pub enum Arg {
     Immediate(i64),
     Reg(Reg),

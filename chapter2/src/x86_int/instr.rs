@@ -2,7 +2,7 @@ use super::{Arg, Reg};
 use std::fmt;
 pub type Label = String;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Hash, Debug, PartialEq, Eq)]
 pub enum Instr<T> {
     AddQ(T, T),
     SubQ(T, T),
