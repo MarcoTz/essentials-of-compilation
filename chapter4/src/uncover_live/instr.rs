@@ -5,19 +5,10 @@ use chapter2::{
 };
 use std::collections::HashSet;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Default)]
 pub struct InstrVars {
     pub read: HashSet<Var>,
     pub written: HashSet<Var>,
-}
-
-impl Default for InstrVars {
-    fn default() -> InstrVars {
-        InstrVars {
-            read: HashSet::new(),
-            written: HashSet::new(),
-        }
-    }
 }
 
 impl From<InstrVars> for HashSet<Var> {
@@ -39,11 +30,7 @@ impl InstrVars {
 
     fn from_read(args: Vec<&Arg>) -> InstrVars {
         InstrVars {
-            read: args
-                .iter()
-                .map(|arg| arg.uncover())
-                .filter_map(|x| x)
-                .collect(),
+            read: args.iter().filter_map(|arg| arg.uncover()).collect(),
             written: HashSet::new(),
         }
     }

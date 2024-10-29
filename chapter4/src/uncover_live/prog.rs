@@ -1,12 +1,9 @@
-use super::UncoverLive;
-use chapter2::{
-    x86_var::{Arg, Instr, Prog},
-    Var,
-};
+use super::{LiveMap, UncoverLive};
+use chapter2::x86_var::Prog;
 use std::collections::{HashMap, HashSet};
 
 impl UncoverLive for Prog {
-    type Target = HashMap<Instr<Arg>, HashSet<Var>>;
+    type Target = LiveMap;
     fn uncover(&self) -> Self::Target {
         let mut live = HashMap::new();
         let mut last = HashSet::new();
@@ -27,7 +24,8 @@ impl UncoverLive for Prog {
 
 #[cfg(test)]
 mod prog_tests {
-    use super::{Arg, Instr, Prog, UncoverLive};
+    use super::{Prog, UncoverLive};
+    use chapter2::x86_var::{Arg, Instr};
     use std::collections::{HashMap, HashSet};
 
     #[test]
