@@ -23,6 +23,22 @@ impl InterferenceGraph {
 
         self.edges.insert((start, end));
     }
+
+    pub fn adjacent(&self, v: &Var) -> HashSet<Var> {
+        self.edges
+            .iter()
+            .filter_map(|(v1, v2)| {
+                if v1 == v {
+                    Some(v2)
+                } else if v2 == v {
+                    Some(v1)
+                } else {
+                    None
+                }
+            })
+            .cloned()
+            .collect()
+    }
 }
 
 pub trait BuildGraph {
