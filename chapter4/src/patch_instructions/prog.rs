@@ -1,5 +1,5 @@
 use super::PatchInstructions;
-use chapter2::x86_int::Prog;
+use crate::x86_int::Prog;
 
 impl PatchInstructions for Prog {
     type Target = Prog;
@@ -20,6 +20,7 @@ impl PatchInstructions for Prog {
             labels: new_labels,
             instrs: new_instrs,
             stack_space: self.stack_space,
+            used_callee: self.used_callee,
         }
     }
 }
@@ -27,8 +28,8 @@ impl PatchInstructions for Prog {
 #[cfg(test)]
 mod prog_tests {
     use super::{PatchInstructions, Prog};
-    use chapter2::x86_int::{Arg, Instr, Reg};
-    use std::collections::HashMap;
+    use crate::x86_int::{Arg, Instr, Reg};
+    use std::collections::{HashMap, HashSet};
 
     #[test]
     fn patch_empty() {
@@ -36,12 +37,14 @@ mod prog_tests {
             instrs: vec![],
             labels: HashMap::new(),
             stack_space: 0,
+            used_callee: HashSet::new(),
         }
         .patch();
         let expected = Prog {
             instrs: vec![],
             labels: HashMap::new(),
             stack_space: 0,
+            used_callee: HashSet::new(),
         };
         assert_eq!(result, expected)
     }
@@ -55,6 +58,7 @@ mod prog_tests {
                 Instr::CallQ("print_int".to_owned(), 1),
             ],
             stack_space: 16,
+            used_callee: HashSet::new(),
         }
         .patch();
         let expected = Prog {
@@ -65,6 +69,7 @@ mod prog_tests {
                 Instr::CallQ("print_int".to_owned(), 1),
             ],
             stack_space: 16,
+            used_callee: HashSet::new(),
         };
         assert_eq!(result, expected)
     }

@@ -1,5 +1,5 @@
 use super::UncoverLive;
-use chapter2::{
+use crate::{
     x86_var::{Arg, Instr},
     Var,
 };
@@ -35,6 +35,7 @@ impl InstrVars {
         }
     }
 }
+
 impl UncoverLive for Instr<Arg> {
     type Target = InstrVars;
     fn uncover(&self) -> Self::Target {

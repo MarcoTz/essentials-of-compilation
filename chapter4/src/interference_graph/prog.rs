@@ -1,6 +1,5 @@
 use super::{BuildGraph, InterferenceGraph};
-use crate::uncover_live::LiveMap;
-use chapter2::x86_var::Prog;
+use crate::{uncover_live::LiveMap, x86_var::Prog};
 
 impl BuildGraph for Prog {
     fn build(&self, graph: &mut InterferenceGraph, live: &LiveMap) {
@@ -14,7 +13,7 @@ impl BuildGraph for Prog {
 mod prog_tests {
     use super::{BuildGraph, InterferenceGraph, Prog};
     use crate::uncover_live::UncoverLive;
-    use chapter2::x86_var::{Arg, Instr, Reg};
+    use crate::x86_var::{Arg, Instr, Reg};
     use std::collections::{HashMap, HashSet};
 
     #[test]

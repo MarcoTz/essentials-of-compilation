@@ -1,10 +1,7 @@
-pub mod arg;
-pub mod instr;
-pub mod reg;
+pub use crate::x86_int::{instr::Instr, reg::Reg};
 
+pub mod arg;
 pub use arg::Arg;
-pub use instr::Instr;
-pub use reg::Reg;
 
 use std::fmt;
 
@@ -13,21 +10,7 @@ use std::collections::HashMap;
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prog {
     pub instrs: Vec<Instr<Arg>>,
-    pub stack_space: usize,
     pub labels: HashMap<String, usize>,
-}
-
-pub fn get_stack_space(instrs: &Vec<Instr<Arg>>) -> usize {
-    let mut size: usize = 0;
-    for instr in instrs.iter() {
-        let args = instr.get_args();
-        for arg in args.iter() {
-            if let Arg::Deref(Reg::Rbp, off) = arg {
-                size = std::cmp::max(size, off.abs() as usize);
-            }
-        }
-    }
-    size
 }
 
 impl fmt::Display for Prog {
@@ -60,8 +43,7 @@ mod prog_tests {
             "{}",
             Prog {
                 instrs: vec![],
-                labels: HashMap::new(),
-                stack_space: 0,
+                labels: HashMap::new()
             }
         );
         let expected = "\n";
@@ -78,8 +60,7 @@ mod prog_tests {
                     Instr::CallQ("print_int".to_owned(), 0),
                     Instr::Jump("start".to_owned())
                 ],
-                labels: HashMap::from([("start".to_owned(), 1)]),
-                stack_space: 0
+                labels: HashMap::from([("start".to_owned(), 1)])
             }
         );
         let expected = ".globl start\nmovq $1 %rax\nstart: callq print_int\njump start";

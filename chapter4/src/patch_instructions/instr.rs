@@ -1,5 +1,5 @@
 use super::PatchInstructions;
-use chapter2::x86_int::{Arg, Instr};
+use crate::x86_int::{Arg, Instr};
 
 impl PatchInstructions for Instr<Arg> {
     type Target = Vec<Instr<Arg>>;
@@ -26,7 +26,7 @@ impl PatchInstructions for Instr<Arg> {
 #[cfg(test)]
 mod instr_tests {
     use super::{Arg, Instr, PatchInstructions};
-    use chapter2::x86_int::Reg;
+    use crate::x86_int::Reg;
 
     #[test]
     fn add_reg_reg() {

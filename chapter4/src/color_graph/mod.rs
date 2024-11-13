@@ -1,5 +1,5 @@
 use super::interference_graph::InterferenceGraph;
-use chapter2::{x86_var::Reg, Var};
+use crate::{x86_var::Reg, Var};
 use std::collections::{HashMap, HashSet};
 
 pub mod assign_registers;

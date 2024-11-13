@@ -1,6 +1,8 @@
 use super::{BuildGraph, InterferenceGraph};
-use crate::uncover_live::{LiveMap, UncoverLive};
-use chapter2::x86_var::{Arg, Instr};
+use crate::{
+    uncover_live::{LiveMap, UncoverLive},
+    x86_var::{Arg, Instr},
+};
 use std::collections::HashSet;
 
 impl BuildGraph for Instr<Arg> {

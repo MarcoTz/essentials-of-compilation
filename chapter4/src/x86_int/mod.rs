@@ -8,13 +8,14 @@ pub use reg::Reg;
 
 use std::fmt;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prog {
     pub instrs: Vec<Instr<Arg>>,
     pub stack_space: usize,
     pub labels: HashMap<String, usize>,
+    pub used_callee: HashSet<Reg>,
 }
 
 pub fn get_stack_space(instrs: &Vec<Instr<Arg>>) -> usize {
@@ -52,7 +53,7 @@ impl fmt::Display for Prog {
 #[cfg(test)]
 mod prog_tests {
     use super::{Arg, Instr, Prog, Reg};
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     #[test]
     fn display_empty() {
@@ -62,6 +63,7 @@ mod prog_tests {
                 instrs: vec![],
                 labels: HashMap::new(),
                 stack_space: 0,
+                used_callee: HashSet::new()
             }
         );
         let expected = "\n";
@@ -79,7 +81,8 @@ mod prog_tests {
                     Instr::Jump("start".to_owned())
                 ],
                 labels: HashMap::from([("start".to_owned(), 1)]),
-                stack_space: 0
+                stack_space: 0,
+                used_callee: HashSet::new()
             }
         );
         let expected = ".globl start\nmovq $1 %rax\nstart: callq print_int\njump start";

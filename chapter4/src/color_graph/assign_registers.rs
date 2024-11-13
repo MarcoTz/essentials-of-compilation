@@ -1,6 +1,5 @@
 use super::{Color, Coloring, RegisterAssignment};
-use crate::errors::Error;
-use chapter2::x86_var::Reg;
+use crate::{errors::Error, x86_var::Reg};
 use std::collections::HashMap;
 
 pub fn num_reg(color: Color) -> Result<Reg, Error> {

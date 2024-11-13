@@ -1,4 +1,4 @@
-use chapter2::Var;
+use crate::Var;
 use std::fmt;
 
 #[derive(Debug)]

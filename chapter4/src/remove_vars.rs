@@ -1,8 +1,9 @@
 use super::{color_graph::RegisterAssignment, errors::Error};
-use chapter2::{
-    x86_int::{Arg as IntArg, Prog as IntProg},
+use crate::{
+    x86_int::{get_stack_space, Arg as IntArg, Prog as IntProg},
     x86_var::{Arg as VarArg, Instr, Prog as VarProg},
 };
+use std::collections::HashSet;
 
 pub trait RemoveVars: Sized {
     type Target;
@@ -17,10 +18,12 @@ impl RemoveVars for VarProg {
             let new_instr = instr.remove_vars(assignment)?;
             new_instrs.push(new_instr);
         }
+        let stack_space = get_stack_space(&new_instrs);
         Ok(IntProg {
             instrs: new_instrs,
             labels: self.labels,
-            stack_space: 0,
+            stack_space,
+            used_callee: HashSet::new(),
         })
     }
 }

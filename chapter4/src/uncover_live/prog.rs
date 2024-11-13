@@ -1,5 +1,5 @@
 use super::{LiveMap, UncoverLive};
-use chapter2::x86_var::Prog;
+use crate::x86_var::Prog;
 use std::collections::{HashMap, HashSet};
 
 impl UncoverLive for Prog {
@@ -25,7 +25,7 @@ impl UncoverLive for Prog {
 #[cfg(test)]
 mod prog_tests {
     use super::{Prog, UncoverLive};
-    use chapter2::x86_var::{Arg, Instr};
+    use crate::x86_var::{Arg, Instr};
     use std::collections::{HashMap, HashSet};
 
     #[test]

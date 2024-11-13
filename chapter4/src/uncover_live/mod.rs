@@ -2,7 +2,7 @@ pub mod arg;
 pub mod instr;
 pub mod prog;
 
-use chapter2::{
+use crate::{
     x86_var::{Arg, Instr},
     Var,
 };

@@ -1,5 +1,5 @@
 use super::uncover_live::LiveMap;
-use chapter2::Var;
+use crate::Var;
 use std::collections::HashSet;
 
 pub mod instr;

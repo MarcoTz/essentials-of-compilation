@@ -1,5 +1,5 @@
 use super::UncoverLive;
-use chapter2::{x86_var::Arg, Var};
+use crate::{x86_var::Arg, Var};
 
 impl UncoverLive for Arg {
     type Target = Option<Var>;
