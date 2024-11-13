@@ -1,4 +1,5 @@
 use super::{Arg, Reg};
+use crate::x86_var::Arg as VarArg;
 use std::fmt;
 pub type Label = String;
 
@@ -133,6 +134,24 @@ impl Instr<Arg> {
         }
     }
 }
+
+impl TryInto<Instr<Arg>> for Instr<VarArg> {
+    type Error = String;
+    fn try_into(self) -> Result<Instr<Arg>, Self::Error> {
+        match self {
+            Instr::AddQ(a1, a2) => Ok(Instr::AddQ(a1.try_into()?, a2.try_into()?)),
+            Instr::SubQ(a1, a2) => Ok(Instr::SubQ(a1.try_into()?, a2.try_into()?)),
+            Instr::NegQ(a) => Ok(Instr::NegQ(a.try_into()?)),
+            Instr::MovQ(a1, a2) => Ok(Instr::MovQ(a1.try_into()?, a2.try_into()?)),
+            Instr::CallQ(fun, i) => Ok(Instr::CallQ(fun, i)),
+            Instr::PushQ(a) => Ok(Instr::PushQ(a.try_into()?)),
+            Instr::PopQ(a) => Ok(Instr::PopQ(a.try_into()?)),
+            Instr::RetQ => Ok(Instr::RetQ),
+            Instr::Jump(lab) => Ok(Instr::Jump(lab)),
+        }
+    }
+}
+
 #[cfg(test)]
 mod instr_tests {
     use super::Instr;

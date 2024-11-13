@@ -1,26 +1,33 @@
 use super::{color_graph::RegisterAssignment, errors::Error};
-use chapter2::x86_var::{Arg, Instr, Prog};
+use chapter2::{
+    x86_int::{Arg as IntArg, Prog as IntProg},
+    x86_var::{Arg as VarArg, Instr, Prog as VarProg},
+};
 
 pub trait RemoveVars: Sized {
-    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self, Error>;
+    type Target;
+    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self::Target, Error>;
 }
 
-impl RemoveVars for Prog {
-    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self, Error> {
+impl RemoveVars for VarProg {
+    type Target = IntProg;
+    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self::Target, Error> {
         let mut new_instrs = vec![];
         for instr in self.instrs {
             let new_instr = instr.remove_vars(assignment)?;
             new_instrs.push(new_instr);
         }
-        Ok(Prog {
+        Ok(IntProg {
             instrs: new_instrs,
             labels: self.labels,
+            stack_space: 0,
         })
     }
 }
 
-impl RemoveVars for Instr<Arg> {
-    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self, Error> {
+impl RemoveVars for Instr<VarArg> {
+    type Target = Instr<IntArg>;
+    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self::Target, Error> {
         match self {
             Instr::AddQ(a1, a2) => {
                 let a1_new = a1.remove_vars(assignment)?;
@@ -49,19 +56,20 @@ impl RemoveVars for Instr<Arg> {
                 let a_new = a.remove_vars(assignment)?;
                 Ok(Instr::PopQ(a_new))
             }
-            _ => Ok(self),
+            _ => Ok(self.try_into().unwrap()),
         }
     }
 }
 
-impl RemoveVars for Arg {
-    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self, Error> {
+impl RemoveVars for VarArg {
+    type Target = IntArg;
+    fn remove_vars(self, assignment: &RegisterAssignment) -> Result<Self::Target, Error> {
         match self {
-            Arg::Var(v) => match assignment.get(&v) {
+            VarArg::Var(v) => match assignment.get(&v) {
                 None => Err(Error::VariableNotFound(v)),
-                Some(reg) => Ok(Arg::Reg(reg.clone())),
+                Some(reg) => Ok(IntArg::Reg(reg.clone())),
             },
-            _ => Ok(self),
+            _ => Ok(self.try_into().unwrap()),
         }
     }
 }
