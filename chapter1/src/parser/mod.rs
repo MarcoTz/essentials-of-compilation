@@ -4,7 +4,7 @@ use errors::Error;
 pub mod errors;
 pub mod lexer;
 
-use lexer::{consume_sequence, consume_whitespace};
+use lexer::{consume_sequence, consume_whitespace, parse_int};
 
 ///Accepted Grammar:
 /// exp ::=
@@ -23,38 +23,10 @@ fn parse_exp(input: &mut String) -> Result<Exp, Error> {
     let exp = match input.chars().nth(0) {
         None => Err(Error::UnexpectedEOI),
         Some('(') => parse_paren_exp(input),
-        Some(_) => parse_int(input),
+        Some(_) => Ok(parse_int(input)?.into()),
     }?;
     consume_whitespace(input);
     Ok(exp)
-}
-
-fn parse_int(input: &mut String) -> Result<Exp, Error> {
-    let mut digits = vec![];
-    if input.is_empty() {
-        return Err(Error::UnexpectedEOI);
-    }
-
-    consume_whitespace(input);
-    while !input.is_empty() {
-        let next_char = input.remove(0);
-        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].contains(&next_char) {
-            digits.push(next_char.to_string().parse::<i64>().unwrap());
-        } else {
-            input.insert(0, next_char);
-            break;
-        }
-    }
-
-    if digits.is_empty() {
-        Err(Error::NoInt)
-    } else {
-        consume_whitespace(input);
-        let res = digits.iter().enumerate().fold(0, |num, (ind, next_num)| {
-            num + 10_i64.pow((digits.len() - 1 - ind) as u32) * next_num
-        });
-        Ok(res.into())
-    }
 }
 
 fn parse_op(input: &mut String) -> Result<Exp, Error> {

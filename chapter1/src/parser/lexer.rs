@@ -1,5 +1,32 @@
 use super::errors::Error;
 
+pub fn parse_int(input: &mut String) -> Result<i64, Error> {
+    let mut digits = vec![];
+    if input.is_empty() {
+        return Err(Error::UnexpectedEOI);
+    }
+
+    consume_whitespace(input);
+    while !input.is_empty() {
+        let next_char = input.remove(0);
+        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].contains(&next_char) {
+            digits.push(next_char.to_string().parse::<i64>().unwrap());
+        } else {
+            input.insert(0, next_char);
+            break;
+        }
+    }
+
+    if digits.is_empty() {
+        Err(Error::NoInt)
+    } else {
+        consume_whitespace(input);
+        let res = digits.iter().enumerate().fold(0, |num, (ind, next_num)| {
+            num + 10_i64.pow((digits.len() - 1 - ind) as u32) * next_num
+        });
+        Ok(res)
+    }
+}
 pub fn consume_whitespace(input: &mut String) {
     let next = input.chars().nth(0);
     if next == Some(' ') {
