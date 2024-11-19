@@ -1,3 +1,3 @@
 pub mod eval;
-pub mod examples;
+pub mod parser;
 pub mod syntax;

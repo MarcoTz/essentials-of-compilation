@@ -1,9 +1,11 @@
 use std::fmt;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum UnaryOp {
     Neg,
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum BinOp {
     Add,
     Sub,

@@ -1,8 +1,9 @@
-use super::{BinOp, Stmt, UnaryOp};
+use super::{BinOp, UnaryOp};
 use std::fmt;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Exp {
-    Constant(i32),
+    Constant(i64),
     InputInt,
     UnaryOp {
         op: UnaryOp,
@@ -32,15 +33,9 @@ impl Exp {
     }
 }
 
-impl From<i32> for Exp {
-    fn from(i: i32) -> Exp {
+impl From<i64> for Exp {
+    fn from(i: i64) -> Exp {
         Exp::Constant(i)
-    }
-}
-
-impl From<Exp> for Stmt {
-    fn from(e: Exp) -> Stmt {
-        Stmt::Exp(e)
     }
 }
 

@@ -1,15 +1,15 @@
-use super::syntax::{BinOp, Exp, Module, Stmt, UnaryOp};
+use super::syntax::{BinOp, Exp, Program, UnaryOp};
 use std::io::stdin;
 
-fn get_input() -> i32 {
+fn get_input() -> i64 {
     let mut inp: String = String::default();
     stdin().read_line(&mut inp).unwrap_or_default();
-    match inp.trim_end().parse::<i32>() {
+    match inp.trim_end().parse::<i64>() {
         Ok(i) => i,
         Err(_) => get_input(),
     }
 }
-pub fn interp_exp(e: Exp) -> i32 {
+pub fn interp_exp(e: Exp) -> i64 {
     match e {
         Exp::Constant(i) => i,
         Exp::InputInt => get_input(),
@@ -30,31 +30,13 @@ pub fn interp_exp(e: Exp) -> i32 {
     }
 }
 
-pub fn interp_stmt(st: Stmt) -> Option<i32> {
-    match st {
-        Stmt::Print(arg) => {
-            let arg_res = interp_exp(arg);
-            println!("{}", arg_res);
-            None
-        }
-        Stmt::Exp(e) => Some(interp_exp(e)),
-    }
-}
-
-pub fn interp_lint(m: Module) -> Vec<i32> {
-    let mut results = vec![];
-    for stmt in m.into_iter() {
-        let res = interp_stmt(stmt);
-        if let Some(i) = res {
-            results.push(i)
-        }
-    }
-    results
+pub fn interp_lint(prog: Program) -> i64 {
+    interp_exp(prog.exp)
 }
 
 #[cfg(test)]
 mod eval_tests {
-    use super::{interp_exp, interp_lint, interp_stmt, BinOp, Exp, Stmt, UnaryOp};
+    use super::{interp_exp, interp_lint, BinOp, Exp, Program, UnaryOp};
 
     #[test]
     fn eval_const() {
@@ -84,27 +66,15 @@ mod eval_tests {
     }
 
     #[test]
-    fn eval_print() {
-        let result = interp_stmt(Stmt::Print(1.into()));
-        let expected = None;
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn eval_exp() {
-        let result = interp_stmt(Stmt::Exp(2.into()));
-        let expected = Some(2);
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn eval_mod() {
-        let result = interp_lint(vec![
-            Stmt::Print(1.into()),
-            Stmt::Exp(2.into()),
-            Stmt::Exp(3.into()),
-        ]);
-        let expected = vec![2, 3];
+    fn eval_prog() {
+        let result = interp_lint(Program {
+            exp: Exp::BinOp {
+                exp1: Box::new(1.into()),
+                op: BinOp::Add,
+                exp2: Box::new(2.into()),
+            },
+        });
+        let expected = 3;
         assert_eq!(result, expected)
     }
 }
