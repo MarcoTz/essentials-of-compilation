@@ -1,4 +1,4 @@
-use crate::Var;
+use crate::l_var::syntax::Var;
 use std::fmt;
 
 #[derive(Debug)]
