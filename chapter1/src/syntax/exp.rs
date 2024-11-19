@@ -20,9 +20,9 @@ impl fmt::Display for Exp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Exp::Constant(i) => write!(f, "{}", i),
-            Exp::InputInt => f.write_str("input_int"),
-            Exp::UnaryOp { op, exp } => write!(f, "{}{}", op, exp),
-            Exp::BinOp { exp1, op, exp2 } => write!(f, "{}{}{}", exp1, op, exp2),
+            Exp::InputInt => f.write_str("read"),
+            Exp::UnaryOp { op, exp } => write!(f, "({op} {exp})",),
+            Exp::BinOp { exp1, op, exp2 } => write!(f, "({op} {exp1} {exp2})"),
         }
     }
 }
@@ -76,21 +76,21 @@ mod exp_tests {
     #[test]
     fn display_input() {
         let result = format!("{}", example_input());
-        let expected = "input_int";
+        let expected = "read";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_unary() {
         let result = format!("{}", example_unary());
-        let expected = "-1";
+        let expected = "(- 1)";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_bin() {
         let result = format!("{}", example_bin());
-        let expected = "1+1";
+        let expected = "(+ 1 1)";
         assert_eq!(result, expected)
     }
 
