@@ -1,46 +1,38 @@
-use super::{Atm, Stmt};
-use crate::{BinOp, UnaryOp, Var};
+use super::{Atm, BinOp, UnaryOp, Var};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Exp {
     Atm(Atm),
+    Assign {
+        name: Var,
+        bound_term: Atm,
+        in_term: Atm,
+    },
     InputInt,
-    UnaryOp { op: UnaryOp, exp: Atm },
-    BinOp { exp1: Atm, op: BinOp, exp2: Atm },
+    UnaryOp {
+        op: UnaryOp,
+        exp: Atm,
+    },
+    BinOp {
+        exp1: Atm,
+        op: BinOp,
+        exp2: Atm,
+    },
 }
 
 impl fmt::Display for Exp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Exp::Atm(at) => at.fmt(f),
-            Exp::InputInt => f.write_str("input_int"),
-            Exp::UnaryOp { op, exp } => write!(f, "{op}{exp}"),
-            Exp::BinOp { exp1, op, exp2 } => write!(f, "{exp1}{op}{exp2}"),
-        }
-    }
-}
-
-impl From<Exp> for Stmt {
-    fn from(exp: Exp) -> Stmt {
-        Stmt::Exp(exp)
-    }
-}
-
-impl Exp {
-    pub fn occurs(&self, var: &Var) -> bool {
-        match self {
-            Exp::Atm(atm) => atm.occurs(var),
-            Exp::InputInt => false,
-            Exp::UnaryOp { op: _, exp } => exp.occurs(var),
-            Exp::BinOp { exp1, op: _, exp2 } => exp1.occurs(var) || exp2.occurs(var),
-        }
-    }
-
-    pub fn as_atm(&self) -> Option<Atm> {
-        match self {
-            Exp::Atm(at) => Some(at.clone()),
-            _ => None,
+            Exp::Atm(atm) => atm.fmt(f),
+            Exp::Assign {
+                name,
+                bound_term,
+                in_term,
+            } => write!(f, "(let [{name} {bound_term}] {in_term})"),
+            Exp::InputInt => f.write_str("read"),
+            Exp::UnaryOp { op, exp } => write!(f, "({op} {exp})"),
+            Exp::BinOp { exp1, op, exp2 } => write!(f, "({op} {exp1} {exp2})"),
         }
     }
 }
@@ -50,16 +42,9 @@ mod exp_tests {
     use super::{BinOp, Exp, UnaryOp};
 
     #[test]
-    fn display_atm() {
-        let result = format!("{}", Exp::Atm(1.into()));
-        let expected = "1";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
     fn display_input() {
         let result = format!("{}", Exp::InputInt);
-        let expected = "input_int";
+        let expected = "read";
         assert_eq!(result, expected)
     }
 
@@ -72,7 +57,7 @@ mod exp_tests {
                 exp: 1.into()
             }
         );
-        let expected = "-1";
+        let expected = "(- 1)";
         assert_eq!(result, expected)
     }
 
@@ -82,58 +67,25 @@ mod exp_tests {
             "{}",
             Exp::BinOp {
                 op: BinOp::Add,
-                exp1: 2.into(),
-                exp2: 4.into()
+                exp1: 6.into(),
+                exp2: 2.into()
             }
         );
-        let expected = "2+4";
+        let expected = "(+ 6 2)";
         assert_eq!(result, expected)
     }
 
     #[test]
-    fn occurs_atom() {
-        let result = Exp::Atm("x".to_owned().into()).occurs(&"y".to_owned());
-        assert!(!result)
-    }
-
-    #[test]
-    fn occurs_input() {
-        let result = Exp::InputInt.occurs(&"x".to_owned());
-        assert!(!result)
-    }
-
-    #[test]
-    fn occurs_unary() {
-        let result = Exp::UnaryOp {
-            op: UnaryOp::Neg,
-            exp: 1.into(),
-        }
-        .occurs(&"x".to_owned());
-        assert!(!result)
-    }
-
-    #[test]
-    fn occurs_binary() {
-        let result = Exp::BinOp {
-            op: BinOp::Add,
-            exp1: 1.into(),
-            exp2: 2.into(),
-        }
-        .occurs(&"x".to_owned());
-        assert!(!result)
-    }
-
-    #[test]
-    fn atm_as_atm() {
-        let result = Exp::Atm(1.into()).as_atm();
-        let expected = Some(1.into());
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn input_as_atm() {
-        let result = Exp::InputInt.as_atm();
-        let expected = None;
+    fn display_let() {
+        let result = format!(
+            "{}",
+            Exp::Assign {
+                name: "x".to_owned(),
+                bound_term: 2.into(),
+                in_term: "x".to_owned().into()
+            }
+        );
+        let expected = "(let [x 2] x)";
         assert_eq!(result, expected)
     }
 }
