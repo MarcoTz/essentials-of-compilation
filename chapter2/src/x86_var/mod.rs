@@ -1,34 +1,45 @@
-pub use crate::x86_int::{instr::Instr, reg::Reg};
-
 pub mod arg;
+pub mod instr;
+pub mod reg;
+
 pub use arg::Arg;
+pub use instr::Instr;
+pub use reg::Reg;
 
 use std::fmt;
 
 use std::collections::HashMap;
 
+pub type Label = String;
+pub type Var = String;
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prog {
-    pub instrs: Vec<Instr<Arg>>,
-    pub labels: HashMap<String, usize>,
+    pub blocks: HashMap<Label, Vec<Instr>>,
 }
 
 impl fmt::Display for Prog {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let label_strs: Vec<String> = self
-            .labels
-            .keys()
-            .map(|lb| format!(".globl {}", lb))
-            .collect();
-        let mut instr_strs: Vec<String> = self
-            .instrs
+        let main_str = if self.blocks.contains_key("main") {
+            ".globl main"
+        } else {
+            ""
+        };
+        let block_strs = self
+            .blocks
             .iter()
-            .map(|instr| format!("{}", instr))
-            .collect();
-        for (label, location) in self.labels.iter() {
-            instr_strs[*location] = format!("{}: {}", label, instr_strs[*location]);
-        }
-        write!(f, "{}\n{}", label_strs.join("\n"), instr_strs.join("\n"))
+            .map(|(label, instrs)| {
+                format!(
+                    "{label}: {}",
+                    instrs
+                        .iter()
+                        .map(|instr| format!("{instr}\n"))
+                        .collect::<Vec<String>>()
+                        .join("\n")
+                )
+            })
+            .collect::<Vec<String>>();
+        write!(f, "{}\n{}", main_str, block_strs.join("\n"))
     }
 }
 
@@ -42,8 +53,7 @@ mod prog_tests {
         let result = format!(
             "{}",
             Prog {
-                instrs: vec![],
-                labels: HashMap::new()
+                blocks: HashMap::new()
             }
         );
         let expected = "\n";
@@ -55,15 +65,17 @@ mod prog_tests {
         let result = format!(
             "{}",
             Prog {
-                instrs: vec![
-                    Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax)),
-                    Instr::CallQ("print_int".to_owned(), 0),
-                    Instr::Jump("start".to_owned())
-                ],
-                labels: HashMap::from([("start".to_owned(), 1)])
+                blocks: HashMap::from([(
+                    "main".to_owned(),
+                    vec![
+                        Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax)),
+                        Instr::CallQ("print_int".to_owned(), 0),
+                        Instr::Jump("start".to_owned())
+                    ]
+                )]),
             }
         );
-        let expected = ".globl start\nmovq $1 %rax\nstart: callq print_int\njump start";
+        let expected = ".globl main\nmain: movq $1 %rax\n\ncallq print_int\n\njump start\n";
         assert_eq!(result, expected)
     }
 }

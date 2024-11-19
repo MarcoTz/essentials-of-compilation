@@ -32,8 +32,7 @@ impl fmt::Display for Instr {
 
 #[cfg(test)]
 mod instr_tests {
-    use super::Instr;
-    use crate::x86_int::Arg;
+    use super::{Arg, Instr};
 
     #[test]
     fn display_addq() {

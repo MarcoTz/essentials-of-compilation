@@ -1,5 +1,4 @@
-use super::Reg;
-use crate::{x86_int::Arg as IntArg, Var};
+use super::{Reg, Var};
 use std::fmt;
 
 #[derive(Hash, Clone, Debug, PartialEq, Eq)]
@@ -17,18 +16,6 @@ impl fmt::Display for Arg {
             Arg::Reg(reg) => write!(f, "%{reg}"),
             Arg::Deref(reg, i) => write!(f, "{i}(%{reg})"),
             Arg::Var(var) => write!(f, "_{var}"),
-        }
-    }
-}
-
-impl TryInto<IntArg> for Arg {
-    type Error = String;
-    fn try_into(self) -> Result<IntArg, Self::Error> {
-        match self {
-            Arg::Immediate(i) => Ok(IntArg::Immediate(i)),
-            Arg::Reg(reg) => Ok(IntArg::Reg(reg)),
-            Arg::Deref(reg, i) => Ok(IntArg::Deref(reg, i)),
-            Arg::Var(v) => Err(v),
         }
     }
 }

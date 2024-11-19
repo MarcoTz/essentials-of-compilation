@@ -1,7 +1,7 @@
 use super::Reg;
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum Arg {
     Immediate(i64),
     Reg(Reg),
