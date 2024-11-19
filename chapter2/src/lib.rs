@@ -7,5 +7,6 @@ pub mod l_var;
 //pub mod prelude_conclusion;
 //pub mod reduce;
 //pub mod select_instructions;
+pub mod c_var;
 pub mod x86_int;
 pub mod x86_var;
