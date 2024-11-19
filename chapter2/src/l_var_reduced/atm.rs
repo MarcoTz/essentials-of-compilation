@@ -1,10 +1,19 @@
-use super::Var;
-use std::fmt;
+use super::{UsedVars, Var};
+use std::{collections::HashSet, fmt};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Atm {
     Int(i64),
     Var(Var),
+}
+
+impl UsedVars for Atm {
+    fn used_vars(&self) -> HashSet<Var> {
+        match self {
+            Atm::Int(_) => HashSet::new(),
+            Atm::Var(v) => HashSet::from([v.clone()]),
+        }
+    }
 }
 
 impl fmt::Display for Atm {

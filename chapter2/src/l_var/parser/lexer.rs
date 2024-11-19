@@ -27,7 +27,7 @@ pub fn parse_int(input: &mut String) -> Result<i64, Error> {
         let res = digits.iter().enumerate().fold(0, |num, (ind, next_num)| {
             num + 10_i64.pow((digits.len() - 1 - ind) as u32) * next_num
         });
-        Ok(res.into())
+        Ok(res)
     }
 }
 
@@ -54,7 +54,7 @@ pub fn parse_var(input: &mut String) -> Result<Var, Error> {
 }
 
 pub fn consume_whitespace(input: &mut String) {
-    let next = input.chars().nth(0);
+    let next = input.chars().next();
     if next == Some(' ') {
         input.remove(0);
         consume_whitespace(input);

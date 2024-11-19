@@ -29,7 +29,7 @@ pub fn parse_int(input: &mut String) -> Result<i64, Error> {
 }
 
 pub fn consume_whitespace(input: &mut String) {
-    let next = input.chars().nth(0);
+    let next = input.chars().next();
     if next == Some(' ') {
         input.remove(0);
         consume_whitespace(input);

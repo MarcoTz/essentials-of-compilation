@@ -22,7 +22,7 @@ pub fn parse_l_int(input: &mut String) -> Result<Program, Error> {
 }
 
 fn parse_exp(input: &mut String) -> Result<Exp, Error> {
-    let exp = match input.chars().nth(0) {
+    let exp = match input.chars().next() {
         None => Err(Error::UnexpectedEOI),
         Some('(') => parse_paren_exp(input),
         Some(_) => parse_lit(input),
@@ -32,7 +32,7 @@ fn parse_exp(input: &mut String) -> Result<Exp, Error> {
 }
 
 fn parse_lit(input: &mut String) -> Result<Exp, Error> {
-    match input.chars().nth(0) {
+    match input.chars().next() {
         None => Err(Error::UnexpectedEOI),
         Some(c) => {
             if DIGITS.contains(&c) {
@@ -66,7 +66,7 @@ fn parse_op(input: &mut String) -> Result<Exp, Error> {
             consume_whitespace(input);
             let exp1 = parse_exp(input)?;
             consume_whitespace(input);
-            if input.chars().nth(0) == Some(')') {
+            if input.starts_with(')') {
                 Ok(Exp::UnaryOp {
                     op: UnaryOp::Neg,
                     exp: Box::new(exp1),
@@ -130,7 +130,7 @@ fn parse_paren_exp(input: &mut String) -> Result<Exp, Error> {
     }?;
     consume_whitespace(input);
 
-    let exp = match input.chars().nth(0) {
+    let exp = match input.chars().next() {
         None => Err(Error::UnexpectedEOI),
         Some('r') => {
             consume_sequence(input, "read")?;

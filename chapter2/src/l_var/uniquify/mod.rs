@@ -14,8 +14,7 @@ impl UniqueState {
         let prefix = "x".to_owned();
         let mut new_ind = 0;
         let mut new_var = prefix.clone() + &new_ind.to_string();
-        while new_var == *used_name || self.var_subst.values().find(|var| **var == new_var) != None
-        {
+        while new_var == *used_name || self.var_subst.values().any(|var| **var == new_var) {
             new_ind += 1;
             new_var = prefix.clone() + &new_ind.to_string();
         }

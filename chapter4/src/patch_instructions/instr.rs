@@ -5,7 +5,7 @@ impl PatchInstructions for Instr<Arg> {
     type Target = Vec<Instr<Arg>>;
     fn patch(self) -> Self::Target {
         let args = self.get_args();
-        if args.len() == 2 && args.get(0) == args.get(1) {
+        if args.len() == 2 && args.first() == args.get(1) {
             return vec![];
         }
 

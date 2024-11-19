@@ -1,13 +1,13 @@
-use super::{Atm, BinOp, UnaryOp, Var};
-use std::fmt;
+use super::{Atm, BinOp, UnaryOp, UsedVars, Var};
+use std::{collections::HashSet, fmt};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Exp {
     Atm(Atm),
     Assign {
         name: Var,
-        bound_term: Atm,
-        in_term: Atm,
+        bound_term: Box<Exp>,
+        in_term: Box<Exp>,
     },
     InputInt,
     UnaryOp {
@@ -19,6 +19,37 @@ pub enum Exp {
         op: BinOp,
         exp2: Atm,
     },
+}
+
+impl From<Atm> for Exp {
+    fn from(at: Atm) -> Exp {
+        Exp::Atm(at)
+    }
+}
+
+impl UsedVars for Exp {
+    fn used_vars(&self) -> HashSet<Var> {
+        match self {
+            Exp::Atm(at) => at.used_vars(),
+            Exp::Assign {
+                name,
+                bound_term,
+                in_term,
+            } => {
+                let mut used = bound_term.used_vars();
+                used.extend(in_term.used_vars());
+                used.insert(name.clone());
+                used
+            }
+            Exp::InputInt => HashSet::new(),
+            Exp::UnaryOp { op: _, exp } => exp.used_vars(),
+            Exp::BinOp { exp1, op: _, exp2 } => {
+                let mut used = exp1.used_vars();
+                used.extend(exp2.used_vars());
+                used
+            }
+        }
+    }
 }
 
 impl fmt::Display for Exp {
@@ -81,8 +112,8 @@ mod exp_tests {
             "{}",
             Exp::Assign {
                 name: "x".to_owned(),
-                bound_term: 2.into(),
-                in_term: "x".to_owned().into()
+                bound_term: Box::new(Exp::Atm(2.into())),
+                in_term: Box::new(Exp::Atm("x".to_owned().into()))
             }
         );
         let expected = "(let [x 2] x)";

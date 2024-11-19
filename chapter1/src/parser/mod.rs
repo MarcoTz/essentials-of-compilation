@@ -20,7 +20,7 @@ pub fn parse_l_int(input: &mut String) -> Result<Program, Error> {
 }
 
 fn parse_exp(input: &mut String) -> Result<Exp, Error> {
-    let exp = match input.chars().nth(0) {
+    let exp = match input.chars().next() {
         None => Err(Error::UnexpectedEOI),
         Some('(') => parse_paren_exp(input),
         Some(_) => Ok(parse_int(input)?.into()),
@@ -49,7 +49,7 @@ fn parse_op(input: &mut String) -> Result<Exp, Error> {
         '-' => {
             let exp1 = parse_exp(input)?;
             consume_whitespace(input);
-            if input.chars().nth(0) == Some(')') {
+            if input.starts_with(')') {
                 Ok(Exp::UnaryOp {
                     op: UnaryOp::Neg,
                     exp: Box::new(exp1),
@@ -81,7 +81,7 @@ fn parse_paren_exp(input: &mut String) -> Result<Exp, Error> {
 
     consume_whitespace(input);
 
-    let exp = match input.chars().nth(0) {
+    let exp = match input.chars().next() {
         None => Err(Error::UnexpectedEOI),
         Some('r') => {
             consume_sequence(input, "read")?;
