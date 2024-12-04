@@ -8,7 +8,7 @@ pub mod tail;
 
 pub use atm::Atm;
 pub use exp::Exp;
-pub use prog::Prog;
+pub use prog::Program;
 pub use stmt::Stmt;
 pub use tail::Tail;
 

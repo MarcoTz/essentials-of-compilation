@@ -1,4 +1,4 @@
-use super::{Atm, BinOp, UnaryOp};
+use super::{Atm, BinOp, Tail, UnaryOp};
 use std::fmt;
 
 #[derive(Debug)]
@@ -7,6 +7,12 @@ pub enum Exp {
     Read,
     UnaryOp { op: UnaryOp, exp: Atm },
     BinOp { exp1: Atm, op: BinOp, exp2: Atm },
+}
+
+impl From<Exp> for Tail {
+    fn from(e: Exp) -> Tail {
+        Tail::Return(e)
+    }
 }
 
 impl fmt::Display for Exp {

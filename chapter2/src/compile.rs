@@ -1,11 +1,7 @@
-use super::{
-    assign_homes::{AssignHomes, AssignState},
-    l_var::syntax::Module,
-    patch_instructions::PatchInstructions,
-    prelude_conclusion::generate_prelude_conclusion,
-    reduce::{Reduce, ReduceState},
-    select_instructions::SelectInstructions,
-    x86_int::Prog,
+use crate::{
+    explicate_control::ExplicateControl,
+    l_var::{syntax::Program, uniquify::Uniquify},
+    remove_complex_operands::RemoveComplexOperands,
 };
 
 /// Compiles a l_var program in the following steps:
@@ -16,10 +12,9 @@ use super::{
 /// assign_homes : x86_var -> x86_var
 /// patch_instructions : x86_var -> x86_int
 /// prelude_conclusion : x86_int -> x86_int
-pub fn compile(md: Module) -> Prog {
-    let md_reduced = md.reduce(&mut ReduceState::default());
-    let prog_var = md_reduced.select_instructions();
-    let prog_int = prog_var.assign_homes(&mut AssignState::default());
-    let prog_patched = prog_int.patch();
-    generate_prelude_conclusion(prog_patched)
+pub fn compile(prog: Program) -> Program {
+    let prog_unique = prog.uniquify(&mut Default::default());
+    let prog_reduced = prog_unique.remove_complex_operands(&mut Default::default());
+    let prog_explicated = prog_reduced.explicate_control();
+    todo!()
 }

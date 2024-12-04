@@ -2,11 +2,11 @@ use super::{Label, Tail};
 use std::{collections::HashMap, fmt};
 
 #[derive(Debug)]
-pub struct Prog {
+pub struct Program {
     pub blocks: HashMap<Label, Tail>,
 }
 
-impl fmt::Display for Prog {
+impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let block_strs = self
             .blocks
@@ -19,7 +19,7 @@ impl fmt::Display for Prog {
 
 #[cfg(test)]
 mod prog_test {
-    use super::{Prog, Tail};
+    use super::{Program, Tail};
     use crate::c_var::Exp;
     use std::collections::HashMap;
 
@@ -27,7 +27,7 @@ mod prog_test {
     fn display_empty() {
         let result = format!(
             "{}",
-            Prog {
+            Program {
                 blocks: HashMap::new(),
             }
         );
@@ -39,7 +39,7 @@ mod prog_test {
     fn display_simple() {
         let result = format!(
             "{}",
-            Prog {
+            Program {
                 blocks: HashMap::from([("main".to_owned(), Tail::Return(Exp::Read))])
             }
         );
