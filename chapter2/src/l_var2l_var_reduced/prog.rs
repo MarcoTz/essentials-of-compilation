@@ -1,18 +1,18 @@
-use super::{Reduce, ReduceState};
+use super::{ReduceState, RemoveComplexOperands};
 use crate::{l_var::syntax as l_var, l_var_reduced};
 
-impl Reduce for l_var::Program {
+impl RemoveComplexOperands for l_var::Program {
     type Target = l_var_reduced::Program;
-    fn reduce(self, st: &mut ReduceState) -> Self::Target {
+    fn remove_complex_operands(self, st: &mut ReduceState) -> Self::Target {
         l_var_reduced::Program {
-            exp: self.exp.reduce(st),
+            exp: self.exp.remove_complex_operands(st),
         }
     }
 }
 
 #[cfg(test)]
 mod prog_tests {
-    use super::{l_var, l_var_reduced, Reduce, ReduceState};
+    use super::{l_var, l_var_reduced, ReduceState, RemoveComplexOperands};
 
     #[test]
     fn reduce_prog() {
@@ -31,7 +31,7 @@ mod prog_tests {
                 }),
             },
         }
-        .reduce(&mut ReduceState::default());
+        .remove_complex_operands(&mut ReduceState::default());
         let expected = l_var_reduced::Program {
             exp: l_var_reduced::Exp::Assign {
                 name: "x".to_owned(),

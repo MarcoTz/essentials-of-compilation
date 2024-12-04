@@ -1,9 +1,9 @@
-use super::{Reduce, ReduceState};
+use super::{ReduceState, RemoveComplexOperands};
 use crate::{l_var::syntax as l_var, l_var_reduced};
 
-impl Reduce for l_var::Exp {
+impl RemoveComplexOperands for l_var::Exp {
     type Target = l_var_reduced::Exp;
-    fn reduce(self, st: &mut ReduceState) -> Self::Target {
+    fn remove_complex_operands(self, st: &mut ReduceState) -> Self::Target {
         match self {
             l_var::Exp::Name(name) => {
                 st.used_vars.insert(name.clone());
@@ -12,11 +12,11 @@ impl Reduce for l_var::Exp {
             l_var::Exp::Constant(i) => l_var_reduced::Atm::Int(i).into(),
             l_var::Exp::InputInt => l_var_reduced::Exp::InputInt,
             l_var::Exp::UnaryOp { exp, op } => {
-                let exp_red = exp.reduce(st);
-                let op_reduced = op.reduce(st);
+                let exp_red = exp.remove_complex_operands(st);
+                let op_remove_complex_operandsd = op.remove_complex_operands(st);
                 if let l_var_reduced::Exp::Atm(at) = exp_red {
                     l_var_reduced::Exp::UnaryOp {
-                        op: op_reduced,
+                        op: op_remove_complex_operandsd,
                         exp: at,
                     }
                 } else {
@@ -25,16 +25,16 @@ impl Reduce for l_var::Exp {
                         name: new_name.clone(),
                         bound_term: Box::new(exp_red),
                         in_term: Box::new(l_var_reduced::Exp::UnaryOp {
-                            op: op_reduced,
+                            op: op_remove_complex_operandsd,
                             exp: new_name.into(),
                         }),
                     }
                 }
             }
             l_var::Exp::BinOp { exp1, op, exp2 } => {
-                let exp1_red = exp1.reduce(st);
-                let exp2_red = exp2.reduce(st);
-                let op_red = op.reduce(st);
+                let exp1_red = exp1.remove_complex_operands(st);
+                let exp2_red = exp2.remove_complex_operands(st);
+                let op_red = op.remove_complex_operands(st);
 
                 match (exp1_red, exp2_red) {
                     (l_var_reduced::Exp::Atm(at1), l_var_reduced::Exp::Atm(at2)) => {
@@ -96,8 +96,8 @@ impl Reduce for l_var::Exp {
                 st.used_vars.insert(name.clone());
                 l_var_reduced::Exp::Assign {
                     name,
-                    bound_term: Box::new(bound_term.reduce(st)),
-                    in_term: Box::new(in_term.reduce(st)),
+                    bound_term: Box::new(bound_term.remove_complex_operands(st)),
+                    in_term: Box::new(in_term.remove_complex_operands(st)),
                 }
             }
         }
@@ -106,42 +106,43 @@ impl Reduce for l_var::Exp {
 
 #[cfg(test)]
 mod exp_tests {
-    use super::Reduce;
+    use super::RemoveComplexOperands;
     use crate::{l_var::syntax as l_var, l_var_reduced};
 
     #[test]
-    fn reduce_name() {
-        let result = l_var::Exp::Name("x".to_owned()).reduce(&mut Default::default());
+    fn remove_complex_operands_name() {
+        let result =
+            l_var::Exp::Name("x".to_owned()).remove_complex_operands(&mut Default::default());
         let expected = l_var_reduced::Exp::Atm("x".to_owned().into()).into();
         assert_eq!(result, expected)
     }
 
     #[test]
-    fn reduce_const() {
+    fn remove_complex_operands_const() {
         let mut st = Default::default();
-        let result = l_var::Exp::Constant(1).reduce(&mut st);
+        let result = l_var::Exp::Constant(1).remove_complex_operands(&mut st);
         let expected = l_var_reduced::Exp::Atm(1.into()).into();
         assert_eq!(result, expected);
         assert_eq!(st, Default::default())
     }
 
     #[test]
-    fn reduce_input() {
+    fn remove_complex_operands_input() {
         let mut st = Default::default();
-        let result = l_var::Exp::InputInt.reduce(&mut st);
+        let result = l_var::Exp::InputInt.remove_complex_operands(&mut st);
         let expected = l_var_reduced::Exp::InputInt.into();
         assert_eq!(result, expected);
         assert_eq!(st, Default::default())
     }
 
     #[test]
-    fn reduce_unary() {
+    fn remove_complex_operands_unary() {
         let mut st = Default::default();
         let result = l_var::Exp::UnaryOp {
             op: l_var::UnaryOp::Neg,
             exp: Box::new(1.into()),
         }
-        .reduce(&mut st);
+        .remove_complex_operands(&mut st);
         let expected = l_var_reduced::Exp::UnaryOp {
             op: l_var_reduced::UnaryOp::Neg,
             exp: 1.into(),
@@ -152,14 +153,14 @@ mod exp_tests {
     }
 
     #[test]
-    fn reduce_bin() {
+    fn remove_complex_operands_bin() {
         let mut st = Default::default();
         let result = l_var::Exp::BinOp {
             op: l_var::BinOp::Add,
             exp1: Box::new(1.into()),
             exp2: Box::new(2.into()),
         }
-        .reduce(&mut st);
+        .remove_complex_operands(&mut st);
         let expected = l_var_reduced::Exp::BinOp {
             op: l_var_reduced::BinOp::Add,
             exp1: 1.into(),

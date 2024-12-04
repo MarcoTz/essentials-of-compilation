@@ -26,9 +26,9 @@ impl ReduceState {
     }
 }
 
-pub trait Reduce {
+pub trait RemoveComplexOperands {
     type Target;
-    fn reduce(self, st: &mut ReduceState) -> Self::Target;
+    fn remove_complex_operands(self, st: &mut ReduceState) -> Self::Target;
 }
 
 #[cfg(test)]
