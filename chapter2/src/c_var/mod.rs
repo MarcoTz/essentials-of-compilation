@@ -5,6 +5,7 @@ pub mod exp;
 pub mod prog;
 pub mod stmt;
 pub mod tail;
+pub mod typecheck;
 
 pub use atm::Atm;
 pub use exp::Exp;

@@ -1,9 +1,10 @@
-use super::{Label, Tail};
+use super::{typecheck::Type, Label, Tail, Var};
 use std::{collections::HashMap, fmt};
 
 #[derive(Debug)]
 pub struct Program {
     pub blocks: HashMap<Label, Tail>,
+    pub types: HashMap<Var, Type>,
 }
 
 impl fmt::Display for Program {
@@ -29,6 +30,7 @@ mod prog_test {
             "{}",
             Program {
                 blocks: HashMap::new(),
+                types: HashMap::new()
             }
         );
         let expected = "";
@@ -40,7 +42,8 @@ mod prog_test {
         let result = format!(
             "{}",
             Program {
-                blocks: HashMap::from([("main".to_owned(), Tail::Return(Exp::Read))])
+                blocks: HashMap::from([("main".to_owned(), Tail::Return(Exp::Read))]),
+                types: HashMap::new()
             }
         );
         let expected = "main: return read;";

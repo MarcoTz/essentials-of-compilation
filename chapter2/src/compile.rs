@@ -1,4 +1,6 @@
 use crate::{
+    assign_homes::AssignHomes,
+    c_var::typecheck::check,
     explicate_control::ExplicateControl,
     l_var::{syntax::Program, uniquify::Uniquify},
     remove_complex_operands::RemoveComplexOperands,
@@ -16,7 +18,9 @@ use crate::{
 pub fn compile(prog: Program) -> Program {
     let prog_unique = prog.uniquify(&mut Default::default());
     let prog_reduced = prog_unique.remove_complex_operands(&mut Default::default());
-    let prog_explicated = prog_reduced.explicate_control();
+    let mut prog_explicated = prog_reduced.explicate_control();
+    check(&mut prog_explicated);
     let prog_selected = prog_explicated.select_instructions();
+    let prog_homes = prog_selected.assign_homes(&mut Default::default());
     todo!()
 }
