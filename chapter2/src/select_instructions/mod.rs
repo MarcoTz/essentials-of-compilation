@@ -1,7 +1,7 @@
 pub mod atm;
-pub mod exp;
 pub mod prog;
 pub mod stmt;
+pub mod tail;
 
 pub trait SelectInstructions {
     type Target;

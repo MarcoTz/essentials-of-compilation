@@ -2,6 +2,7 @@ use crate::{
     explicate_control::ExplicateControl,
     l_var::{syntax::Program, uniquify::Uniquify},
     remove_complex_operands::RemoveComplexOperands,
+    select_instructions::SelectInstructions,
 };
 
 /// Compiles a l_var program in the following steps:
@@ -16,5 +17,6 @@ pub fn compile(prog: Program) -> Program {
     let prog_unique = prog.uniquify(&mut Default::default());
     let prog_reduced = prog_unique.remove_complex_operands(&mut Default::default());
     let prog_explicated = prog_reduced.explicate_control();
+    let prog_selected = prog_explicated.select_instructions();
     todo!()
 }

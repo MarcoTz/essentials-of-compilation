@@ -1,64 +1,46 @@
 use super::SelectInstructions;
-use crate::{
-    l_var_reduced::Stmt,
-    x86_var::{Arg, Instr, Reg},
-};
+use crate::{c_var, x86_var};
 
-impl SelectInstructions for Stmt {
-    type Target = Vec<Instr<Arg>>;
+impl SelectInstructions for c_var::Stmt {
+    type Target = Vec<x86_var::Instr>;
     fn select_instructions(self) -> Self::Target {
-        match self {
-            Stmt::Print(at) => {
-                let atm_instr = at.select_instructions();
-                let mut instrs = vec![atm_instr];
-                instrs.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)));
-                instrs.push(Instr::CallQ("print_int".to_owned(), 1));
-                instrs
+        let c_var::Stmt::Assign { var, exp } = self;
+        let var_arg = x86_var::Arg::Var(var);
+        match exp {
+            c_var::Exp::Atm(at) => vec![x86_var::Instr::MovQ(at.select_instructions(), var_arg)],
+            c_var::Exp::Read => {
+                vec![
+                    x86_var::Instr::CallQ("read_int".to_owned(), 0),
+                    x86_var::Instr::MovQ(x86_var::Arg::Reg(x86_var::Reg::Rax), var_arg),
+                ]
             }
-            Stmt::Exp(exp) => exp.select_instructions(),
-            Stmt::Assign { name, exp } => {
-                let mut instrs = exp.select_instructions();
-                instrs.push(Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var(name)));
-                instrs
+            c_var::Exp::UnaryOp { exp, op } => {
+                let op_instr = match op {
+                    c_var::UnaryOp::Neg => x86_var::Instr::NegQ,
+                };
+                vec![
+                    x86_var::Instr::MovQ(exp.select_instructions(), var_arg.clone()),
+                    op_instr(var_arg),
+                ]
+            }
+            c_var::Exp::BinOp { exp1, op, exp2 } => {
+                let arg1 = exp1.select_instructions();
+                let arg2 = exp2.select_instructions();
+                let op_instr = match op {
+                    c_var::BinOp::Add => x86_var::Instr::AddQ,
+                    c_var::BinOp::Sub => x86_var::Instr::SubQ,
+                };
+                if arg1 == var_arg {
+                    vec![op_instr(arg2, var_arg)]
+                } else if arg2 == var_arg {
+                    vec![op_instr(arg1, var_arg)]
+                } else {
+                    vec![
+                        x86_var::Instr::MovQ(arg1, var_arg.clone()),
+                        op_instr(arg2, var_arg),
+                    ]
+                }
             }
         }
-    }
-}
-
-#[cfg(test)]
-mod stmt_tests {
-    use super::{Arg, Instr, Reg, SelectInstructions, Stmt};
-    use crate::l_var_reduced::Exp;
-
-    #[test]
-    fn select_print() {
-        let result = Stmt::Print(2.into()).select_instructions();
-        let expected = vec![
-            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
-            Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Reg(Reg::Rdi)),
-            Instr::CallQ("print_int".to_owned(), 1),
-        ];
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn select_exp() {
-        let result = Stmt::Exp(Exp::InputInt).select_instructions();
-        let expected = vec![Instr::CallQ("read_int".to_owned(), 0)];
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn select_assign() {
-        let result = Stmt::Assign {
-            name: "x".to_owned(),
-            exp: Exp::Atm(2.into()),
-        }
-        .select_instructions();
-        let expected = vec![
-            Instr::MovQ(Arg::Immediate(2), Arg::Reg(Reg::Rax)),
-            Instr::MovQ(Arg::Reg(Reg::Rax), Arg::Var("x".to_owned())),
-        ];
-        assert_eq!(result, expected)
     }
 }

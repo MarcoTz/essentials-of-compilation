@@ -1,34 +1,12 @@
 use super::SelectInstructions;
-use crate::{
-    l_var_reduced::Atm,
-    x86_var::{Arg, Instr, Reg},
-};
+use crate::{c_var, x86_var};
 
-impl SelectInstructions for Atm {
-    type Target = Instr<Arg>;
+impl SelectInstructions for c_var::Atm {
+    type Target = x86_var::Arg;
     fn select_instructions(self) -> Self::Target {
         match self {
-            Atm::Constant(i) => Instr::MovQ(Arg::Immediate(i), Arg::Reg(Reg::Rax)),
-            Atm::Name(name) => Instr::MovQ(Arg::Var(name), Arg::Reg(Reg::Rax)),
+            c_var::Atm::Int(i) => x86_var::Arg::Immediate(i),
+            c_var::Atm::Var(v) => x86_var::Arg::Var(v),
         }
-    }
-}
-
-#[cfg(test)]
-mod atm_tests {
-    use super::{Arg, Atm, Instr, Reg, SelectInstructions};
-
-    #[test]
-    fn select_constant() {
-        let result = Atm::Constant(1).select_instructions();
-        let expected = Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax));
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn select_name() {
-        let result = Atm::Name("x".to_owned()).select_instructions();
-        let expected = Instr::MovQ(Arg::Var("x".to_owned()), Arg::Reg(Reg::Rax));
-        assert_eq!(result, expected)
     }
 }
