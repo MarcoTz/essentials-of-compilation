@@ -1,7 +1,6 @@
 pub mod assign_homes;
-pub mod compile;
-//pub mod examples;
 pub mod c_var;
+pub mod compile;
 pub mod explicate_control;
 pub mod l_var;
 pub mod l_var_reduced;
