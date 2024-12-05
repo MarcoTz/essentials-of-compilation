@@ -1,4 +1,4 @@
-//pub mod assign_homes;
+pub mod assign_homes;
 pub mod compile;
 //pub mod examples;
 pub mod l_var;

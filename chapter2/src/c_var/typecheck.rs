@@ -10,7 +10,7 @@ pub trait Typecheck: Sized {
     fn check(&self) -> HashMap<Var, Type>;
 }
 
-pub fn check(prog: &mut Program) {
+pub fn typecheck(prog: &mut Program) {
     let vars = prog.check();
     prog.types = vars;
 }

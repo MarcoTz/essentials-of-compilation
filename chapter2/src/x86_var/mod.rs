@@ -14,8 +14,14 @@ pub type Label = String;
 pub type Var = String;
 
 #[derive(Debug, PartialEq, Eq)]
+pub enum Type {
+    Int,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub struct Program {
     pub blocks: HashMap<Label, Vec<Instr>>,
+    pub types: HashMap<Var, Type>,
 }
 
 impl fmt::Display for Program {
@@ -53,7 +59,8 @@ mod prog_tests {
         let result = format!(
             "{}",
             Program {
-                blocks: HashMap::new()
+                blocks: HashMap::new(),
+                types: HashMap::new()
             }
         );
         let expected = "\n";
@@ -73,6 +80,7 @@ mod prog_tests {
                         Instr::Jump("start".to_owned())
                     ]
                 )]),
+                types: HashMap::new()
             }
         );
         let expected = ".globl main\nmain: movq $1 %rax\n\ncallq print_int\n\njump start\n";

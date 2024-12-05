@@ -10,6 +10,17 @@ impl SelectInstructions for c_var::Program {
                 .into_iter()
                 .map(|(label, tl)| (label, tl.select_instructions()))
                 .collect(),
+            types: self
+                .types
+                .into_iter()
+                .map(|(var, ty)| (var, conv_ty(ty)))
+                .collect(),
         }
+    }
+}
+
+fn conv_ty(ty: c_var::typecheck::Type) -> x86_var::Type {
+    match ty {
+        c_var::typecheck::Type::Int => x86_var::Type::Int,
     }
 }

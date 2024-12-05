@@ -13,12 +13,12 @@ use std::collections::HashMap;
 pub type Label = String;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Prog {
+pub struct Program {
     pub blocks: HashMap<Label, Vec<Instr>>,
     pub stack_space: usize,
 }
 
-impl fmt::Display for Prog {
+impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let main_str = if self.blocks.contains_key("main") {
             ".globl main"
@@ -45,14 +45,14 @@ impl fmt::Display for Prog {
 
 #[cfg(test)]
 mod prog_tests {
-    use super::{Arg, Instr, Prog, Reg};
+    use super::{Arg, Instr, Program, Reg};
     use std::collections::HashMap;
 
     #[test]
     fn display_empty() {
         let result = format!(
             "{}",
-            Prog {
+            Program {
                 blocks: HashMap::new(),
                 stack_space: 0
             }
@@ -65,7 +65,7 @@ mod prog_tests {
     fn display_prog() {
         let result = format!(
             "{}",
-            Prog {
+            Program {
                 stack_space: 0,
                 blocks: HashMap::from([(
                     "main".to_owned(),

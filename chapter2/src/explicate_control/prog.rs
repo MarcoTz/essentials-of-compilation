@@ -7,6 +7,7 @@ impl ExplicateControl for l_var_reduced::Program {
     fn explicate_control(self) -> Self::Target {
         c_var::Program {
             blocks: HashMap::from([("start".to_owned(), self.exp.explicate_control())]),
+            types: HashMap::new(),
         }
     }
 }
