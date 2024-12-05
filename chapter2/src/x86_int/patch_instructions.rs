@@ -1,5 +1,5 @@
 use super::{Arg, Instr, Program, Reg};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub trait PatchInstructions {
     type Target;
@@ -20,6 +20,7 @@ impl PatchInstructions for Program {
         Program {
             blocks: new_blocks,
             stack_space: self.stack_space,
+            global_labels: HashSet::new(),
         }
     }
 }

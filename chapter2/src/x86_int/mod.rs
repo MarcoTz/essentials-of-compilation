@@ -1,6 +1,7 @@
 pub mod arg;
 pub mod instr;
 pub mod patch_instructions;
+pub mod prelude_conclusion;
 pub mod reg;
 
 pub use arg::Arg;
@@ -9,7 +10,7 @@ pub use reg::Reg;
 
 use std::fmt;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub type Label = String;
 
@@ -17,68 +18,31 @@ pub type Label = String;
 pub struct Program {
     pub blocks: HashMap<Label, Vec<Instr>>,
     pub stack_space: usize,
+    pub global_labels: HashSet<Label>,
 }
 
 impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let main_str = if self.blocks.contains_key("main") {
-            ".globl main"
-        } else {
-            ""
-        };
-        let block_strs = self
+        let globl_str = self
+            .global_labels
+            .iter()
+            .map(|label| format!(".globl {label}"))
+            .collect::<Vec<String>>()
+            .join("\n");
+        let block_str = self
             .blocks
             .iter()
             .map(|(label, instrs)| {
-                format!(
-                    "{label}: {}",
-                    instrs
-                        .iter()
-                        .map(|instr| format!("{instr}\n"))
-                        .collect::<Vec<String>>()
-                        .join("\n")
-                )
+                let instr_str = instrs
+                    .iter()
+                    .map(|instr| format!("\t{instr}"))
+                    .collect::<Vec<String>>()
+                    .join("\n");
+                format!("{label}:\n{instr_str}")
             })
-            .collect::<Vec<String>>();
-        write!(f, "{}\n{}", main_str, block_strs.join("\n"))
-    }
-}
+            .collect::<Vec<String>>()
+            .join("\n\n");
 
-#[cfg(test)]
-mod prog_tests {
-    use super::{Arg, Instr, Program, Reg};
-    use std::collections::HashMap;
-
-    #[test]
-    fn display_empty() {
-        let result = format!(
-            "{}",
-            Program {
-                blocks: HashMap::new(),
-                stack_space: 0
-            }
-        );
-        let expected = "\n";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_prog() {
-        let result = format!(
-            "{}",
-            Program {
-                stack_space: 0,
-                blocks: HashMap::from([(
-                    "main".to_owned(),
-                    vec![
-                        Instr::MovQ(Arg::Immediate(1), Arg::Reg(Reg::Rax)),
-                        Instr::CallQ("print_int".to_owned(), 0),
-                        Instr::Jump("start".to_owned())
-                    ]
-                )]),
-            }
-        );
-        let expected = ".globl main\nmain: movq $1 %rax\n\ncallq print_int\n\njump start\n";
-        assert_eq!(result, expected)
+        write!(f, "{globl_str}\n{block_str}")
     }
 }

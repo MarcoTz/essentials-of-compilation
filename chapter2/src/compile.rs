@@ -2,10 +2,14 @@ use crate::{
     assign_homes::AssignHomes,
     c_var::typecheck::typecheck,
     explicate_control::ExplicateControl,
-    l_var::{syntax::Program, uniquify::Uniquify},
+    l_var,
+    l_var::uniquify::Uniquify,
     remove_complex_operands::RemoveComplexOperands,
     select_instructions::SelectInstructions,
-    x86_int::patch_instructions::PatchInstructions,
+    x86_int,
+    x86_int::{
+        patch_instructions::PatchInstructions, prelude_conclusion::generate_prelude_conclusion,
+    },
 };
 
 /// Compiles a l_var program in the following steps:
@@ -16,7 +20,7 @@ use crate::{
 /// assign_homes : x86_var -> x86_var
 /// patch_instructions : x86_var -> x86_int
 /// prelude_conclusion : x86_int -> x86_int
-pub fn compile(prog: Program) -> Program {
+pub fn compile(prog: l_var::Program) -> x86_int::Program {
     let prog_unique = prog.uniquify(&mut Default::default());
     let prog_reduced = prog_unique.remove_complex_operands(&mut Default::default());
     let mut prog_explicated = prog_reduced.explicate_control();
@@ -24,5 +28,5 @@ pub fn compile(prog: Program) -> Program {
     let prog_selected = prog_explicated.select_instructions();
     let prog_homes = prog_selected.assign_homes(&mut Default::default());
     let prog_patched = prog_homes.patch();
-    todo!()
+    generate_prelude_conclusion(prog_patched)
 }

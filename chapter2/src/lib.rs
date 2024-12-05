@@ -1,11 +1,10 @@
 pub mod assign_homes;
 pub mod compile;
 //pub mod examples;
-pub mod l_var;
-pub mod l_var_reduced;
-//pub mod prelude_conclusion;
 pub mod c_var;
 pub mod explicate_control;
+pub mod l_var;
+pub mod l_var_reduced;
 pub mod remove_complex_operands;
 pub mod select_instructions;
 pub mod x86_int;

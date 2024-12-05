@@ -1,6 +1,6 @@
 use super::{AssignHomes, AssignState};
 use crate::{x86_int, x86_var};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 impl AssignHomes for x86_var::Program {
     type Target = x86_int::Program;
@@ -16,6 +16,7 @@ impl AssignHomes for x86_var::Program {
         x86_int::Program {
             blocks: new_blocks,
             stack_space: st.stack_size,
+            global_labels: HashSet::new(),
         }
     }
 }
