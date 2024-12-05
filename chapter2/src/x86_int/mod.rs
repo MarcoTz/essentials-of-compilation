@@ -1,5 +1,6 @@
 pub mod arg;
 pub mod instr;
+pub mod patch_instructions;
 pub mod reg;
 
 pub use arg::Arg;

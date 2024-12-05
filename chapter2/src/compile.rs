@@ -5,6 +5,7 @@ use crate::{
     l_var::{syntax::Program, uniquify::Uniquify},
     remove_complex_operands::RemoveComplexOperands,
     select_instructions::SelectInstructions,
+    x86_int::patch_instructions::PatchInstructions,
 };
 
 /// Compiles a l_var program in the following steps:
@@ -22,5 +23,6 @@ pub fn compile(prog: Program) -> Program {
     typecheck(&mut prog_explicated);
     let prog_selected = prog_explicated.select_instructions();
     let prog_homes = prog_selected.assign_homes(&mut Default::default());
+    let prog_patched = prog_homes.patch();
     todo!()
 }

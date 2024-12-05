@@ -1,8 +1,9 @@
 pub mod arg;
 pub mod instr;
 pub mod prog;
+pub mod reg;
 
-use crate::Var;
+use crate::x86_var::Var;
 use std::collections::HashMap;
 
 #[derive(Default)]

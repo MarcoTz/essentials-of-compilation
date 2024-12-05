@@ -18,7 +18,8 @@ pub fn typecheck(prog: &mut Program) {
 impl Typecheck for Program {
     fn check(&self) -> HashMap<Var, Type> {
         let mut vars = HashMap::new();
-        self.blocks
+        let _ = self
+            .blocks
             .iter()
             .map(|(_, tail)| vars.extend(tail.check()));
         vars
