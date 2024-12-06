@@ -10,3 +10,22 @@ impl ExplicateControl for l_var_reduced::Atm {
         }
     }
 }
+
+#[cfg(test)]
+mod atm_tests {
+    use super::{c_var, l_var_reduced, ExplicateControl};
+
+    #[test]
+    fn explicate_int() {
+        let result = l_var_reduced::Atm::Int(2).explicate_control();
+        let expected = c_var::Atm::Int(2);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn explicate_var() {
+        let result = l_var_reduced::Atm::Var("x".to_owned()).explicate_control();
+        let expected = c_var::Atm::Var("x".to_owned());
+        assert_eq!(result, expected)
+    }
+}
