@@ -20,3 +20,39 @@ impl AssignHomes for x86_var::Arg {
         }
     }
 }
+
+#[cfg(test)]
+mod arg_tests {
+    use super::{x86_int, x86_var, AssignHomes, AssignState};
+
+    #[test]
+    fn assign_immediate() {
+        let result = x86_var::Arg::Immediate(10).assign_homes(&mut Default::default());
+        let expected = x86_int::Arg::Immediate(10);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn assign_var_none() {
+        let mut st = AssignState::default();
+        let result = x86_var::Arg::Var("x".to_owned()).assign_homes(&mut st);
+        let expected = x86_int::Arg::Deref(x86_int::Reg::Rbp, -8);
+        let mut new_st = AssignState::default();
+        new_st.stack_size = 8;
+        new_st.stack_vars.insert("x".to_owned(), -8);
+        assert_eq!(result, expected);
+        assert_eq!(st, new_st)
+    }
+
+    #[test]
+    fn assign_var_some() {
+        let mut st = AssignState::default();
+        st.stack_vars.insert("x".to_owned(), 15);
+        let result = x86_var::Arg::Var("x".to_owned()).assign_homes(&mut st);
+        let expected = x86_int::Arg::Deref(x86_int::Reg::Rbp, 15);
+        let mut new_st = AssignState::default();
+        new_st.stack_vars.insert("x".to_owned(), 15);
+        assert_eq!(result, expected);
+        assert_eq!(st, new_st)
+    }
+}

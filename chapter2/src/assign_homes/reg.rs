@@ -24,3 +24,22 @@ impl AssignHomes for x86_var::Reg {
         }
     }
 }
+
+#[cfg(test)]
+mod reg_tests {
+    use super::{x86_int, x86_var, AssignHomes};
+
+    #[test]
+    fn assign_rdx() {
+        let result = x86_var::Reg::Rdx.assign_homes(&mut Default::default());
+        let expected = x86_int::Reg::Rdx;
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn assign_r15() {
+        let result = x86_var::Reg::R15.assign_homes(&mut Default::default());
+        let expected = x86_int::Reg::R15;
+        assert_eq!(result, expected)
+    }
+}

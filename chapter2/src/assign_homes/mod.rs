@@ -6,7 +6,7 @@ pub mod reg;
 use crate::x86_var::Var;
 use std::collections::HashMap;
 
-#[derive(Default)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct AssignState {
     pub stack_size: usize,
     pub stack_vars: HashMap<Var, i64>,
