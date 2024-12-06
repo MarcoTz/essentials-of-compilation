@@ -16,7 +16,7 @@ pub use tail::Tail;
 pub type Var = String;
 pub type Label = String;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum BinOp {
     Add,
     Sub,
@@ -31,7 +31,7 @@ impl fmt::Display for BinOp {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum UnaryOp {
     Neg,
 }

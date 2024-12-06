@@ -1,7 +1,7 @@
 use super::{Atm, BinOp, Tail, UnaryOp};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Exp {
     Atm(Atm),
     Read,

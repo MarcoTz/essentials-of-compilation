@@ -1,7 +1,7 @@
 use super::{Exp, Stmt};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Tail {
     Return(Exp),
     Seq(Stmt, Box<Tail>),

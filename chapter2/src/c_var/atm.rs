@@ -1,7 +1,7 @@
 use super::Var;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Atm {
     Int(i64),
     Var(Var),

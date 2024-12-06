@@ -1,7 +1,7 @@
 use super::{typecheck::Type, Label, Tail, Var};
 use std::{collections::HashMap, fmt};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Program {
     pub blocks: HashMap<Label, Tail>,
     pub types: HashMap<Var, Type>,

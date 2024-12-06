@@ -1,7 +1,7 @@
 use super::{Atm, Exp, Program, Stmt, Tail, Var};
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Type {
     Int,
 }
@@ -12,16 +12,16 @@ pub trait Typecheck: Sized {
 
 pub fn typecheck(prog: &mut Program) {
     let vars = prog.check();
+    println!("got vars {vars:?}");
     prog.types = vars;
 }
 
 impl Typecheck for Program {
     fn check(&self) -> HashMap<Var, Type> {
         let mut vars = HashMap::new();
-        let _ = self
-            .blocks
-            .iter()
-            .map(|(_, tail)| vars.extend(tail.check()));
+        for (_, exp) in self.blocks.iter() {
+            vars.extend(exp.check());
+        }
         vars
     }
 }
@@ -72,5 +72,108 @@ impl Typecheck for Atm {
             Atm::Int(_) => HashMap::new(),
             Atm::Var(v) => HashMap::from([(v.to_owned(), Type::Int)]),
         }
+    }
+}
+
+#[cfg(test)]
+mod typecheck_tests {
+    use super::{typecheck, Atm, Exp, Program, Stmt, Tail, Type, Typecheck};
+    use crate::c_var::{BinOp, UnaryOp};
+    use std::collections::HashMap;
+
+    #[test]
+    fn check_var() {
+        let result = Atm::Var("x".to_owned()).check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_int() {
+        let result = Atm::Int(3).check();
+        let expected = HashMap::new();
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_assign() {
+        let result = Stmt::Assign {
+            var: "x".to_owned(),
+            exp: Exp::Read,
+        }
+        .check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_read() {
+        let result = Exp::Read.check();
+        let expected = HashMap::new();
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_unary() {
+        let result = Exp::UnaryOp {
+            exp: Atm::Var("x".to_owned()),
+            op: UnaryOp::Neg,
+        }
+        .check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_binop() {
+        let result = Exp::BinOp {
+            exp1: Atm::Var("x".to_owned()),
+            op: BinOp::Add,
+            exp2: Atm::Var("y".to_owned()),
+        }
+        .check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int), ("y".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_return() {
+        let result = Tail::Return(Exp::Atm(Atm::Var("x".to_owned()))).check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_seq() {
+        let result = Tail::Seq(
+            Stmt::Assign {
+                var: "x".to_owned(),
+                exp: Exp::Read,
+            },
+            Box::new(Tail::Return(Exp::Atm(Atm::Var("x".to_owned())))),
+        )
+        .check();
+        let expected = HashMap::from([("x".to_owned(), Type::Int)]);
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn check_prog() {
+        let mut result = Program {
+            blocks: HashMap::from([(
+                "start".to_owned(),
+                Tail::Return(Exp::Atm(Atm::Var("x".to_owned()))),
+            )]),
+            types: HashMap::new(),
+        };
+        typecheck(&mut result);
+        let expected = Program {
+            blocks: HashMap::from([(
+                "start".to_owned(),
+                Tail::Return(Exp::Atm(Atm::Var("x".to_owned()))),
+            )]),
+            types: HashMap::from([("x".to_owned(), Type::Int)]),
+        };
+        assert_eq!(result, expected)
     }
 }

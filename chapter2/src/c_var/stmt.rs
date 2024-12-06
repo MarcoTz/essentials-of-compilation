@@ -1,7 +1,7 @@
 use super::{Exp, Var};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Stmt {
     Assign { var: Var, exp: Exp },
 }
