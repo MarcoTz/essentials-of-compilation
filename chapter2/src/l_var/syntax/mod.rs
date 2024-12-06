@@ -6,6 +6,7 @@ pub use exp::Exp;
 
 pub type Var = String;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Program {
     pub exp: Exp,
 }

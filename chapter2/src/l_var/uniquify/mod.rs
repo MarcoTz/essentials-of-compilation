@@ -26,3 +26,26 @@ pub trait Uniquify {
     type Target;
     fn uniquify(self, st: &mut UniqueState) -> Self::Target;
 }
+
+#[cfg(test)]
+mod fresh_var_tests {
+    use super::UniqueState;
+
+    #[test]
+    fn fresh_empty() {
+        let result = UniqueState::default().fresh_var(&"x".to_owned());
+        let expected = "x0";
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn fresh_nonempty() {
+        let mut st = UniqueState::default();
+        st.var_subst.insert("x3".to_owned(), "y".to_owned());
+        st.var_subst.insert("x".to_owned(), "x0".to_owned());
+        st.var_subst.insert("y".to_owned(), "x1".to_owned());
+        let result = st.fresh_var(&"x2".to_owned());
+        let expected = "x3";
+        assert_eq!(result, expected)
+    }
+}

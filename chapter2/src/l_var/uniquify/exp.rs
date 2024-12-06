@@ -10,12 +10,12 @@ impl Uniquify for Exp {
                 bound_term,
                 in_term,
             } => {
+                let bound_subst = bound_term.subst_vars(&st.var_subst).uniquify(st);
                 let new_name = st.fresh_var(&name);
-                println!("gotnew name {new_name} for {name}");
                 st.var_subst.insert(name.clone(), new_name.clone());
                 Exp::Assign {
                     name: new_name,
-                    bound_term: Box::new(bound_term.subst_vars(&st.var_subst).uniquify(st)),
+                    bound_term: Box::new(bound_subst),
                     in_term: Box::new(in_term.subst_vars(&st.var_subst).uniquify(st)),
                 }
             }
