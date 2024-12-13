@@ -5,9 +5,9 @@ pub mod patch_instructions;
 pub mod prelude_conclusion;
 pub mod remove_vars;
 pub mod uncover_live;
-pub mod x86_int;
-pub mod x86_var;
 
+use chapter2::x86_int::Program as IntProg;
+use chapter2::x86_var::Program as VarProg;
 use color_graph::assign_registers::assign_registers;
 use color_graph::color_graph;
 use errors::Error;
@@ -15,8 +15,6 @@ use interference_graph::{BuildGraph, InterferenceGraph};
 use patch_instructions::PatchInstructions;
 use remove_vars::RemoveVars;
 use uncover_live::UncoverLive;
-use x86_int::Prog as IntProg;
-use x86_var::Prog as VarProg;
 
 pub type Var = String;
 

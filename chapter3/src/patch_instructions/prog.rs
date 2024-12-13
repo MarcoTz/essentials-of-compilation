@@ -1,12 +1,14 @@
 use super::PatchInstructions;
-use crate::x86_int::Prog;
+use chapter2::x86_int::{Instr, Label, Program};
 
-impl PatchInstructions for Prog {
-    type Target = Prog;
+impl PatchInstructions for Program {
+    type Target = Program;
     fn patch(self) -> Self::Target {
         let mut new_instrs = vec![];
-        let mut new_labels = self.labels;
-        for instr in self.instrs.into_iter() {
+        let mut new_labels: Vec<(Label, usize)> = todo!(); //self.labels;
+        let instrs: Vec<Instr> = todo!();
+        for instr in instrs.into_iter() {
+            //self.instrs.into_iter() {
             let instrs = instr.patch();
             if instrs.len() > 1 {
                 new_labels = new_labels
@@ -16,61 +18,62 @@ impl PatchInstructions for Prog {
             }
             new_instrs.extend(instrs)
         }
-        Prog {
+        todo!()
+        /*Program {
             labels: new_labels,
             instrs: new_instrs,
             stack_space: self.stack_space,
             used_callee: self.used_callee,
-        }
+        }*/
     }
 }
 
 #[cfg(test)]
 mod prog_tests {
-    use super::{PatchInstructions, Prog};
-    use crate::x86_int::{Arg, Instr, Reg};
+    use super::{PatchInstructions, Program};
+    use chapter2::x86_int::{Arg, Instr, Reg};
     use std::collections::{HashMap, HashSet};
 
     #[test]
     fn patch_empty() {
-        let result = Prog {
-            instrs: vec![],
-            labels: HashMap::new(),
-            stack_space: 0,
-            used_callee: HashSet::new(),
-        }
-        .patch();
-        let expected = Prog {
-            instrs: vec![],
-            labels: HashMap::new(),
-            stack_space: 0,
-            used_callee: HashSet::new(),
-        };
+        let result = todo!(); /*Program {
+                                  blocks:
+                                  labels: HashMap::new(),
+                                  stack_space: 0,
+                                  used_callee: HashSet::new(),
+                              }
+                              .patch();*/
+        let expected = todo!(); /*Program {
+                                    instrs: vec![],
+                                    labels: HashMap::new(),
+                                    stack_space: 0,
+                                    used_callee: HashSet::new(),
+                                };*/
         assert_eq!(result, expected)
     }
 
     #[test]
     fn patch_prog() {
-        let result = Prog {
-            labels: HashMap::new(),
-            instrs: vec![
-                Instr::AddQ(Arg::Deref(Reg::Rbp, -8), Arg::Deref(Reg::Rbp, -16)),
-                Instr::CallQ("print_int".to_owned(), 1),
-            ],
-            stack_space: 16,
-            used_callee: HashSet::new(),
-        }
-        .patch();
-        let expected = Prog {
-            labels: HashMap::new(),
-            instrs: vec![
-                Instr::MovQ(Arg::Deref(Reg::Rbp, -8), Arg::Reg(Reg::Rax)),
-                Instr::AddQ(Arg::Reg(Reg::Rax), Arg::Deref(Reg::Rbp, -16)),
-                Instr::CallQ("print_int".to_owned(), 1),
-            ],
-            stack_space: 16,
-            used_callee: HashSet::new(),
-        };
+        let result = todo!(); /*Program {
+                                  labels: HashMap::new(),
+                                  instrs: vec![
+                                      Instr::AddQ(Arg::Deref(Reg::Rbp, -8), Arg::Deref(Reg::Rbp, -16)),
+                                      Instr::CallQ("print_int".to_owned(), 1),
+                                  ],
+                                  stack_space: 16,
+                                  used_callee: HashSet::new(),
+                              }
+                              .patch();*/
+        let expected = todo!(); /*Program {
+                                    labels: HashMap::new(),
+                                    instrs: vec![
+                                        Instr::MovQ(Arg::Deref(Reg::Rbp, -8), Arg::Reg(Reg::Rax)),
+                                        Instr::AddQ(Arg::Reg(Reg::Rax), Arg::Deref(Reg::Rbp, -16)),
+                                        Instr::CallQ("print_int".to_owned(), 1),
+                                    ],
+                                    stack_space: 16,
+                                    used_callee: HashSet::new(),
+                                };*/
         assert_eq!(result, expected)
     }
 }

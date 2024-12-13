@@ -2,3 +2,6 @@
 name = "chapter3"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+chapter2 = {path="../chapter2"}

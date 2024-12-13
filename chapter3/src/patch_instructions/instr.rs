@@ -1,22 +1,23 @@
 use super::PatchInstructions;
-use crate::x86_int::{Arg, Instr};
+use chapter2::x86_int::{Arg, Instr};
 
-impl PatchInstructions for Instr<Arg> {
-    type Target = Vec<Instr<Arg>>;
+impl PatchInstructions for Instr {
+    type Target = Vec<Instr>;
     fn patch(self) -> Self::Target {
-        let args = self.get_args();
+        let args: Vec<Arg> = todo!(); //self.get_args();
         if args.len() == 2 && args.first() == args.get(1) {
             return vec![];
         }
 
         let max_immediate = 2_i64.pow(16);
-        let no_double_deref = self.remove_double_deref();
-        let no_max_immediate: Vec<Instr<Arg>> =
+        let no_double_deref: Vec<Instr> = todo!(); //self.remove_double_deref();
+        let no_max_immediate: Vec<Instr> =
             no_double_deref
                 .into_iter()
                 .fold(vec![], |instrs, next_instr| {
                     let mut new_instrs = instrs;
-                    new_instrs.extend(next_instr.remove_max_immediate(max_immediate));
+                    todo!();
+                    //new_instrs.extend(next_instr.remove_max_immediate(max_immediate));
                     new_instrs
                 });
         no_max_immediate
@@ -26,7 +27,7 @@ impl PatchInstructions for Instr<Arg> {
 #[cfg(test)]
 mod instr_tests {
     use super::{Arg, Instr, PatchInstructions};
-    use crate::x86_int::Reg;
+    use chapter2::x86_int::Reg;
 
     #[test]
     fn add_reg_reg() {

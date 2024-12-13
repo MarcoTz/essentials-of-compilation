@@ -1,8 +1,6 @@
 use super::UncoverLive;
-use crate::{
-    x86_var::{Arg, Instr},
-    Var,
-};
+use chapter2::x86_var::{Arg, Instr, Var};
+
 use std::collections::HashSet;
 
 #[derive(Debug, PartialEq, Eq, Default)]
@@ -36,7 +34,7 @@ impl InstrVars {
     }
 }
 
-impl UncoverLive for Instr<Arg> {
+impl UncoverLive for Instr {
     type Target = InstrVars;
     fn uncover(&self) -> Self::Target {
         match self {

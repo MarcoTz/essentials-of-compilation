@@ -1,11 +1,9 @@
 use super::{BuildGraph, InterferenceGraph};
-use crate::{
-    uncover_live::{LiveMap, UncoverLive},
-    x86_var::{Arg, Instr},
-};
+use crate::uncover_live::{LiveMap, UncoverLive};
+use chapter2::x86_var::{Arg, Instr};
 use std::collections::HashSet;
 
-impl BuildGraph for Instr<Arg> {
+impl BuildGraph for Instr {
     fn build(&self, graph: &mut InterferenceGraph, live: &LiveMap) {
         match self {
             Instr::MovQ(Arg::Var(v1), Arg::Var(v2)) => {
