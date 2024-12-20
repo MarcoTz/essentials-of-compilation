@@ -1,10 +1,10 @@
 pub mod instr;
 
-use chapter2::x86_var::{Instr, Label, Program, Var};
+use chapter2::x86_var::{Arg, Instr, Label, Program};
 use instr::l_before;
 use std::collections::{HashMap, HashSet};
 
-pub type LiveMap = HashMap<Label, Vec<HashSet<Var>>>;
+pub type LiveMap = HashMap<Label, Vec<HashSet<Arg>>>;
 
 pub fn uncover_live(prog: &Program) -> LiveMap {
     let mut map = HashMap::new();
@@ -33,7 +33,7 @@ pub fn uncover_live(prog: &Program) -> LiveMap {
     map
 }
 
-fn get_target_set(map: &LiveMap, target_label: &Label) -> Option<HashSet<Var>> {
+fn get_target_set(map: &LiveMap, target_label: &Label) -> Option<HashSet<Arg>> {
     let target_sets = map.get(target_label)?;
     target_sets.first().cloned()
 }
@@ -63,10 +63,10 @@ mod uncover_tests {
             "main".to_owned(),
             vec![
                 HashSet::new(),
-                HashSet::from(["a".to_owned()]),
-                HashSet::from(["a".to_owned()]),
-                HashSet::from(["c".to_owned()]),
-                HashSet::from(["c".to_owned(), "b".to_owned()]),
+                HashSet::from([Arg::Var("a".to_owned())]),
+                HashSet::from([Arg::Var("a".to_owned())]),
+                HashSet::from([Arg::Var("c".to_owned())]),
+                HashSet::from([Arg::Var("c".to_owned()), Arg::Var("b".to_owned())]),
             ],
         )]);
         assert_eq!(result, expected)
@@ -98,16 +98,24 @@ mod uncover_tests {
             "main".to_owned(),
             vec![
                 HashSet::new(),
-                HashSet::from(["v".to_owned()]),
-                HashSet::from(["v".to_owned(), "w".to_owned()]),
-                HashSet::from(["w".to_owned(), "x".to_owned()]),
-                HashSet::from(["w".to_owned(), "x".to_owned()]),
-                HashSet::from(["w".to_owned(), "x".to_owned(), "y".to_owned()]),
-                HashSet::from(["w".to_owned(), "z".to_owned(), "y".to_owned()]),
-                HashSet::from(["z".to_owned(), "y".to_owned()]),
-                HashSet::from(["z".to_owned(), "t".to_owned()]),
-                HashSet::from(["z".to_owned(), "t".to_owned()]),
-                HashSet::from(["t".to_owned()]),
+                HashSet::from([Arg::Var("v".to_owned())]),
+                HashSet::from([Arg::Var("v".to_owned()), Arg::Var("w".to_owned())]),
+                HashSet::from([Arg::Var("w".to_owned()), Arg::Var("x".to_owned())]),
+                HashSet::from([Arg::Var("w".to_owned()), Arg::Var("x".to_owned())]),
+                HashSet::from([
+                    Arg::Var("w".to_owned()),
+                    Arg::Var("x".to_owned()),
+                    Arg::Var("y".to_owned()),
+                ]),
+                HashSet::from([
+                    Arg::Var("w".to_owned()),
+                    Arg::Var("z".to_owned()),
+                    Arg::Var("y".to_owned()),
+                ]),
+                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("y".to_owned())]),
+                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("t".to_owned())]),
+                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("t".to_owned())]),
+                HashSet::from([Arg::Var("t".to_owned()), Arg::Reg(Reg::Rax)]),
                 HashSet::new(),
             ],
         )]);

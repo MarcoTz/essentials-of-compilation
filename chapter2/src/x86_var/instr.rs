@@ -7,7 +7,7 @@ pub enum Instr {
     SubQ(Arg, Arg),
     NegQ(Arg),
     MovQ(Arg, Arg),
-    CallQ(Label, i64),
+    CallQ(Label, usize),
     PushQ(Arg),
     PopQ(Arg),
     RetQ,

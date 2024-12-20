@@ -1,3 +1,4 @@
+use super::Arg;
 use std::fmt;
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
@@ -18,6 +19,40 @@ pub enum Reg {
     R13,
     R14,
     R15,
+}
+
+impl Reg {
+    pub fn caller_saved() -> Vec<Reg> {
+        vec![
+            Reg::Rax,
+            Reg::Rcx,
+            Reg::Rdx,
+            Reg::Rsi,
+            Reg::Rdi,
+            Reg::R8,
+            Reg::R9,
+            Reg::R10,
+            Reg::R11,
+        ]
+    }
+
+    pub fn callee_saved() -> Vec<Reg> {
+        vec![
+            Reg::Rsp,
+            Reg::Rbp,
+            Reg::Rbx,
+            Reg::R12,
+            Reg::R13,
+            Reg::R14,
+            Reg::R15,
+        ]
+    }
+}
+
+impl From<Reg> for Arg {
+    fn from(r: Reg) -> Arg {
+        Arg::Reg(r)
+    }
 }
 
 impl fmt::Display for Reg {
