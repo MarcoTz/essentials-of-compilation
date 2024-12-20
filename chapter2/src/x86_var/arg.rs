@@ -9,6 +9,16 @@ pub enum Arg {
     Var(Var),
 }
 
+impl Arg {
+    pub fn as_var(&self) -> Option<Var> {
+        if let Arg::Var(v) = self {
+            Some(v.clone())
+        } else {
+            None
+        }
+    }
+}
+
 impl fmt::Display for Arg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
