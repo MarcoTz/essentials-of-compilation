@@ -1,4 +1,4 @@
-use chapter2::x86_var::{Arg, Instr, Reg, Var};
+use chapter2::x86_var::{Arg, Instr, Reg};
 use std::collections::HashSet;
 
 pub fn l_before(instr: &Instr, l_after: &HashSet<Arg>) -> HashSet<Arg> {
@@ -12,7 +12,7 @@ pub fn l_before(instr: &Instr, l_after: &HashSet<Arg>) -> HashSet<Arg> {
     l_before
 }
 
-fn get_written(instr: &Instr) -> HashSet<Arg> {
+pub fn get_written(instr: &Instr) -> HashSet<Arg> {
     match instr {
         Instr::AddQ(_, a2) => args_to_set(vec![a2.clone()]),
         Instr::RetQ => HashSet::new(),

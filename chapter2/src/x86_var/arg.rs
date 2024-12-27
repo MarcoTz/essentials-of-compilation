@@ -19,6 +19,12 @@ impl Arg {
     }
 }
 
+impl From<&str> for Arg {
+    fn from(s: &str) -> Arg {
+        Arg::Var(s.to_owned())
+    }
+}
+
 impl fmt::Display for Arg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

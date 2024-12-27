@@ -1,6 +1,7 @@
 pub mod instr;
 
-use chapter2::x86_var::{Arg, Instr, Label, Program};
+use chapter2::x86_var::{Arg, Instr, Label, Program, Reg};
+pub use instr::get_written;
 use instr::l_before;
 use std::collections::{HashMap, HashSet};
 
@@ -8,65 +9,51 @@ pub type LiveMap = HashMap<Label, Vec<HashSet<Arg>>>;
 
 pub fn uncover_live(prog: &Program) -> LiveMap {
     let mut map = HashMap::new();
-    let mut jumps = HashMap::new();
     for (label, instrs) in prog.blocks.iter() {
         let mut live_sets = vec![];
         let mut last_live = HashSet::new();
         for instr in instrs.iter().rev() {
-            if let Instr::Jump(l) = instr {
-                jumps.insert(
-                    l.clone(),
-                    (label.clone(), instrs.len() - live_sets.len() - 1),
-                );
+            //only jump is to conclusion for now
+            if let Instr::Jump(_) = instr {
+                last_live = HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]);
+            } else {
+                last_live = l_before(instr, &last_live);
             }
-            last_live = l_before(instr, &last_live);
             live_sets.insert(0, last_live.clone());
         }
         map.insert(label.clone(), live_sets);
     }
 
-    for (target_label, (block_label, block_index)) in jumps.into_iter() {
-        let target_set = get_target_set(&map, &target_label).unwrap_or(HashSet::new());
-        let label_sets = map.get_mut(&block_label).unwrap();
-        label_sets[block_index] = target_set;
+    let main_sets = map.get_mut(&"main".to_owned()).unwrap();
+    for arg_set in main_sets.iter_mut() {
+        arg_set.insert(Reg::Rsp.into());
     }
-    map
-}
 
-fn get_target_set(map: &LiveMap, target_label: &Label) -> Option<HashSet<Arg>> {
-    let target_sets = map.get(target_label)?;
-    target_sets.first().cloned()
+    map
 }
 
 #[cfg(test)]
 mod uncover_tests {
-    use super::{uncover_live, Instr, Program};
+    use super::uncover_live;
+    use crate::test_examples::{example_prog1, example_prog2};
     use chapter2::x86_var::{Arg, Reg};
     use std::collections::{HashMap, HashSet};
 
     #[test]
     fn uncover_example1() {
-        let result = uncover_live(&Program {
-            blocks: HashMap::from([(
-                "main".to_owned(),
-                vec![
-                    Instr::MovQ(Arg::Immediate(5), Arg::Var("a".to_owned())),
-                    Instr::MovQ(Arg::Immediate(30), Arg::Var("b".to_owned())),
-                    Instr::MovQ(Arg::Var("a".to_owned()), Arg::Var("c".to_owned())),
-                    Instr::MovQ(Arg::Immediate(10), Arg::Var("b".to_owned())),
-                    Instr::AddQ(Arg::Var("b".to_owned()), Arg::Var("c".to_owned())),
-                ],
-            )]),
-            types: HashMap::new(),
-        });
+        let result = uncover_live(&example_prog1());
         let expected = HashMap::from([(
             "main".to_owned(),
             vec![
-                HashSet::new(),
-                HashSet::from([Arg::Var("a".to_owned())]),
-                HashSet::from([Arg::Var("a".to_owned())]),
-                HashSet::from([Arg::Var("c".to_owned())]),
-                HashSet::from([Arg::Var("c".to_owned()), Arg::Var("b".to_owned())]),
+                HashSet::from([Reg::Rsp.into()]),
+                HashSet::from([Arg::Var("a".to_owned()), Reg::Rsp.into()]),
+                HashSet::from([Arg::Var("a".to_owned()), Reg::Rsp.into()]),
+                HashSet::from([Arg::Var("c".to_owned()), Reg::Rsp.into()]),
+                HashSet::from([
+                    Arg::Var("c".to_owned()),
+                    Arg::Var("b".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
             ],
         )]);
         assert_eq!(result, expected)
@@ -74,49 +61,60 @@ mod uncover_tests {
 
     #[test]
     fn uncover_example2() {
-        let result = uncover_live(&Program {
-            blocks: HashMap::from([(
-                "main".to_owned(),
-                vec![
-                    Instr::MovQ(Arg::Immediate(1), Arg::Var("v".to_owned())),
-                    Instr::MovQ(Arg::Immediate(42), Arg::Var("w".to_owned())),
-                    Instr::MovQ(Arg::Var("v".to_owned()), Arg::Var("x".to_owned())),
-                    Instr::AddQ(Arg::Immediate(7), Arg::Var("x".to_owned())),
-                    Instr::MovQ(Arg::Var("x".to_owned()), Arg::Var("y".to_owned())),
-                    Instr::MovQ(Arg::Var("x".to_owned()), Arg::Var("z".to_owned())),
-                    Instr::AddQ(Arg::Var("w".to_owned()), Arg::Var("z".to_owned())),
-                    Instr::MovQ(Arg::Var("y".to_owned()), Arg::Var("t".to_owned())),
-                    Instr::NegQ(Arg::Var("t".to_owned())),
-                    Instr::MovQ(Arg::Var("z".to_owned()), Arg::Reg(Reg::Rax)),
-                    Instr::AddQ(Arg::Var("t".to_owned()), Arg::Reg(Reg::Rax)),
-                    Instr::Jump("conclusion".to_owned()),
-                ],
-            )]),
-            types: HashMap::new(),
-        });
+        let result = uncover_live(&example_prog2());
         let expected = HashMap::from([(
             "main".to_owned(),
             vec![
-                HashSet::new(),
-                HashSet::from([Arg::Var("v".to_owned())]),
-                HashSet::from([Arg::Var("v".to_owned()), Arg::Var("w".to_owned())]),
-                HashSet::from([Arg::Var("w".to_owned()), Arg::Var("x".to_owned())]),
-                HashSet::from([Arg::Var("w".to_owned()), Arg::Var("x".to_owned())]),
+                HashSet::from([Reg::Rsp.into()]),
+                HashSet::from([Arg::Var("v".to_owned()), Reg::Rsp.into()]),
+                HashSet::from([
+                    Arg::Var("v".to_owned()),
+                    Arg::Var("w".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([
+                    Arg::Var("w".to_owned()),
+                    Arg::Var("x".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([
+                    Arg::Var("w".to_owned()),
+                    Arg::Var("x".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
                 HashSet::from([
                     Arg::Var("w".to_owned()),
                     Arg::Var("x".to_owned()),
                     Arg::Var("y".to_owned()),
+                    Reg::Rsp.into(),
                 ]),
                 HashSet::from([
                     Arg::Var("w".to_owned()),
                     Arg::Var("z".to_owned()),
                     Arg::Var("y".to_owned()),
+                    Reg::Rsp.into(),
                 ]),
-                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("y".to_owned())]),
-                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("t".to_owned())]),
-                HashSet::from([Arg::Var("z".to_owned()), Arg::Var("t".to_owned())]),
-                HashSet::from([Arg::Var("t".to_owned()), Arg::Reg(Reg::Rax)]),
-                HashSet::new(),
+                HashSet::from([
+                    Arg::Var("z".to_owned()),
+                    Arg::Var("y".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([
+                    Arg::Var("z".to_owned()),
+                    Arg::Var("t".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([
+                    Arg::Var("z".to_owned()),
+                    Arg::Var("t".to_owned()),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([
+                    Arg::Var("t".to_owned()),
+                    Arg::Reg(Reg::Rax),
+                    Reg::Rsp.into(),
+                ]),
+                HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
             ],
         )]);
         assert_eq!(result, expected)
