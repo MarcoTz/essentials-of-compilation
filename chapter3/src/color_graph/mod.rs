@@ -12,7 +12,7 @@ pub type RegisterAssignment = HashMap<Var, Reg>;
 
 pub fn saturation(vert: &Var, graph: &InterferenceGraph, coloring: &Coloring) -> HashSet<Color> {
     let mut colors = HashSet::new();
-    let adj = graph.adjacent(vert);
+    let adj: HashSet<Var> = todo!(); //graph.adjacent(vert);
     for v in adj.iter() {
         match coloring.get(v) {
             None => continue,
@@ -30,7 +30,7 @@ pub fn color_graph(graph: InterferenceGraph) -> Result<Coloring, Error> {
     while !verts.is_empty() {
         let saturations = verts
             .iter()
-            .map(|v| (v.clone(), saturation(v, &graph, &coloring)));
+            .map(|v| (v.clone(), saturation(/*v*/ todo!(), &graph, &coloring)));
         let (next_vert, next_saturation) = saturations
             .max_by(|(_, color1), (_, color2)| color1.len().cmp(&color2.len()))
             .unwrap();
@@ -38,40 +38,8 @@ pub fn color_graph(graph: InterferenceGraph) -> Result<Coloring, Error> {
             .filter(|i| !next_saturation.contains(i))
             .min()
             .ok_or(Error::RegistersFull)?;
-        coloring.insert(next_vert.clone(), vert_color);
+        coloring.insert(todo!() /*next_vert.clone()*/, vert_color);
         verts.remove(&next_vert);
     }
     Ok(coloring)
-}
-
-#[cfg(test)]
-mod color_tests {
-    use super::{color_graph, InterferenceGraph};
-    use std::collections::HashSet;
-
-    #[test]
-    fn color_ex() {
-        let graph = InterferenceGraph {
-            vertices: HashSet::from([
-                "tmp_0".to_owned(),
-                "tmp_1".to_owned(),
-                "y".to_owned(),
-                "z".to_owned(),
-                "x".to_owned(),
-                "w".to_owned(),
-                "v".to_owned(),
-            ]),
-            edges: HashSet::from([
-                ("tmp_0".to_owned(), "tmp_1".to_owned()),
-                ("tmp_0".to_owned(), "z".to_owned()),
-                ("y".to_owned(), "z".to_owned()),
-                ("z".to_owned(), "w".to_owned()),
-                ("y".to_owned(), "w".to_owned()),
-                ("x".to_owned(), "w".to_owned()),
-                ("w".to_owned(), "v".to_owned()),
-            ]),
-        };
-        let result = color_graph(graph);
-        assert!(result.is_ok())
-    }
 }
