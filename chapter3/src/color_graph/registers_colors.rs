@@ -3,7 +3,28 @@ use crate::errors::Error;
 use chapter2::x86_var::Reg;
 use std::collections::HashMap;
 
-pub fn num_reg(color: Color) -> Result<Reg, Error> {
+pub fn reg_to_color(reg: &Reg) -> i32 {
+    match reg {
+        Reg::Rcx => 0,
+        Reg::Rdx => 1,
+        Reg::Rsi => 2,
+        Reg::Rdi => 3,
+        Reg::R8 => 4,
+        Reg::R9 => 5,
+        Reg::R10 => 6,
+        Reg::Rbx => 7,
+        Reg::R12 => 8,
+        Reg::R13 => 9,
+        Reg::R14 => 10,
+        Reg::Rax => -1,
+        Reg::Rsp => -2,
+        Reg::Rbp => -3,
+        Reg::R11 => -4,
+        Reg::R15 => -5,
+    }
+}
+
+pub fn color_to_reg(color: Color) -> Result<Reg, Error> {
     match color {
         0 => Ok(Reg::Rcx),
         1 => Ok(Reg::Rdx),
@@ -23,13 +44,4 @@ pub fn num_reg(color: Color) -> Result<Reg, Error> {
         -5 => Ok(Reg::R15),
         _ => Err(Error::RegistersFull),
     }
-}
-
-pub fn assign_registers(coloring: Coloring) -> Result<RegisterAssignment, Error> {
-    let mut assignment = HashMap::new();
-    for (var, color) in coloring.into_iter() {
-        let reg = num_reg(color)?;
-        assignment.insert(var, reg);
-    }
-    Ok(assignment)
 }
