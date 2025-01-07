@@ -16,6 +16,10 @@ pub enum Error {
         found: Value,
         expected: Type,
     },
+    TypeMismatch {
+        found: Type,
+        expected: Type,
+    },
 }
 
 impl fmt::Display for Error {
@@ -32,6 +36,9 @@ impl fmt::Display for Error {
             ),
             Error::BadValue { found, expected } => {
                 write!(f, "Expected value of type {expected}, got {found}")
+            }
+            Error::TypeMismatch { found, expected } => {
+                write!(f, "Expected type {expected}, found {found}")
             }
         }
     }

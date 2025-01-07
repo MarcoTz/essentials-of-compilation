@@ -1,3 +1,4 @@
+use crate::syntax::types::Type;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
@@ -44,6 +45,22 @@ impl Op {
             Op::And => 2,
             Op::Or => 2,
             Op::Not => 1,
+        }
+    }
+
+    pub fn arg_tys(&self) -> Type {
+        if matches!(self, Op::Read | Op::Plus | Op::Sub | Op::Neg | Op::Cmp(_)) {
+            Type::Int
+        } else {
+            Type::Bool
+        }
+    }
+
+    pub fn ret_ty(&self) -> Type {
+        if let Op::Cmp(_) = self {
+            Type::Bool
+        } else {
+            self.arg_tys()
         }
     }
 }
