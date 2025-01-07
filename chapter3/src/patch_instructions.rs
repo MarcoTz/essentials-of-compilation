@@ -9,6 +9,7 @@ pub fn patch_instructions(prog: Program) -> Program {
             .collect(),
         stack_space: prog.stack_space,
         global_labels: prog.global_labels,
+        callee_saved: prog.callee_saved,
     }
 }
 
@@ -55,7 +56,7 @@ fn patch_instr(instr: Instr) -> Vec<Instr> {
 #[cfg(test)]
 mod patchinstructions_tests {
     use super::patch_instructions;
-    use chapter2::x86_int::{Arg, Instr, Program, Reg};
+    use crate::x86_int::{Arg, Instr, Program, Reg};
     use std::collections::{HashMap, HashSet};
 
     #[test]
@@ -80,6 +81,7 @@ mod patchinstructions_tests {
             )]),
             stack_space: 16,
             global_labels: HashSet::new(),
+            callee_saved: HashSet::new(),
         };
         let result = patch_instructions(prog);
         let expected = Program {
@@ -101,6 +103,7 @@ mod patchinstructions_tests {
             )]),
             stack_space: 16,
             global_labels: HashSet::new(),
+            callee_saved: HashSet::new(),
         };
         assert_eq!(result, expected)
     }

@@ -12,6 +12,22 @@ pub fn assign_homes(prog: VarProg, coloring: Coloring) -> IntProg {
 }
 
 fn apply_assignment(prog: VarProg, assignment: RegisterAssignment) -> IntProg {
+    let callee_saved = assignment
+        .vars
+        .iter()
+        .filter_map(|(_, arg)| {
+            let reg = if let VarArg::Reg(reg) = arg {
+                reg.clone()
+            } else {
+                return None;
+            };
+            if VarReg::callee_saved().contains(&reg) {
+                Some(reg.into())
+            } else {
+                None
+            }
+        })
+        .collect();
     IntProg {
         blocks: prog
             .blocks
@@ -20,6 +36,7 @@ fn apply_assignment(prog: VarProg, assignment: RegisterAssignment) -> IntProg {
             .collect(),
         stack_space: assignment.stack_space,
         global_labels: HashSet::new(),
+        callee_saved,
     }
 }
 

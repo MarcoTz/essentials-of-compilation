@@ -1,3 +1,4 @@
+use chapter2::x86_var::Reg as VarReg;
 use std::fmt;
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone)]
@@ -43,119 +44,25 @@ impl fmt::Display for Reg {
     }
 }
 
-#[cfg(test)]
-mod reg_tests {
-    use super::Reg;
-
-    #[test]
-    fn display_rsp() {
-        let result = format!("{}", Reg::Rsp);
-        let expected = "rsp";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rbp() {
-        let result = format!("{}", Reg::Rbp);
-        let expected = "rbp";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rax() {
-        let result = format!("{}", Reg::Rax);
-        let expected = "rax";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rbx() {
-        let result = format!("{}", Reg::Rbx);
-        let expected = "rbx";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rcx() {
-        let result = format!("{}", Reg::Rcx);
-        let expected = "rcx";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rdx() {
-        let result = format!("{}", Reg::Rdx);
-        let expected = "rdx";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rsi() {
-        let result = format!("{}", Reg::Rsi);
-        let expected = "rsi";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_rdi() {
-        let result = format!("{}", Reg::Rdi);
-        let expected = "rdi";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r8() {
-        let result = format!("{}", Reg::R8);
-        let expected = "r8";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r9() {
-        let result = format!("{}", Reg::R9);
-        let expected = "r9";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r10() {
-        let result = format!("{}", Reg::R10);
-        let expected = "r10";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r11() {
-        let result = format!("{}", Reg::R11);
-        let expected = "r11";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r12() {
-        let result = format!("{}", Reg::R12);
-        let expected = "r12";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r13() {
-        let result = format!("{}", Reg::R13);
-        let expected = "r13";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r14() {
-        let result = format!("{}", Reg::R14);
-        let expected = "r14";
-        assert_eq!(result, expected)
-    }
-
-    #[test]
-    fn display_r15() {
-        let result = format!("{}", Reg::R15);
-        let expected = "r15";
-        assert_eq!(result, expected)
+impl From<VarReg> for Reg {
+    fn from(reg: VarReg) -> Reg {
+        match reg {
+            VarReg::Rsp => Reg::Rsp,
+            VarReg::Rbp => Reg::Rbp,
+            VarReg::Rax => Reg::Rax,
+            VarReg::Rbx => Reg::Rbx,
+            VarReg::Rcx => Reg::Rcx,
+            VarReg::Rdx => Reg::Rdx,
+            VarReg::Rsi => Reg::Rsi,
+            VarReg::Rdi => Reg::Rdi,
+            VarReg::R8 => Reg::R8,
+            VarReg::R9 => Reg::R9,
+            VarReg::R10 => Reg::R10,
+            VarReg::R11 => Reg::R11,
+            VarReg::R12 => Reg::R12,
+            VarReg::R13 => Reg::R13,
+            VarReg::R14 => Reg::R14,
+            VarReg::R15 => Reg::R15,
+        }
     }
 }

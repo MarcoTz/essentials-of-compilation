@@ -1,7 +1,6 @@
-use super::{Color, Coloring, RegisterAssignment};
+use super::Color;
 use crate::errors::Error;
 use chapter2::x86_var::Reg;
-use std::collections::HashMap;
 
 pub fn reg_to_color(reg: &Reg) -> i32 {
     match reg {

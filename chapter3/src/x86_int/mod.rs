@@ -1,7 +1,5 @@
 pub mod arg;
 pub mod instr;
-pub mod patch_instructions;
-pub mod prelude_conclusion;
 pub mod reg;
 
 pub use arg::Arg;
@@ -19,6 +17,7 @@ pub struct Program {
     pub blocks: HashMap<Label, Vec<Instr>>,
     pub stack_space: usize,
     pub global_labels: HashSet<Label>,
+    pub callee_saved: HashSet<Reg>,
 }
 
 impl fmt::Display for Program {
