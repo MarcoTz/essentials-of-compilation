@@ -9,6 +9,18 @@ pub enum Cmp {
     GreaterEq,
 }
 
+impl Cmp {
+    pub fn apply(&self, fst: i64, snd: i64) -> bool {
+        match self {
+            Cmp::Equal => fst == snd,
+            Cmp::Less => fst < snd,
+            Cmp::LessEq => fst <= snd,
+            Cmp::Greater => fst > snd,
+            Cmp::GreaterEq => fst >= snd,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Op {
     Read,
