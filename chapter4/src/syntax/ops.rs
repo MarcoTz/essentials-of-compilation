@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Cmp {
     Equal,
     Less,
@@ -9,15 +9,31 @@ pub enum Cmp {
     GreaterEq,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Op {
     Read,
     Plus,
+    Sub,
     Neg,
     Cmp(Cmp),
     And,
     Or,
     Not,
+}
+
+impl Op {
+    pub fn arity(&self) -> usize {
+        match self {
+            Op::Read => 0,
+            Op::Plus => 2,
+            Op::Neg => 1,
+            Op::Sub => 2,
+            Op::Cmp(_) => 2,
+            Op::And => 2,
+            Op::Or => 2,
+            Op::Not => 1,
+        }
+    }
 }
 
 impl From<Cmp> for Op {
@@ -44,6 +60,7 @@ impl fmt::Display for Op {
             Op::Read => f.write_str("read"),
             Op::Plus => f.write_str("+"),
             Op::Neg => f.write_str("-"),
+            Op::Sub => f.write_str("-"),
             Op::Cmp(cmp) => cmp.fmt(f),
             Op::And => f.write_str("and"),
             Op::Or => f.write_str("or"),

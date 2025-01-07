@@ -5,6 +5,7 @@ pub mod types;
 pub use ops::{Cmp, Op};
 
 pub type Var = String;
+pub type Program = Exp;
 
 #[derive(Debug)]
 pub enum Exp {
