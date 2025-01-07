@@ -1,4 +1,4 @@
-use chapter2::x86_int::{Arg, Instr, Program, Reg};
+use crate::x86_int::{Arg, Instr, Program, Reg};
 
 pub fn patch_instructions(prog: Program) -> Program {
     Program {

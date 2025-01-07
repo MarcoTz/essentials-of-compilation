@@ -1,16 +1,12 @@
 use crate::{
-    color_graph::{assign_registers, color_graph, RegisterAssignment},
-    interference_graph::build_graph,
-};
-use chapter2::{
+    color_graph::{assign_registers, Coloring, RegisterAssignment},
     x86_int::{Arg as IntArg, Instr as IntInstr, Program as IntProg, Reg as IntReg},
-    x86_var::{Arg as VarArg, Instr as VarInstr, Program as VarProg, Reg as VarReg, Var},
 };
+use chapter2::x86_var::{Arg as VarArg, Instr as VarInstr, Program as VarProg, Reg as VarReg, Var};
+
 use std::collections::{HashMap, HashSet};
 
-pub fn assign_homes(prog: VarProg) -> IntProg {
-    let graph = build_graph(&prog);
-    let coloring = color_graph(graph);
+pub fn assign_homes(prog: VarProg, coloring: Coloring) -> IntProg {
     let assignment = assign_registers(coloring);
     apply_assignment(prog, assignment)
 }

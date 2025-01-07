@@ -6,6 +6,7 @@ pub mod interference_graph;
 pub mod patch_instructions;
 pub mod prelude_conclusion;
 pub mod uncover_live;
+pub mod x86_int;
 
 pub type Var = String;
 

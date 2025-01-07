@@ -1,4 +1,4 @@
-use chapter2::x86_int::Program;
+use crate::x86_int::Program;
 
 pub fn generate_prelude_conclusion(prog: Program) -> Program {
     todo!()
