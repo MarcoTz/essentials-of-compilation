@@ -21,7 +21,7 @@ fn apply_assignment(prog: VarProg, assignment: RegisterAssignment) -> IntProg {
             } else {
                 return None;
             };
-            if VarReg::callee_saved().contains(&reg) {
+            if VarReg::callee_saved().contains(&reg) && !matches!(reg, VarReg::Rsp) {
                 Some(reg.into())
             } else {
                 None
