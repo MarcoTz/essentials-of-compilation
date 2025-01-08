@@ -1,3 +1,4 @@
+use crate::Label;
 use std::collections::HashMap;
 
 pub mod atm;
@@ -11,8 +12,6 @@ pub use exp::Exp;
 pub use ops::{Cmp, Op};
 pub use stmt::Stmt;
 pub use tail::Tail;
-
-pub type Label = String;
 
 pub struct Program {
     pub blocks: HashMap<Label, Tail>,
