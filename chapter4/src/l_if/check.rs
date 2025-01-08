@@ -1,6 +1,9 @@
 use crate::{
-    errors::Error,
-    syntax::{types::Type, Exp, Var},
+    l_if::{
+        errors::Error,
+        syntax::{types::Type, Exp},
+    },
+    Var,
 };
 use std::collections::HashMap;
 

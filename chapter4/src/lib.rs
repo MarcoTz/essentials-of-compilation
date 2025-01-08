@@ -1,4 +1,4 @@
-pub mod check;
-pub mod errors;
-pub mod eval;
-pub mod syntax;
+pub mod c_if;
+pub mod l_if;
+
+pub type Var = String;

@@ -1,4 +1,4 @@
-use crate::syntax::types::Type;
+use crate::l_if::syntax::types::Type;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy)]

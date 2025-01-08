@@ -1,10 +1,10 @@
+use crate::Var;
 use std::fmt;
 pub mod ops;
 pub mod types;
 
 pub use ops::{Cmp, Op};
 
-pub type Var = String;
 pub type Program = Exp;
 
 #[derive(Debug, Clone)]

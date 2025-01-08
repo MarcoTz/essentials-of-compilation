@@ -1,6 +1,9 @@
 use crate::{
-    eval::Value,
-    syntax::{types::Type, Op, Var},
+    l_if::{
+        eval::Value,
+        syntax::{types::Type, Op},
+    },
+    Var,
 };
 use std::fmt;
 
