@@ -30,6 +30,11 @@ pub fn eval(prog: Program) -> Result<Value, Error> {
                     let snd = evaled[1].as_int()?;
                     Ok(Value::Int(fst - snd))
                 }
+                Op::Mult => {
+                    let fst = evaled[0].as_int()?;
+                    let snd = evaled[1].as_int()?;
+                    Ok(Value::Int(fst * snd))
+                }
                 Op::Neg => {
                     let arg = evaled[0].as_int()?;
                     Ok(Value::Int(-1 * arg))

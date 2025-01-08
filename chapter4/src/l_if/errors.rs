@@ -1,6 +1,7 @@
 use crate::{
     l_if::{
         eval::Value,
+        parse::Error as ParseErr,
         syntax::{types::Type, Op},
     },
     Var,
@@ -23,6 +24,7 @@ pub enum Error {
         found: Type,
         expected: Type,
     },
+    Parse(ParseErr),
 }
 
 impl fmt::Display for Error {
@@ -43,6 +45,13 @@ impl fmt::Display for Error {
             Error::TypeMismatch { found, expected } => {
                 write!(f, "Expected type {expected}, found {found}")
             }
+            Error::Parse(err) => write!(f, "Error during parsing: {err}"),
         }
+    }
+}
+
+impl From<ParseErr> for Error {
+    fn from(err: ParseErr) -> Error {
+        Error::Parse(err)
     }
 }

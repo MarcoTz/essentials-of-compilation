@@ -6,7 +6,6 @@ pub enum Arg {
     Deref(Reg, i64),
     ByteReg(ByteReg),
 }
-
 pub enum CC {
     E,
     L,

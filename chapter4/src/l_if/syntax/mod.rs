@@ -7,7 +7,7 @@ pub use ops::{Cmp, Op};
 
 pub type Program = Exp;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Exp {
     Int(i64),
     Bool(bool),

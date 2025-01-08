@@ -1,7 +1,7 @@
 use crate::l_if::syntax::types::Type;
 use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Cmp {
     Equal,
     Less,
@@ -22,9 +22,10 @@ impl Cmp {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Op {
     Read,
+    Mult,
     Plus,
     Sub,
     Neg,
@@ -39,6 +40,7 @@ impl Op {
         match self {
             Op::Read => 0,
             Op::Plus => 2,
+            Op::Mult => 2,
             Op::Neg => 1,
             Op::Sub => 2,
             Op::Cmp(_) => 2,
@@ -87,6 +89,7 @@ impl fmt::Display for Op {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Op::Read => f.write_str("read"),
+            Op::Mult => f.write_str("*"),
             Op::Plus => f.write_str("+"),
             Op::Neg => f.write_str("-"),
             Op::Sub => f.write_str("-"),
