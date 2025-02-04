@@ -37,6 +37,7 @@ fn parse_op(input: &mut String) -> Result<Exp, Error> {
     consume_whitespace(input);
     match input.remove(0) {
         '+' => {
+            consume_whitespace(input);
             let exp1 = parse_exp(input)?;
             consume_whitespace(input);
             let exp2 = parse_exp(input)?;

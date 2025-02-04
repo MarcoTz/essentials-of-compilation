@@ -3,6 +3,7 @@ use std::io::stdin;
 
 fn get_input() -> i64 {
     let mut inp: String = String::default();
+    println!("Please enter a number:");
     stdin().read_line(&mut inp).unwrap_or_default();
     match inp.trim_end().parse::<i64>() {
         Ok(i) => i,
