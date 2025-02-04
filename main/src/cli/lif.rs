@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 #[derive(clap::Args)]
 pub struct Args {
+    /// The file to compile
     file_path: PathBuf,
 }
 

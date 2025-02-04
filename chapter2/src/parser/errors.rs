@@ -43,6 +43,16 @@ impl fmt::Display for Error {
     }
 }
 
+impl From<nom::Err<Error>> for Error {
+    fn from(err: nom::Err<Error>) -> Error {
+        match err {
+            nom::Err::Incomplete(_) => Error::UnexpectedEOI,
+            nom::Err::Error(err) => err,
+            nom::Err::Failure(err) => err,
+        }
+    }
+}
+
 impl std::error::Error for Error {}
 
 impl<I> ParseError<I> for Error {

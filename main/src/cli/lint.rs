@@ -3,6 +3,7 @@ use std::{fs::read_to_string, path::PathBuf};
 
 #[derive(clap::Args)]
 pub struct Args {
+    /// The file to compile and evaluate
     file_path: PathBuf,
 }
 

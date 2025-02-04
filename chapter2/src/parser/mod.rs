@@ -11,6 +11,10 @@ pub mod keywords;
 use errors::ParseRes;
 use keywords::{parse_keyword, parse_non_keyword, Keyword};
 
+pub fn parse_program(input: &str) -> ParseRes<Program> {
+    let (rem, exp) = parse_exp(input)?;
+    Ok((rem, Program { exp }))
+}
 fn parse_assign(input: &str) -> ParseRes<Exp> {
     let (rem, _) = parse_keyword(input, Keyword::Let)?;
     let (rem, _) = space0(rem)?;
@@ -99,11 +103,6 @@ fn parse_exp(input: &str) -> ParseRes<Exp> {
         parse_const,
         parse_var,
     ))(input)
-}
-
-pub fn parse_program(input: &str) -> ParseRes<Program> {
-    let (rem, exp) = parse_exp(input)?;
-    Ok((rem, Program { exp }))
 }
 
 #[cfg(test)]

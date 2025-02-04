@@ -4,12 +4,13 @@ use super::{
     x86_int::Program as IntProg,
 };
 
-use chapter2::x86_var::Program as VarProg;
+use chapter2::{compile::compile_lvar, parser::errors::Error};
 
-pub fn compile(prog: VarProg) -> IntProg {
+pub fn compile(input: &str) -> Result<IntProg, Error> {
+    let prog = compile_lvar(input)?;
     let inter_graph = build_graph(&prog);
     let coloring = color_graph(inter_graph);
     let prog = assign_homes(prog, coloring);
     let patched = patch_instructions(prog);
-    generate_prelude_conclusion(patched)
+    Ok(generate_prelude_conclusion(patched))
 }
