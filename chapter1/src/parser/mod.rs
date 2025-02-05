@@ -48,6 +48,7 @@ fn parse_op(input: &mut String) -> Result<Exp, Error> {
             })
         }
         '-' => {
+            consume_whitespace(input);
             let exp1 = parse_exp(input)?;
             consume_whitespace(input);
             if input.starts_with(')') {

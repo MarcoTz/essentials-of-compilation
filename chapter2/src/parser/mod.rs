@@ -38,6 +38,7 @@ fn parse_assign(input: &str) -> ParseRes<Exp> {
 }
 
 fn parse_const(input: &str) -> ParseRes<Exp> {
+    println!("parsing const {input}");
     let (rem, dig) = digit1(input)?;
     Ok((rem, Exp::Constant(dig.parse::<i64>().unwrap())))
 }
@@ -53,6 +54,7 @@ fn parse_input(input: &str) -> ParseRes<Exp> {
 }
 
 fn parse_unary(input: &str) -> ParseRes<Exp> {
+    println!("parsing unary {input}");
     let (rem, _) = tag("(")(input)?;
     let (rem, _) = space0(rem)?;
     let (rem, _) = tag("-")(rem)?;
