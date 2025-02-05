@@ -12,6 +12,9 @@ mod lvar;
 pub fn run_tests() {
     println!("Running L-Int Tests");
     lint::LIntSuite.run_tests();
+    println!("");
+    println!("Running L-Var Tests");
+    lvar::LVarSuite.run_tests();
 }
 
 struct Test {
@@ -32,8 +35,6 @@ impl From<Box<dyn std::error::Error>> for TestResult {
 }
 
 trait Suite {
-    type ExampleResult: ToString;
-
     fn examples_dir(&self) -> PathBuf;
     fn name(&self) -> &str;
 
@@ -60,22 +61,26 @@ trait Suite {
 fn load_tests(dir: PathBuf) -> Vec<Test> {
     let mut tests = vec![];
 
-    println!("loading examples from {dir:?}");
     for entry in read_dir(dir).unwrap() {
         let entry = entry.unwrap();
         let file_path = entry.path();
-        if file_path.extension().unwrap() == "res" {
+        if file_path.is_dir() {
             continue;
         }
 
+        let name = file_path.file_stem().unwrap().to_str().unwrap().to_owned();
+
         let mut expected = file_path.clone();
+        expected.pop();
+        expected.push("expected/");
+        expected.push(&name);
         expected.set_extension("res");
         let expected_contents = read_to_string(expected).unwrap().trim().to_owned();
 
         let contents = read_to_string(&file_path).unwrap();
 
         tests.push(Test {
-            name: file_path.file_stem().unwrap().to_str().unwrap().to_owned(),
+            name,
             contents,
             expected: expected_contents,
         });

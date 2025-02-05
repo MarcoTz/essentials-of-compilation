@@ -5,8 +5,6 @@ use std::path::PathBuf;
 pub struct LIntSuite;
 
 impl Suite for LIntSuite {
-    type ExampleResult = i64;
-
     fn examples_dir(&self) -> PathBuf {
         PathBuf::from(EXAMPLES_DIR).join("l_int")
     }
