@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "app",
+    "testsuite",
     "chapter1",
     "chapter2",
     "chapter3",
