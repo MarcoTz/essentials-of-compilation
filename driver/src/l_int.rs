@@ -6,11 +6,11 @@ pub struct LIntDriver;
 impl Driver for LIntDriver {
     type Target = chapter1::syntax::Program;
 
-    fn compile(
-        &self,
-        input: &str,
-        _print_intermediary: bool,
-    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn is_debug(&self) -> bool {
+        false
+    }
+
+    fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let mut input = input.to_owned();
         parse_l_int(&mut input).map_err(|err| Box::new(err) as Box<dyn std::error::Error>)
     }

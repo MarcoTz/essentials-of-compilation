@@ -14,16 +14,16 @@ pub struct Args {
 pub fn exec(args: Args) {
     let contents = read_to_string(args.file_path).unwrap();
     if args.skip_alloc {
-        let driver = LVarDriver;
+        let driver = LVarDriver::default();
         let compiled = driver
-            .compile(&contents, false)
+            .compile(&contents)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");
     } else {
-        let driver = LVarRegDriver;
+        let driver = LVarRegDriver::default();
         let compiled = driver
-            .compile(&contents, false)
+            .compile(&contents)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");

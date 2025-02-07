@@ -10,7 +10,7 @@ pub struct Args {
 pub fn exec(args: Args) {
     let driver = LIntDriver;
     let evaled = driver
-        .compile_and_eval_file(&args.file_path, false)
+        .compile_and_eval_file(&args.file_path)
         .map_err(|err| err.to_string())
         .unwrap();
     println!("{evaled}");

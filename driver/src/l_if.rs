@@ -1,15 +1,17 @@
 use super::Driver;
 
-pub struct LIfDriver {}
+pub struct LIfDriver {
+    print_intermediary: bool,
+}
 
 impl Driver for LIfDriver {
     type Target = chapter4::x86_if::Program;
 
-    fn compile(
-        &self,
-        _input: &str,
-        _print_intermediary: bool,
-    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn is_debug(&self) -> bool {
+        self.print_intermediary
+    }
+
+    fn compile(&self, _input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
         todo!()
     }
 

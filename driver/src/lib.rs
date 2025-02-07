@@ -9,37 +9,28 @@ pub mod l_var_reg;
 pub trait Driver {
     type Target;
 
-    fn compile(
-        &self,
-        source: &str,
-        print_intermediary: bool,
-    ) -> Result<Self::Target, Box<dyn std::error::Error>>;
+    fn compile(&self, source: &str) -> Result<Self::Target, Box<dyn std::error::Error>>;
     fn evaluate(&self, prog: Self::Target) -> Result<String, Box<dyn std::error::Error>>;
+    fn is_debug(&self) -> bool;
 
-    fn compile_file(
-        &self,
-        path: &PathBuf,
-        print_intermediary: bool,
-    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn compile_file(&self, path: &PathBuf) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let contents = read_to_string(path)?;
-        self.compile(&contents, print_intermediary)
+        self.compile(&contents)
     }
 
-    fn compile_and_eval(
-        &self,
-        input: &str,
-        print_intermediary: bool,
-    ) -> Result<String, Box<dyn std::error::Error>> {
-        let compiled = self.compile(input, print_intermediary)?;
+    fn compile_and_eval(&self, input: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let compiled = self.compile(input)?;
         self.evaluate(compiled)
     }
 
-    fn compile_and_eval_file(
-        &self,
-        input: &PathBuf,
-        print_intermediary: bool,
-    ) -> Result<String, Box<dyn std::error::Error>> {
-        let compiled = self.compile_file(input, print_intermediary)?;
+    fn compile_and_eval_file(&self, input: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+        let compiled = self.compile_file(input)?;
         self.evaluate(compiled)
+    }
+
+    fn debug(&self, msg: String) {
+        if self.is_debug() {
+            println!("{msg}");
+        }
     }
 }
