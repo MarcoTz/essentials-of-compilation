@@ -14,7 +14,14 @@ impl fmt::Display for Program {
             .iter()
             .map(|(label, tail)| format!("{label}: {tail}"))
             .collect::<Vec<String>>();
-        write!(f, "{}", block_strs.join(", "))
+        write!(f, "{}", block_strs.join(", "))?;
+        if !self.types.is_empty() {
+            writeln!(f, "\n")?;
+            for (var, ty) in self.types.iter() {
+                writeln!(f, "{var}:{ty}")?;
+            }
+        }
+        Ok(())
     }
 }
 

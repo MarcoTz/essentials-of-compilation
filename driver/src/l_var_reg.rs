@@ -30,22 +30,27 @@ impl Driver for LVarRegDriver {
 
     fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog = self.l_var_driver.compile_lvar(input)?;
-        self.debug(prog.to_string());
+        self.debug(&prog.to_string());
 
         let inter_graph = build_graph(&prog);
-        self.debug(inter_graph.to_string());
+        self.debug("----- Interference Graph ----");
+        self.debug(&inter_graph.to_string());
 
         let coloring = color_graph(inter_graph);
-        self.debug(coloring_to_string(&coloring));
+        self.debug("----- Graph Coloring ----");
+        self.debug(&coloring_to_string(&coloring));
 
         let prog = assign_homes(prog, coloring);
-        self.debug(prog.to_string());
+        self.debug("----- Assigned Homes ----");
+        self.debug(&prog.to_string());
 
         let patched = patch_instructions(prog);
-        self.debug(patched.to_string());
+        self.debug("----- Patched Instructions ----");
+        self.debug(&patched.to_string());
 
         let prel_conc = generate_prelude_conclusion(patched);
-        self.debug(prel_conc.to_string());
+        self.debug("----- Generated Prelude and Conclusion ----");
+        self.debug(&prel_conc.to_string());
         Ok(prel_conc)
     }
 

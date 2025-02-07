@@ -28,9 +28,9 @@ pub trait Driver {
         self.evaluate(compiled)
     }
 
-    fn debug(&self, msg: String) {
+    fn debug(&self, msg: &str) {
         if self.is_debug() {
-            println!("{msg}");
+            println!("{msg}\n");
         }
     }
 }

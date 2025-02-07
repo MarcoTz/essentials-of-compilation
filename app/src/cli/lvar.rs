@@ -9,19 +9,22 @@ pub struct Args {
     /// use register allocation (chapter 3) or skip
     #[arg(long)]
     skip_alloc: bool,
+    /// Print intermediary steps of compilation
+    #[arg(long, short)]
+    verbose: bool,
 }
 
 pub fn exec(args: Args) {
     let contents = read_to_string(args.file_path).unwrap();
     if args.skip_alloc {
-        let driver = LVarDriver::default();
+        let driver = LVarDriver::new(args.verbose);
         let compiled = driver
             .compile(&contents)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");
     } else {
-        let driver = LVarRegDriver::default();
+        let driver = LVarRegDriver::new(args.verbose);
         let compiled = driver
             .compile(&contents)
             .map_err(|err| err.to_string())

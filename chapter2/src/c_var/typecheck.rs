@@ -1,5 +1,5 @@
 use super::{Atm, Exp, Program, Stmt, Tail, Var};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Type {
@@ -12,7 +12,6 @@ pub trait Typecheck: Sized {
 
 pub fn typecheck(prog: &mut Program) {
     let vars = prog.check();
-    println!("got vars {vars:?}");
     prog.types = vars;
 }
 
@@ -175,5 +174,13 @@ mod typecheck_tests {
             types: HashMap::from([("x".to_owned(), Type::Int)]),
         };
         assert_eq!(result, expected)
+    }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Type::Int => f.write_str("int"),
+        }
     }
 }

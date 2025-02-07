@@ -28,19 +28,29 @@ impl LVarDriver {
         input: &str,
     ) -> Result<chapter2::x86_var::Program, Box<dyn std::error::Error>> {
         let (_, parsed) = parse_program(input)?;
-        self.debug(parsed.to_string());
+        self.debug("----- Parsed ----");
+        self.debug(&parsed.to_string());
 
         let prog_unique = parsed.uniquify(&mut Default::default());
-        self.debug(prog_unique.to_string());
+        self.debug("------ Uniquified -----");
+        self.debug(&prog_unique.to_string());
 
         let prog_reduced = prog_unique.remove_complex_operands(&mut Default::default());
-        self.debug(prog_reduced.to_string());
+        self.debug("------ Reduced -----");
+        self.debug(&prog_reduced.to_string());
 
         let mut prog_explicated = prog_reduced.explicate_control();
-        self.debug(prog_explicated.to_string());
+        self.debug("------ Explicated -----");
+        self.debug(&prog_explicated.to_string());
 
         typecheck(&mut prog_explicated);
-        Ok(prog_explicated.select_instructions())
+        self.debug("------ Typechecked -----");
+        self.debug(&prog_explicated.to_string());
+
+        let selected = prog_explicated.select_instructions();
+        self.debug("------ Selected Instructions -----");
+        self.debug(&selected.to_string());
+        Ok(selected)
     }
 }
 
@@ -53,16 +63,18 @@ impl Driver for LVarDriver {
 
     fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog_selected = self.compile_lvar(input)?;
-        self.debug(prog_selected.to_string());
 
         let prog_homes = prog_selected.assign_homes(&mut Default::default());
-        self.debug(prog_homes.to_string());
+        self.debug("------ Assigned Homes -----");
+        self.debug(&prog_homes.to_string());
 
         let prog_patched = prog_homes.patch();
-        self.debug(prog_patched.to_string());
+        self.debug("------ Patched Instructions -----");
+        self.debug(&prog_patched.to_string());
 
         let prog_prel_conc = generate_prelude_conclusion(prog_patched);
-        self.debug(prog_prel_conc.to_string());
+        self.debug("------ Generated Prelude and Conclusion -----");
+        self.debug(&prog_prel_conc.to_string());
 
         Ok(prog_prel_conc)
     }
