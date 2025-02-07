@@ -7,6 +7,7 @@ use registers_colors::{color_to_reg, reg_to_color};
 
 pub type Color = i32;
 pub type Coloring = HashMap<Var, Color>;
+
 pub struct RegisterAssignment {
     pub vars: HashMap<Var, Arg>,
     pub stack_space: usize,
@@ -83,4 +84,12 @@ pub fn assign_registers(coloring: Coloring) -> RegisterAssignment {
         vars: assignment,
         stack_space: stack_space.abs() as usize,
     }
+}
+
+pub fn coloring_to_string(c: &Coloring) -> String {
+    let mut out = "".to_owned();
+    for (var, col) in c.iter() {
+        out += &format!("{var}->{col}");
+    }
+    out
 }

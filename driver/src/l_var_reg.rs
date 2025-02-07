@@ -1,7 +1,10 @@
 use super::{l_var::LVarDriver, Driver};
 use chapter3::{
-    assign_homes::assign_homes, color_graph::color_graph, interference_graph::build_graph,
-    patch_instructions::patch_instructions, prelude_conclusion::generate_prelude_conclusion,
+    assign_homes::assign_homes,
+    color_graph::{color_graph, coloring_to_string},
+    interference_graph::build_graph,
+    patch_instructions::patch_instructions,
+    prelude_conclusion::generate_prelude_conclusion,
 };
 
 pub struct LVarRegDriver {
@@ -27,11 +30,23 @@ impl Driver for LVarRegDriver {
 
     fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog = self.l_var_driver.compile_lvar(input)?;
+        self.debug(prog.to_string());
+
         let inter_graph = build_graph(&prog);
+        self.debug(inter_graph.to_string());
+
         let coloring = color_graph(inter_graph);
+        self.debug(coloring_to_string(&coloring));
+
         let prog = assign_homes(prog, coloring);
+        self.debug(prog.to_string());
+
         let patched = patch_instructions(prog);
-        Ok(generate_prelude_conclusion(patched))
+        self.debug(patched.to_string());
+
+        let prel_conc = generate_prelude_conclusion(patched);
+        self.debug(prel_conc.to_string());
+        Ok(prel_conc)
     }
 
     fn evaluate(&self, _input: Self::Target) -> Result<String, Box<dyn std::error::Error>> {

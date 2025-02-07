@@ -1,6 +1,7 @@
 use chapter2::x86_var::Arg;
 use std::{
     collections::{hash_map::DefaultHasher, HashSet},
+    fmt,
     hash::{Hash, Hasher},
 };
 
@@ -75,6 +76,25 @@ impl InterferenceGraph {
             })
             .cloned()
             .collect()
+    }
+}
+
+impl fmt::Display for Edge {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}->{}", self.from, self.to)
+    }
+}
+
+impl fmt::Display for InterferenceGraph {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(
+            &self
+                .edges
+                .iter()
+                .map(|edg| edg.to_string())
+                .collect::<Vec<String>>()
+                .join("\n"),
+        )
     }
 }
 

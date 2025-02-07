@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt};
 
 pub mod atm;
 pub mod exp;
@@ -22,5 +22,11 @@ pub trait UsedVars {
 impl UsedVars for Program {
     fn used_vars(&self) -> HashSet<Var> {
         self.exp.used_vars()
+    }
+}
+
+impl fmt::Display for Program {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.exp.fmt(f)
     }
 }
