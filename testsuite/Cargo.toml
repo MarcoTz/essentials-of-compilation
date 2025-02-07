@@ -8,6 +8,7 @@ name = "testsuite"
 path = "src/main.rs"
 
 [dependencies]
+driver = {path="../driver"}
 chapter1 = {path="../chapter1"}
 chapter2 = {path="../chapter2"}
 chapter3 = {path="../chapter3"}

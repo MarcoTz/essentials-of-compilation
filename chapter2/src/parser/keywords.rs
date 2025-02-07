@@ -5,13 +5,12 @@ use std::{fmt, str::FromStr};
 #[derive(Debug)]
 pub enum Keyword {
     Let,
-    In,
     InputInt,
 }
 
 impl Keyword {
     pub fn all() -> Vec<Keyword> {
-        vec![Keyword::Let, Keyword::In, Keyword::InputInt]
+        vec![Keyword::Let, Keyword::InputInt]
     }
 }
 
@@ -32,7 +31,6 @@ impl fmt::Display for Keyword {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Keyword::Let => f.write_str("let"),
-            Keyword::In => f.write_str("in"),
             Keyword::InputInt => f.write_str("input_int"),
         }
     }
@@ -43,7 +41,6 @@ impl FromStr for Keyword {
     fn from_str(s: &str) -> Result<Keyword, Self::Err> {
         match s.trim() {
             "let" => Ok(Keyword::Let),
-            "in" => Ok(Keyword::In),
             "input_int" => Ok(Keyword::InputInt),
             _ => Err(Error::NotAKeyword(s.to_owned())),
         }
@@ -60,11 +57,6 @@ mod keyword_tests {
     }
 
     #[test]
-    fn parse_in() {
-        parse_keyword("in", Keyword::In).unwrap();
-    }
-
-    #[test]
     fn parse_input() {
         parse_keyword("input_int", Keyword::InputInt).unwrap();
     }
@@ -72,11 +64,6 @@ mod keyword_tests {
     #[test]
     fn let_into() {
         "let".parse::<Keyword>().unwrap();
-    }
-
-    #[test]
-    fn in_into() {
-        "in".parse::<Keyword>().unwrap();
     }
 
     #[test]

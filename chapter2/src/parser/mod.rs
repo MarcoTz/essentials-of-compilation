@@ -16,17 +16,18 @@ pub fn parse_program(input: &str) -> ParseRes<Program> {
     Ok((rem, Program { exp }))
 }
 fn parse_assign(input: &str) -> ParseRes<Exp> {
-    let (rem, _) = parse_keyword(input, Keyword::Let)?;
-    let (rem, _) = space0(rem)?;
+    let (rem, _) = tag("(")(input)?;
+    let (rem, _) = parse_keyword(rem, Keyword::Let)?;
+    let (rem, _) = space1(rem)?;
+    let (rem, _) = tag("[")(rem)?;
     let (rem, var) = alphanumeric1(rem)?;
-    let (rem, _) = space0(rem)?;
-    let (rem, _) = tag("=")(rem)?;
-    let (rem, _) = space0(rem)?;
+    let (rem, _) = space1(rem)?;
     let (rem, bound_term) = parse_exp(rem)?;
     let (rem, _) = space0(rem)?;
-    let (rem, _) = parse_keyword(rem, Keyword::In)?;
+    let (rem, _) = tag("]")(rem)?;
     let (rem, _) = space0(rem)?;
     let (rem, in_term) = parse_exp(rem)?;
+    let (rem, _) = tag(")")(rem)?;
     Ok((
         rem,
         Exp::Assign {
@@ -38,7 +39,6 @@ fn parse_assign(input: &str) -> ParseRes<Exp> {
 }
 
 fn parse_const(input: &str) -> ParseRes<Exp> {
-    println!("parsing const {input}");
     let (rem, dig) = digit1(input)?;
     Ok((rem, Exp::Constant(dig.parse::<i64>().unwrap())))
 }
@@ -54,7 +54,6 @@ fn parse_input(input: &str) -> ParseRes<Exp> {
 }
 
 fn parse_unary(input: &str) -> ParseRes<Exp> {
-    println!("parsing unary {input}");
     let (rem, _) = tag("(")(input)?;
     let (rem, _) = space0(rem)?;
     let (rem, _) = tag("-")(rem)?;
@@ -167,7 +166,7 @@ mod parse_tests {
 
     #[test]
     fn parse_assign() {
-        let (_, result) = parse_program("let x= (+ 5 3) in (-x)").unwrap();
+        let (_, result) = parse_program("(let [x (+ 5 3)] (-x))").unwrap();
         let expected = Program {
             exp: Exp::Assign {
                 name: "x".to_owned(),

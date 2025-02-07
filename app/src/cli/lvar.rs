@@ -1,5 +1,5 @@
-use chapter2::compile::compile;
-use chapter3::compile::compile as reg_compile;
+use driver::l_var::LVarDriver;
+use driver::{l_var_reg::LVarRegDriver, Driver};
 use std::{fs::read_to_string, path::PathBuf};
 
 #[derive(clap::Args)]
@@ -14,10 +14,16 @@ pub struct Args {
 pub fn exec(args: Args) {
     let contents = read_to_string(args.file_path).unwrap();
     if args.skip_alloc {
-        let compiled = compile(&contents).map_err(|err| err.to_string()).unwrap();
+        let driver = LVarDriver;
+        let compiled = driver
+            .compile(&contents, false)
+            .map_err(|err| err.to_string())
+            .unwrap();
         println!("{compiled}");
     } else {
-        let compiled = reg_compile(&contents)
+        let driver = LVarRegDriver;
+        let compiled = driver
+            .compile(&contents, false)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");

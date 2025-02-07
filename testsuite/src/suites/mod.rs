@@ -3,15 +3,13 @@ use std::{
     path::PathBuf,
 };
 
-const EXAMPLES_DIR: &str = "examples";
-
 mod lif;
 mod lint;
 mod lvar;
 
 pub fn run_tests() {
     println!("Running L-Int Tests");
-    lint::LIntSuite.run_tests();
+    lint::LIntSuite::new().run_tests();
     println!("");
     println!("Running L-Var Tests");
     lvar::LVarSuite.run_tests();

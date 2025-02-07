@@ -1,12 +1,13 @@
-use super::{Suite, Test, TestResult, EXAMPLES_DIR};
+use super::{Suite, Test, TestResult};
 use chapter2::compile::compile;
+use driver::consts::{EXAMPLES_DIR, L_VAR_DIR};
 use std::path::PathBuf;
 
 pub struct LVarSuite;
 
 impl Suite for LVarSuite {
     fn examples_dir(&self) -> PathBuf {
-        PathBuf::from(EXAMPLES_DIR).join("l_var")
+        PathBuf::from(EXAMPLES_DIR).join(L_VAR_DIR)
     }
 
     fn name(&self) -> &str {

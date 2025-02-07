@@ -1,6 +1,5 @@
 pub mod assign_homes;
 pub mod color_graph;
-pub mod compile;
 pub mod errors;
 pub mod interference_graph;
 pub mod patch_instructions;
