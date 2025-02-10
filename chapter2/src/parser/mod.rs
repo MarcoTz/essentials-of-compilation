@@ -57,6 +57,7 @@ fn parse_unary(input: &str) -> ParseRes<Exp> {
     let (rem, _) = tag("(")(input)?;
     let (rem, _) = space0(rem)?;
     let (rem, _) = tag("-")(rem)?;
+    let (rem, _) = space0(rem)?;
     let (rem, exp) = parse_exp(rem)?;
     let (rem, _) = space0(rem)?;
     let (rem, _) = tag(")")(rem)?;

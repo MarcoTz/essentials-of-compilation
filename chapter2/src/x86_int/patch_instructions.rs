@@ -12,9 +12,9 @@ impl PatchInstructions for Program {
         let mut new_blocks = HashMap::new();
         for (label, instrs) in self.blocks.into_iter() {
             let mut new_instrs = vec![];
-            let _ = instrs
-                .into_iter()
-                .map(|instr| new_instrs.extend(instr.patch()));
+            for instr in instrs {
+                new_instrs.extend(instr.patch())
+            }
             new_blocks.insert(label, new_instrs);
         }
         Program {
