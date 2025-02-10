@@ -23,12 +23,17 @@ impl LVarRegDriver {
 
 impl Driver for LVarRegDriver {
     type Target = chapter3::x86_int::Program;
+    type Parsed = chapter2::l_var::Program;
 
     fn is_debug(&self) -> bool {
         self.print_intermediary
     }
 
-    fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn parse(&self, input: &str) -> Result<Self::Parsed, Box<dyn std::error::Error>> {
+        self.l_var_driver.parse(input)
+    }
+
+    fn compile(&self, input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog = self.l_var_driver.compile_lvar(input)?;
         self.debug(&prog.to_string());
 

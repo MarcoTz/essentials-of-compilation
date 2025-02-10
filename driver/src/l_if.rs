@@ -6,12 +6,17 @@ pub struct LIfDriver {
 
 impl Driver for LIfDriver {
     type Target = chapter4::x86_if::Program;
+    type Parsed = chapter4::l_if::syntax::Program;
 
     fn is_debug(&self) -> bool {
         self.print_intermediary
     }
 
-    fn compile(&self, _input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn parse(&self, _input: &str) -> Result<Self::Parsed, Box<dyn std::error::Error>> {
+        todo!()
+    }
+
+    fn compile(&self, _input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
         todo!()
     }
 

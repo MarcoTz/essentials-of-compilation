@@ -18,15 +18,23 @@ pub fn exec(args: Args) {
     let contents = read_to_string(args.file_path).unwrap();
     if args.skip_alloc {
         let driver = LVarDriver::new(args.verbose);
+        let parsed = driver
+            .parse(&contents)
+            .map_err(|err| err.to_string())
+            .unwrap();
         let compiled = driver
-            .compile(&contents)
+            .compile(parsed)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");
     } else {
         let driver = LVarRegDriver::new(args.verbose);
+        let parsed = driver
+            .parse(&contents)
+            .map_err(|err| err.to_string())
+            .unwrap();
         let compiled = driver
-            .compile(&contents)
+            .compile(parsed)
             .map_err(|err| err.to_string())
             .unwrap();
         println!("{compiled}");

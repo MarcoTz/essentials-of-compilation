@@ -25,13 +25,9 @@ impl LVarDriver {
 impl LVarDriver {
     pub fn compile_lvar(
         &self,
-        input: &str,
+        input: chapter2::l_var::Program,
     ) -> Result<chapter2::x86_var::Program, Box<dyn std::error::Error>> {
-        let (_, parsed) = parse_program(input)?;
-        self.debug("----- Parsed ----");
-        self.debug(&parsed.to_string());
-
-        let prog_unique = parsed.uniquify(&mut Default::default());
+        let prog_unique = input.uniquify(&mut Default::default());
         self.debug("------ Uniquified -----");
         self.debug(&prog_unique.to_string());
 
@@ -56,12 +52,20 @@ impl LVarDriver {
 
 impl Driver for LVarDriver {
     type Target = chapter2::x86_int::Program;
+    type Parsed = chapter2::l_var::Program;
 
     fn is_debug(&self) -> bool {
         self.print_intermediary
     }
 
-    fn compile(&self, input: &str) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn parse(&self, input: &str) -> Result<Self::Parsed, Box<dyn std::error::Error>> {
+        let (_, parsed) = parse_program(input)?;
+        self.debug("----- Parsed ----");
+        self.debug(&parsed.to_string());
+        Ok(parsed)
+    }
+
+    fn compile(&self, input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog_selected = self.compile_lvar(input)?;
 
         let prog_homes = prog_selected.assign_homes(&mut Default::default());
