@@ -17,7 +17,7 @@ enum Command {
     LIf(lif::Args),
 }
 
-pub fn exec() {
+pub fn exec() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
     match cli.command {
         Command::LInt(args) => lint::exec(args),

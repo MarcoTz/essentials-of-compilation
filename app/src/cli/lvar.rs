@@ -14,29 +14,27 @@ pub struct Args {
     verbose: bool,
 }
 
-pub fn exec(args: Args) {
+pub fn exec(args: Args) -> Result<(), Box<dyn std::error::Error>> {
+    let out_name = args
+        .file_path
+        .file_stem()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_owned();
+
     let contents = read_to_string(args.file_path).unwrap();
     if args.skip_alloc {
         let driver = LVarDriver::new(args.verbose);
-        let parsed = driver
-            .parse(&contents)
-            .map_err(|err| err.to_string())
-            .unwrap();
-        let compiled = driver
-            .compile(parsed)
-            .map_err(|err| err.to_string())
-            .unwrap();
+        let parsed = driver.parse(&contents)?;
+        let compiled = driver.compile(parsed, out_name)?;
         println!("{compiled}");
+        Ok(())
     } else {
         let driver = LVarRegDriver::new(args.verbose);
-        let parsed = driver
-            .parse(&contents)
-            .map_err(|err| err.to_string())
-            .unwrap();
-        let compiled = driver
-            .compile(parsed)
-            .map_err(|err| err.to_string())
-            .unwrap();
+        let parsed = driver.parse(&contents)?;
+        let compiled = driver.compile(parsed, out_name)?;
         println!("{compiled}");
+        Ok(())
     }
 }

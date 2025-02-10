@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 
 pub type Label = String;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Program {
     pub blocks: HashMap<Label, Vec<Instr>>,
     pub stack_space: usize,

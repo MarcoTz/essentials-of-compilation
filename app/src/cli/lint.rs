@@ -7,18 +7,11 @@ pub struct Args {
     file_path: PathBuf,
 }
 
-pub fn exec(args: Args) {
+pub fn exec(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     let driver = LIntDriver;
-    let contents = read_to_string(args.file_path)
-        .map_err(|err| err.to_string())
-        .unwrap();
-    let parsed = driver
-        .parse(&contents)
-        .map_err(|err| err.to_string())
-        .unwrap();
-    let evaled = driver
-        .evaluate(parsed)
-        .map_err(|err| err.to_string())
-        .unwrap();
+    let contents = read_to_string(args.file_path)?;
+    let parsed = driver.parse(&contents)?;
+    let evaled = driver.evaluate(parsed)?;
     println!("{evaled}");
+    Ok(())
 }

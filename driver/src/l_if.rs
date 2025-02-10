@@ -16,7 +16,11 @@ impl Driver for LIfDriver {
         todo!()
     }
 
-    fn compile(&self, _input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn compile(
+        &self,
+        _input: Self::Parsed,
+        _prog_name: String,
+    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
         todo!()
     }
 

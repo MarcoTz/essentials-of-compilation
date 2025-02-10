@@ -9,7 +9,11 @@ pub trait Driver {
     type Target;
 
     fn parse(&self, source: &str) -> Result<Self::Parsed, Box<dyn std::error::Error>>;
-    fn compile(&self, source: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>>;
+    fn compile(
+        &self,
+        source: Self::Parsed,
+        prog_name: String,
+    ) -> Result<Self::Target, Box<dyn std::error::Error>>;
     fn evaluate(&self, prog: Self::Target) -> Result<String, Box<dyn std::error::Error>>;
     fn is_debug(&self) -> bool;
 

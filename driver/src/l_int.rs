@@ -16,7 +16,11 @@ impl Driver for LIntDriver {
         parse_l_int(&mut input).map_err(|err| Box::new(err) as Box<dyn std::error::Error>)
     }
 
-    fn compile(&self, input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn compile(
+        &self,
+        input: Self::Parsed,
+        _: String,
+    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
         Ok(input)
     }
 

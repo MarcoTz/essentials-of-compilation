@@ -33,7 +33,11 @@ impl Driver for LVarRegDriver {
         self.l_var_driver.parse(input)
     }
 
-    fn compile(&self, input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn compile(
+        &self,
+        input: Self::Parsed,
+        _prog_name: String,
+    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog = self.l_var_driver.compile_lvar(input)?;
         self.debug(&prog.to_string());
 

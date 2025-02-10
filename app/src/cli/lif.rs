@@ -6,6 +6,7 @@ pub struct Args {
     file_path: PathBuf,
 }
 
-pub fn exec(args: Args) {
+pub fn exec(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     println!("{:?}", args.file_path);
+    Ok(())
 }

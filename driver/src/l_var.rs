@@ -1,5 +1,9 @@
-use super::Driver;
+use super::{
+    consts::{ASSEMBLY_DIR, L_VAR_DIR, OUT_DIR},
+    Driver,
+};
 use chapter2::{
+    assemble::assemble,
     assign_homes::AssignHomes,
     c_var::typecheck::typecheck,
     explicate_control::ExplicateControl,
@@ -11,6 +15,7 @@ use chapter2::{
         patch_instructions::PatchInstructions, prelude_conclusion::generate_prelude_conclusion,
     },
 };
+use std::path::PathBuf;
 
 pub struct LVarDriver {
     print_intermediary: bool,
@@ -65,7 +70,11 @@ impl Driver for LVarDriver {
         Ok(parsed)
     }
 
-    fn compile(&self, input: Self::Parsed) -> Result<Self::Target, Box<dyn std::error::Error>> {
+    fn compile(
+        &self,
+        input: Self::Parsed,
+        prog_name: String,
+    ) -> Result<Self::Target, Box<dyn std::error::Error>> {
         let prog_selected = self.compile_lvar(input)?;
 
         let prog_homes = prog_selected.assign_homes(&mut Default::default());
@@ -79,6 +88,12 @@ impl Driver for LVarDriver {
         let prog_prel_conc = generate_prelude_conclusion(prog_patched);
         self.debug("------ Generated Prelude and Conclusion -----");
         self.debug(&prog_prel_conc.to_string());
+
+        assemble(
+            prog_prel_conc.clone(),
+            prog_name,
+            PathBuf::from(OUT_DIR).join(ASSEMBLY_DIR).join(L_VAR_DIR),
+        )?;
 
         Ok(prog_prel_conc)
     }
