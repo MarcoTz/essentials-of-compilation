@@ -1,9 +1,9 @@
 use super::{
+    assemble::{assemble, link_obj, write_asm},
     consts::{ASSEMBLY_DIR, C_DIR, EXE_DIR, LIB_C, L_VAR_DIR, OBJ_DIR, OUT_DIR},
     Driver,
 };
 use chapter2::{
-    assemble::{assemble, link_obj, write_asm},
     assign_homes::AssignHomes,
     c_var::typecheck::typecheck,
     explicate_control::ExplicateControl,
@@ -104,7 +104,7 @@ impl Driver for LVarDriver {
         self.debug("------ Generated Prelude and Conclusion -----");
         self.debug(&prog_prel_conc.to_string());
 
-        let asm_file = write_asm(prog_prel_conc.clone(), prog_name.clone(), &self.asm_dir)?;
+        let asm_file = write_asm(prog_prel_conc.to_string(), prog_name.clone(), &self.asm_dir)?;
         self.debug(&format!("Successfully wrote {:?}", asm_file));
 
         let obj_file = assemble(&asm_file, &self.obj_dir)?;

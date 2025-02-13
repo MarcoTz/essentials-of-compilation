@@ -1,3 +1,4 @@
+pub mod assemble;
 pub mod consts;
 pub mod l_if;
 pub mod l_int;

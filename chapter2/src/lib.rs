@@ -1,4 +1,3 @@
-pub mod assemble;
 pub mod assign_homes;
 pub mod c_var;
 pub mod explicate_control;

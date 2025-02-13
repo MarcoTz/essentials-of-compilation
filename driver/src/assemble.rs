@@ -1,4 +1,3 @@
-use crate::x86_int::Program;
 use std::{fmt, fs::write, path::PathBuf, process::Command};
 
 #[derive(Debug)]
@@ -20,10 +19,10 @@ impl fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-pub fn write_asm(prog: Program, file_name: String, out_dir: &PathBuf) -> Result<PathBuf, Error> {
+pub fn write_asm(source: String, file_name: String, out_dir: &PathBuf) -> Result<PathBuf, Error> {
     let mut out_file = out_dir.join(file_name);
     out_file.set_extension("asm");
-    write(&out_file, prog.to_string()).map_err(|_| Error::OutPath(out_file.clone()))?;
+    write(&out_file, source).map_err(|_| Error::OutPath(out_file.clone()))?;
     Ok(out_file)
 }
 
