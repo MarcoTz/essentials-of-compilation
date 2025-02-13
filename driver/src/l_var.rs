@@ -1,9 +1,9 @@
 use super::{
-    consts::{ASSEMBLY_DIR, L_VAR_DIR, OUT_DIR},
+    consts::{ASSEMBLY_DIR, C_DIR, EXE_DIR, LIB_C, L_VAR_DIR, OBJ_DIR, OUT_DIR},
     Driver,
 };
 use chapter2::{
-    assemble::assemble,
+    assemble::{assemble, link_obj, write_asm},
     assign_homes::AssignHomes,
     c_var::typecheck::typecheck,
     explicate_control::ExplicateControl,
@@ -15,15 +15,30 @@ use chapter2::{
         patch_instructions::PatchInstructions, prelude_conclusion::generate_prelude_conclusion,
     },
 };
-use std::path::PathBuf;
+use std::{fs::create_dir_all, path::PathBuf};
 
 pub struct LVarDriver {
     print_intermediary: bool,
+    asm_dir: PathBuf,
+    obj_dir: PathBuf,
+    exe_dir: PathBuf,
+    lib_c: PathBuf,
 }
 
 impl LVarDriver {
     pub fn new(print_intermediary: bool) -> LVarDriver {
-        LVarDriver { print_intermediary }
+        let drv = LVarDriver {
+            print_intermediary,
+            asm_dir: PathBuf::from(OUT_DIR).join(L_VAR_DIR).join(ASSEMBLY_DIR),
+            obj_dir: PathBuf::from(OUT_DIR).join(L_VAR_DIR).join(OBJ_DIR),
+            exe_dir: PathBuf::from(OUT_DIR).join(L_VAR_DIR).join(EXE_DIR),
+            lib_c: PathBuf::from(C_DIR).join(LIB_C),
+        };
+
+        create_dir_all(&drv.asm_dir).unwrap();
+        create_dir_all(&drv.obj_dir).unwrap();
+        create_dir_all(&drv.exe_dir).unwrap();
+        drv
     }
 }
 
@@ -89,11 +104,14 @@ impl Driver for LVarDriver {
         self.debug("------ Generated Prelude and Conclusion -----");
         self.debug(&prog_prel_conc.to_string());
 
-        assemble(
-            prog_prel_conc.clone(),
-            prog_name,
-            PathBuf::from(OUT_DIR).join(ASSEMBLY_DIR).join(L_VAR_DIR),
-        )?;
+        let asm_file = write_asm(prog_prel_conc.clone(), prog_name.clone(), &self.asm_dir)?;
+        self.debug(&format!("Successfully wrote {:?}", asm_file));
+
+        let obj_file = assemble(&asm_file, &self.obj_dir)?;
+        self.debug(&format!("Successfully wrote {:?}", obj_file));
+
+        let linked_file = link_obj(&obj_file, &self.exe_dir, &self.lib_c)?;
+        self.debug(&format!("Successfully wrote {:?}", linked_file));
 
         Ok(prog_prel_conc)
     }

@@ -27,14 +27,12 @@ pub fn exec(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     if args.skip_alloc {
         let driver = LVarDriver::new(args.verbose);
         let parsed = driver.parse(&contents)?;
-        let compiled = driver.compile(parsed, out_name)?;
-        println!("{compiled}");
+        let _ = driver.compile(parsed, out_name)?;
         Ok(())
     } else {
         let driver = LVarRegDriver::new(args.verbose);
         let parsed = driver.parse(&contents)?;
-        let compiled = driver.compile(parsed, out_name)?;
-        println!("{compiled}");
+        let _ = driver.compile(parsed, out_name)?;
         Ok(())
     }
 }
