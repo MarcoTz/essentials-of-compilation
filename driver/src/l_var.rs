@@ -15,7 +15,8 @@ use chapter2::{
         patch_instructions::PatchInstructions, prelude_conclusion::generate_prelude_conclusion,
     },
 };
-use std::{fs::create_dir_all, path::PathBuf};
+use core::str;
+use std::{fs::create_dir_all, path::PathBuf, process::Command};
 
 pub struct LVarDriver {
     print_intermediary: bool,
@@ -71,7 +72,7 @@ impl LVarDriver {
 }
 
 impl Driver for LVarDriver {
-    type Target = chapter2::x86_int::Program;
+    type Target = PathBuf;
     type Parsed = chapter2::l_var::Program;
 
     fn is_debug(&self) -> bool {
@@ -113,11 +114,11 @@ impl Driver for LVarDriver {
         let linked_file = link_obj(&obj_file, &self.exe_dir, &self.lib_c)?;
         self.debug(&format!("Successfully wrote {:?}", linked_file));
 
-        Ok(prog_prel_conc)
+        Ok(linked_file)
     }
 
-    fn evaluate(&self, _: Self::Target) -> Result<String, Box<dyn std::error::Error>> {
-        todo!()
+    fn evaluate(&self, bin_file: Self::Target) -> Result<String, Box<dyn std::error::Error>> {
+        Ok(str::from_utf8(&Command::new(bin_file).output()?.stdout)?.to_owned())
     }
 }
 
