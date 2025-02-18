@@ -42,6 +42,6 @@ impl fmt::Display for Program {
             .collect::<Vec<String>>()
             .join("\n\n");
 
-        write!(f, "{globl_str}\n{block_str}")
+        write!(f, "{globl_str}\n{block_str}\n")
     }
 }

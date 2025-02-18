@@ -9,6 +9,7 @@ pub const EXE_DIR: &str = "bin";
 
 pub const L_IF_DIR: &str = "l_if";
 pub const L_VAR_DIR: &str = "l_var";
+pub const L_VAR_REG_DIR: &str = "l_var_reg";
 pub const L_INT_DIR: &str = "l_int";
 
 /// c files

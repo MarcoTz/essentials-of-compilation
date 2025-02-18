@@ -24,7 +24,7 @@ pub fn uncover_live(prog: &Program) -> LiveMap {
         map.insert(label.clone(), live_sets);
     }
 
-    let main_sets = map.get_mut(&"main".to_owned()).unwrap();
+    let main_sets = map.get_mut(&"start".to_owned()).unwrap();
     for arg_set in main_sets.iter_mut() {
         arg_set.insert(Reg::Rsp.into());
     }

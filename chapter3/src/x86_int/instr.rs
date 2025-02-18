@@ -17,15 +17,15 @@ pub enum Instr {
 impl fmt::Display for Instr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Instr::AddQ(a1, a2) => write!(f, "addq {a1} {a2}"),
-            Instr::SubQ(a1, a2) => write!(f, "subq {a1} {a2}"),
+            Instr::AddQ(a1, a2) => write!(f, "addq {a1}, {a2}"),
+            Instr::SubQ(a1, a2) => write!(f, "subq {a1}, {a2}"),
             Instr::NegQ(a) => write!(f, "negq {a}"),
-            Instr::MovQ(a1, a2) => write!(f, "movq {a1} {a2}"),
+            Instr::MovQ(a1, a2) => write!(f, "movq {a1}, {a2}"),
             Instr::CallQ(l, _) => write!(f, "callq {l}"),
             Instr::PushQ(a) => write!(f, "pushq {a}"),
             Instr::PopQ(a) => write!(f, "popq {a}"),
             Instr::RetQ => write!(f, "retq"),
-            Instr::Jump(l) => write!(f, "jump {l}"),
+            Instr::Jump(l) => write!(f, "jmp {l}"),
         }
     }
 }
@@ -94,7 +94,7 @@ mod instr_tests {
     #[test]
     fn display_jump() {
         let result = format!("{}", Instr::Jump("exit".to_owned()));
-        let expected = "jump exit";
+        let expected = "jmp exit";
         assert_eq!(result, expected)
     }
 }
