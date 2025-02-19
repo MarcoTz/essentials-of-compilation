@@ -38,14 +38,14 @@ mod instr_tests {
     #[test]
     fn display_addq() {
         let result = format!("{}", Instr::AddQ(Arg::Immediate(1), Arg::Immediate(2)));
-        let expected = "addq $1 $2";
+        let expected = "addq $1, $2";
         assert_eq!(result, expected)
     }
 
     #[test]
     fn display_subq() {
         let result = format!("{}", Instr::SubQ(Arg::Immediate(5), Arg::Immediate(3)));
-        let expected = "subq $5 $3";
+        let expected = "subq $5, $3";
         assert_eq!(result, expected)
     }
 
@@ -59,7 +59,7 @@ mod instr_tests {
     #[test]
     fn display_movq() {
         let result = format!("{}", Instr::MovQ(Arg::Immediate(4), Arg::Immediate(3)));
-        let expected = "movq $4 $3";
+        let expected = "movq $4, $3";
         assert_eq!(result, expected)
     }
 
@@ -94,7 +94,7 @@ mod instr_tests {
     #[test]
     fn display_jump() {
         let result = format!("{}", Instr::Jump("exit".to_owned()));
-        let expected = "jump exit";
+        let expected = "jmp exit";
         assert_eq!(result, expected)
     }
 }
