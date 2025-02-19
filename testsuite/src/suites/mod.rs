@@ -12,7 +12,7 @@ pub fn run_tests() {
     lint::LIntSuite::new().run_tests();
     println!("");
     println!("Running L-Var Tests");
-    lvar::LVarSuite.run_tests();
+    lvar::LVarSuite::new().run_tests();
 }
 
 struct Test {

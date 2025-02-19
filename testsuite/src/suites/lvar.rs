@@ -1,9 +1,22 @@
 use super::{Suite, Test, TestResult};
-use chapter2::compile::compile;
-use driver::consts::{EXAMPLES_DIR, L_VAR_DIR};
+use driver::{
+    consts::{EXAMPLES_DIR, L_VAR_DIR},
+    l_var::LVarDriver,
+    Driver,
+};
 use std::path::PathBuf;
 
-pub struct LVarSuite;
+pub struct LVarSuite {
+    driver: LVarDriver,
+}
+
+impl LVarSuite {
+    pub fn new() -> LVarSuite {
+        LVarSuite {
+            driver: LVarDriver::new(false),
+        }
+    }
+}
 
 impl Suite for LVarSuite {
     fn examples_dir(&self) -> PathBuf {
@@ -15,14 +28,15 @@ impl Suite for LVarSuite {
     }
 
     fn run_test(&self, test: Test) -> TestResult {
-        let prog = match compile(&test.contents) {
-            Ok(prog) => prog,
+        let parse_res = self.driver.parse(&test.contents);
+        let parsed = match parse_res {
             Err(err) => return TestResult::Failure(err.to_string()),
+            Ok(p) => p,
         };
-        if prog.to_string() == test.expected {
-            TestResult::Success
-        } else {
-            TestResult::Failure(format!("{prog} != {}", test.expected))
+        let compiled = self.driver.compile(parsed, test.name);
+        match compiled {
+            Err(err) => TestResult::Failure(err.to_string()),
+            Ok(_) => TestResult::Success,
         }
     }
 }
