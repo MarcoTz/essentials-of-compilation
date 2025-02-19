@@ -3,6 +3,7 @@ members = [
     "app",
     "testsuite",
     "driver",
+    "s_exp",
     "chapter1",
     "chapter2",
     "chapter3",
