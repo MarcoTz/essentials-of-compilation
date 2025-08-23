@@ -7,3 +7,4 @@ edition="2024"
 parser = { path="../parser" }
 syntax = { path="../syntax" }
 uniquify = { path="../uniquify" }
+remove_complex_operands = { path="../remove_complex_operands" }
