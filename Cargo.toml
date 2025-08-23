@@ -6,6 +6,7 @@ members = [
   "lib/compile",
   "lib/uniquify",
   "lib/remove_complex_operands",
+  "lib/explicate_control",
   "tests"
 ]
 

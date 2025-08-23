@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 pub mod lang;
+pub mod lang_c;
 pub mod lang_mon;
 pub mod x86;
 

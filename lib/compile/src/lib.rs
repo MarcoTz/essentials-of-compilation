@@ -1,7 +1,8 @@
+use explicate_control::explicate_control;
 use parser::parse_program;
 use remove_complex_operands::remove_complex_operands;
 use std::{fs::read_to_string, path::PathBuf};
-use syntax::{lang, lang_mon};
+use syntax::{lang, lang_c, lang_mon};
 use uniquify::uniquify;
 
 mod errors;
@@ -14,6 +15,7 @@ pub struct Compiler {
     parsed: Option<lang::Program>,
     uniquified: Option<lang::Program>,
     monadic: Option<lang_mon::Program>,
+    explicated: Option<lang_c::Program>,
 }
 
 impl Compiler {
@@ -25,6 +27,7 @@ impl Compiler {
             parsed: None,
             uniquified: None,
             monadic: None,
+            explicated: None,
         })
     }
 
@@ -81,9 +84,26 @@ impl Compiler {
         }
         Ok(self.monadic.as_ref().unwrap().clone())
     }
+
+    pub fn explicate_control(&mut self) -> Result<(), Error> {
+        let explicated = explicate_control(self.get_monadic()?);
+        if self.debug {
+            println!("=== Explicate Control ===");
+            println!("{explicated}");
+            println!();
+        }
+        self.explicated = Some(explicated);
+        Ok(())
+    }
+
+    pub fn get_explicated(&mut self) -> Result<lang_c::Program, Error> {
+        if self.explicated.is_none() {
+            self.explicate_control()?;
+        }
+        Ok(self.explicated.as_ref().unwrap().clone())
+    }
 }
 
-//let monadic = remove_complex_operands(uniquified);
 //let explicated = explicate_control(monadic);
 //let selected = select_instructions(explicated);
 //let assigned = assign_homes(selected);

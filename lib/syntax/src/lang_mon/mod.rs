@@ -8,7 +8,7 @@ pub use expr::Expression;
 
 #[derive(Debug, Clone)]
 pub struct Program {
-    exp: Expression,
+    pub exp: Expression,
 }
 
 impl Program {
