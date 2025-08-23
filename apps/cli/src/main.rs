@@ -13,7 +13,7 @@ struct Args {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let compiler = Compiler::new(args.verbose, args.in_file)?;
-    compiler.parse()?;
+    let mut compiler = Compiler::new(args.verbose, args.in_file)?;
+    compiler.uniquify()?;
     Ok(())
 }

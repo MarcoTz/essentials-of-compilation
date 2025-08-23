@@ -6,9 +6,9 @@ mod ops;
 pub use expr::Expression;
 pub use ops::{BinaryOperation, UnaryOperation};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program {
-    exp: Expression,
+    pub exp: Expression,
 }
 
 impl Program {

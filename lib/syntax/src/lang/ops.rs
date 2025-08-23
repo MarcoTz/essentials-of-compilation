@@ -1,12 +1,12 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BinaryOperation {
     Add,
     Sub,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum UnaryOperation {
     Neg,
 }

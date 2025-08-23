@@ -1,7 +1,7 @@
 use super::{BinaryOperation, UnaryOperation};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Literal(i64),
     Variable(String),
@@ -51,6 +51,39 @@ impl Expression {
         Expression::UnOp {
             arg: Box::new(arg),
             op,
+        }
+    }
+
+    pub fn subst_var(self, old: &str, new: &str) -> Expression {
+        match self {
+            Expression::Literal(_) => self,
+            Expression::Variable(ref v) => {
+                if v == old {
+                    Expression::var(new)
+                } else {
+                    self
+                }
+            }
+            Expression::InputInt => self,
+            Expression::LetIn {
+                var,
+                bound_exp,
+                in_exp,
+            } => {
+                let bound_subst = bound_exp.subst_var(old, new);
+                if old == var {
+                    Expression::let_in(&var, bound_subst, *in_exp)
+                } else {
+                    let in_subst = in_exp.subst_var(old, new);
+                    Expression::let_in(&var, bound_subst, in_subst)
+                }
+            }
+            Expression::BinOp { fst, op, snd } => {
+                let fst_subst = fst.subst_var(old, new);
+                let snd_subst = snd.subst_var(old, new);
+                Expression::bin(fst_subst, op, snd_subst)
+            }
+            Expression::UnOp { arg, op } => Expression::un(arg.subst_var(old, new), op),
         }
     }
 }

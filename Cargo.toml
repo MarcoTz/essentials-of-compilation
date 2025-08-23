@@ -4,6 +4,7 @@ members = [
   "lib/syntax",
   "lib/parser",
   "lib/compile",
+  "lib/uniquify",
   "tests"
 ]
 
