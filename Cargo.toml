@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "apps/cli",
+  "lib/syntax"
+]
+
+resolver="2"
+default-members=["apps/cli"]

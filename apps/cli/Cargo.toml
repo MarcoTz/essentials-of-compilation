@@ -1,0 +1,8 @@
+[package]
+name="compile_cli"
+version="0.0.1"
+edition="2024"
+
+[[bin]]
+name="compile_cli"
+path="src/main.rs"
