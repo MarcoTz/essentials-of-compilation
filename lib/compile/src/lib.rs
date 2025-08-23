@@ -1,8 +1,9 @@
 use explicate_control::explicate_control;
 use parser::parse_program;
 use remove_complex_operands::remove_complex_operands;
+use select_instructions::select_instructions;
 use std::{fs::read_to_string, path::PathBuf};
-use syntax::{lang, lang_c, lang_mon};
+use syntax::{lang, lang_c, lang_mon, x86};
 use uniquify::uniquify;
 
 mod errors;
@@ -16,6 +17,7 @@ pub struct Compiler {
     uniquified: Option<lang::Program>,
     monadic: Option<lang_mon::Program>,
     explicated: Option<lang_c::Program>,
+    selected: Option<x86::VarProg>,
 }
 
 impl Compiler {
@@ -28,6 +30,7 @@ impl Compiler {
             uniquified: None,
             monadic: None,
             explicated: None,
+            selected: None,
         })
     }
 
@@ -102,9 +105,26 @@ impl Compiler {
         }
         Ok(self.explicated.as_ref().unwrap().clone())
     }
+
+    pub fn select_instructions(&mut self) -> Result<(), Error> {
+        let selected = select_instructions(self.get_explicated()?);
+        if self.debug {
+            println!("=== Select Instructions ===");
+            println!("{selected}");
+            println!();
+        }
+        self.selected = Some(selected);
+        Ok(())
+    }
+
+    pub fn get_selected(&mut self) -> Result<x86::VarProg, Error> {
+        if self.selected.is_none() {
+            self.select_instructions()?;
+        }
+        Ok(self.selected.as_ref().unwrap().clone())
+    }
 }
 
-//let explicated = explicate_control(monadic);
 //let selected = select_instructions(explicated);
 //let assigned = assign_homes(selected);
 //let patched = patch_instructions(assigned);

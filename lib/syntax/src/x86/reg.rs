@@ -1,6 +1,7 @@
+use super::{Arg, VarArg};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Reg {
     Rsp,
     Rbp,
@@ -40,5 +41,17 @@ impl fmt::Display for Reg {
             Reg::R14 => f.write_str("r14"),
             Reg::R15 => f.write_str("r15"),
         }
+    }
+}
+
+impl From<Reg> for Arg {
+    fn from(reg: Reg) -> Arg {
+        Arg::Register(reg)
+    }
+}
+
+impl From<Reg> for VarArg {
+    fn from(reg: Reg) -> VarArg {
+        VarArg::Arg(reg.into())
     }
 }

@@ -12,7 +12,7 @@ pub use tail::Tail;
 
 #[derive(Debug, Clone)]
 pub struct Program {
-    blocks: HashMap<String, Tail>,
+    pub blocks: HashMap<String, Tail>,
 }
 
 impl Program {

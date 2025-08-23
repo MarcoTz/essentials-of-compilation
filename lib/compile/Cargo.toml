@@ -9,3 +9,4 @@ syntax = { path="../syntax" }
 uniquify = { path="../uniquify" }
 remove_complex_operands = { path="../remove_complex_operands" }
 explicate_control = { path="../explicate_control" }
+select_instructions = { path="../select_instructions" }
