@@ -1,5 +1,5 @@
-use super::{BinaryOperation, UnaryOperation};
-use std::fmt;
+use crate::{BinaryOperation, UnaryOperation};
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone)]
 pub enum Expression {
@@ -84,6 +84,21 @@ impl Expression {
                 Expression::bin(fst_subst, op, snd_subst)
             }
             Expression::UnOp { arg, op } => Expression::un(arg.subst_var(old, new), op),
+        }
+    }
+
+    pub fn used_vars(&self) -> HashSet<String> {
+        match self {
+            Expression::Literal(_) => HashSet::new(),
+            Expression::Variable(v) => HashSet::from([v.clone()]),
+            Expression::InputInt => HashSet::new(),
+            Expression::LetIn {
+                var,
+                bound_exp,
+                in_exp,
+            } => &(&HashSet::from([var.clone()]) | &bound_exp.used_vars()) | &in_exp.used_vars(),
+            Expression::BinOp { fst, snd, .. } => &fst.used_vars() | &snd.used_vars(),
+            Expression::UnOp { arg, .. } => arg.used_vars(),
         }
     }
 }

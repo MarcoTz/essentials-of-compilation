@@ -1,6 +1,9 @@
 use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
-use syntax::lang::{BinaryOperation, Expression, Program, UnaryOperation};
+use syntax::{
+    BinaryOperation, UnaryOperation,
+    lang::{Expression, Program},
+};
 
 mod errors;
 

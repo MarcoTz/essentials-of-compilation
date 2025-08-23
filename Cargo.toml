@@ -5,6 +5,7 @@ members = [
   "lib/parser",
   "lib/compile",
   "lib/uniquify",
+  "lib/remove_complex_operands",
   "tests"
 ]
 

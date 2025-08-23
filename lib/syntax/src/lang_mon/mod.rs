@@ -1,21 +1,19 @@
-use std::{collections::HashSet, fmt};
+use std::fmt;
 
+mod atom;
 mod expr;
 
+pub use atom::Atom;
 pub use expr::Expression;
 
 #[derive(Debug, Clone)]
 pub struct Program {
-    pub exp: Expression,
+    exp: Expression,
 }
 
 impl Program {
     pub fn new(exp: Expression) -> Program {
         Program { exp }
-    }
-
-    pub fn used_vars(&self) -> HashSet<String> {
-        self.exp.used_vars()
     }
 }
 

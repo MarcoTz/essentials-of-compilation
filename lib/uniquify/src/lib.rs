@@ -1,16 +1,8 @@
 use std::collections::HashSet;
-use syntax::lang::{Expression, Program};
-
-fn fresh_var(used_vars: &mut HashSet<String>) -> String {
-    let mut num = 0;
-    let prefix = "x";
-    while used_vars.contains(&format!("{prefix}{num}")) {
-        num += 1;
-    }
-    let var = format!("{prefix}{num}");
-    used_vars.insert(var.clone());
-    var
-}
+use syntax::{
+    fresh_var,
+    lang::{Expression, Program},
+};
 
 pub fn uniquify(prog: Program) -> Program {
     Program::new(uniquify_exp(prog.exp, &mut HashSet::new()))
