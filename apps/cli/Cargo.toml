@@ -9,3 +9,4 @@ path="src/main.rs"
 
 [dependencies]
 syntax = { path = "../../lib/syntax" }
+parser = { path = "../../lib/parser" }

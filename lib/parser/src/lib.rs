@@ -16,18 +16,35 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
     if let Some(p) = pairs.next() {
         return Err(Error::remaining(p.as_rule()));
     }
-    let exp = parse_expression(prog_pair)?;
+    let expr_pair = pair_to_n_inner(prog_pair, &[Rule::expression, Rule::EOI])?.remove(0);
+    let exp = parse_expression(expr_pair)?;
     Ok(Program::new(exp))
 }
 
 fn parse_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
     let mut inner = pair.into_inner();
     let prim_pair = inner.next().ok_or(Error::missing(Rule::prim_expression))?;
-    let prim_expr = parse_prim_expression(prim_pair)?;
+    let mut prim_inner = prim_pair.into_inner();
+    let inner_pair = prim_inner
+        .next()
+        .ok_or(Error::missing(Rule::prim_expression))?;
+    if let Some(p) = prim_inner.next() {
+        return Err(Error::remaining(p.as_rule()));
+    }
+    let prim_expr = parse_prim_expression(inner_pair)?;
 
     let expr = match inner.next() {
         None => prim_expr,
-        Some(left_rec_pair) => parse_leftrec_expression(left_rec_pair, prim_expr)?,
+        Some(left_rec_pair) => {
+            let mut left_rec_inner = left_rec_pair.into_inner();
+            let inner_pair = left_rec_inner
+                .next()
+                .ok_or(Error::missing(Rule::left_rec_expression))?;
+            if let Some(p) = left_rec_inner.next() {
+                return Err(Error::remaining(p.as_rule()));
+            }
+            parse_leftrec_expression(inner_pair, prim_expr)?
+        }
     };
 
     if let Some(p) = inner.next() {
