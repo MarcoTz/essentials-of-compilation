@@ -1,0 +1,10 @@
+[package]
+name="parser"
+version="0.0.1"
+edition="2024"
+
+[dependencies]
+syntax = { path = "../syntax" }
+
+pest={version="2.8.1"}
+pest_derive={version="2.8.1"}

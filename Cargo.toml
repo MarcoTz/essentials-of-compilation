@@ -1,7 +1,8 @@
 [workspace]
 members = [
   "apps/cli",
-  "lib/syntax"
+  "lib/syntax",
+  "lib/parser"
 ]
 
 resolver="2"
