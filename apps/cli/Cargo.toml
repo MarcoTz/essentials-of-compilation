@@ -6,3 +6,6 @@ edition="2024"
 [[bin]]
 name="compile_cli"
 path="src/main.rs"
+
+[dependencies]
+syntax = { path = "../../lib/syntax" }
