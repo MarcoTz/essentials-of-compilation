@@ -3,6 +3,7 @@ members = [
   "apps/cli",
   "lib/syntax",
   "lib/parser",
+  "lib/compile",
   "tests"
 ]
 

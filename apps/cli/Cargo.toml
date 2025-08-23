@@ -8,5 +8,6 @@ name="compile_cli"
 path="src/main.rs"
 
 [dependencies]
-syntax = { path = "../../lib/syntax" }
-parser = { path = "../../lib/parser" }
+compile = { path="../../lib/compile" } 
+
+clap = { version = "4.5.45", features = ["derive"] }
