@@ -1,7 +1,7 @@
-use syntax::x86::{Arg, Instruction, Prog, Reg};
+use syntax::x86::{Arg, Instruction, Program, Reg};
 
-pub fn patch_instructions(prog: Prog) -> Prog {
-    let mut patched = Prog::new();
+pub fn patch_instructions(prog: Program) -> Program {
+    let mut patched = Program::new(prog.stack_space, prog.used_callee);
     for (label, instrs) in prog.blocks {
         let mut new_block = vec![];
         for instr in instrs {

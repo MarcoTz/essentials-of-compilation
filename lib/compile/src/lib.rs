@@ -1,5 +1,6 @@
 use assign_homes::assign_homes;
 use explicate_control::explicate_control;
+use generate_prelude_conclusion::generate_prelude_conclusion;
 use parser::parse_program;
 use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
@@ -19,9 +20,10 @@ pub struct Compiler {
     uniquified: Option<lang::Program>,
     monadic: Option<lang_mon::Program>,
     explicated: Option<lang_c::Program>,
-    selected: Option<x86::VarProg>,
-    assigned: Option<x86::Prog>,
-    patched: Option<x86::Prog>,
+    selected: Option<x86::VarProgram>,
+    assigned: Option<x86::Program>,
+    patched: Option<x86::Program>,
+    finalized: Option<x86::Program>,
 }
 
 impl Compiler {
@@ -37,6 +39,7 @@ impl Compiler {
             selected: None,
             assigned: None,
             patched: None,
+            finalized: None,
         })
     }
 
@@ -123,7 +126,7 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn get_selected(&mut self) -> Result<x86::VarProg, Error> {
+    pub fn get_selected(&mut self) -> Result<x86::VarProgram, Error> {
         if self.selected.is_none() {
             self.select_instructions()?;
         }
@@ -141,7 +144,7 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn get_assigned(&mut self) -> Result<x86::Prog, Error> {
+    pub fn get_assigned(&mut self) -> Result<x86::Program, Error> {
         if self.assigned.is_none() {
             self.assign_homes()?;
         }
@@ -159,12 +162,28 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn get_patched(&mut self) -> Result<x86::Prog, Error> {
+    pub fn get_patched(&mut self) -> Result<x86::Program, Error> {
         if self.patched.is_none() {
             self.patch_instructions()?;
         }
         Ok(self.patched.as_ref().unwrap().clone())
     }
-}
 
-//let finalized = prelude_and_conclusion(patched);*/
+    pub fn generate_prelude_conclusion(&mut self) -> Result<(), Error> {
+        let finalized = generate_prelude_conclusion(self.get_patched()?);
+        if self.debug {
+            println!("=== Generate Prelude and Conclusion ===");
+            println!("{finalized}");
+            println!();
+        }
+        self.finalized = Some(finalized);
+        Ok(())
+    }
+
+    pub fn get_finalized(&mut self) -> Result<x86::Program, Error> {
+        if self.finalized.is_none() {
+            self.generate_prelude_conclusion()?;
+        }
+        Ok(self.finalized.as_ref().unwrap().clone())
+    }
+}

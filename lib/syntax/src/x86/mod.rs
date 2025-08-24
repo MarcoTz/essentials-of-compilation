@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt,
+};
 
 pub mod arg;
 pub mod instr;
@@ -8,32 +11,45 @@ pub use arg::{Arg, VarArg};
 pub use instr::Instruction;
 pub use reg::Reg;
 
-pub type Block<Arg> = Vec<Instruction<Arg>>;
-
 #[derive(Debug, Clone)]
-pub struct Program<Arg> {
-    pub blocks: HashMap<String, Block<Arg>>,
+pub struct VarProgram {
+    pub blocks: HashMap<String, Vec<Instruction<VarArg>>>,
 }
 
-impl<Arg> Program<Arg> {
-    pub fn new() -> Program<Arg> {
-        Program {
+#[derive(Debug, Clone)]
+pub struct Program {
+    pub blocks: HashMap<String, Vec<Instruction<Arg>>>,
+    pub stack_space: u64,
+    pub used_callee: HashSet<Reg>,
+}
+
+impl VarProgram {
+    pub fn new() -> VarProgram {
+        VarProgram {
             blocks: HashMap::new(),
         }
     }
 
-    pub fn add_block(&mut self, lb: &str, block: Block<Arg>) {
+    pub fn add_block(&mut self, lb: &str, block: Vec<Instruction<VarArg>>) {
         self.blocks.insert(lb.to_owned(), block);
     }
 }
 
-pub type VarProg = Program<VarArg>;
-pub type Prog = Program<Arg>;
+impl Program {
+    pub fn new(stack_space: u64, used_callee: HashSet<Reg>) -> Program {
+        Program {
+            stack_space,
+            blocks: HashMap::new(),
+            used_callee,
+        }
+    }
 
-impl<Arg> fmt::Display for Program<Arg>
-where
-    Arg: fmt::Display,
-{
+    pub fn add_block(&mut self, label: &str, block: Vec<Instruction<Arg>>) {
+        self.blocks.insert(label.to_owned(), block);
+    }
+}
+
+impl fmt::Display for VarProgram {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, ".global main")?;
         for (label, instrs) in self.blocks.iter() {
@@ -42,7 +58,25 @@ where
                 "{label}:\n{}",
                 instrs
                     .iter()
-                    .map(|instr| format!("\t{}", instr.to_string()))
+                    .map(|instr| format!("\t{instr}",))
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            )?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for Program {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, ".global main")?;
+        for (label, instrs) in self.blocks.iter() {
+            write!(
+                f,
+                "{label}:\n{}",
+                instrs
+                    .iter()
+                    .map(|instr| format!("\t{instr}"))
                     .collect::<Vec<String>>()
                     .join("\n")
             )?;

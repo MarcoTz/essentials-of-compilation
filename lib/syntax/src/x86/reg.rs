@@ -1,7 +1,7 @@
 use super::{Arg, VarArg};
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Reg {
     Rsp,
     Rbp,
@@ -19,6 +19,34 @@ pub enum Reg {
     R13,
     R14,
     R15,
+}
+
+impl Reg {
+    pub const fn caller_saved() -> [Reg; 9] {
+        [
+            Reg::Rax,
+            Reg::Rcx,
+            Reg::Rdx,
+            Reg::Rsi,
+            Reg::Rdi,
+            Reg::R8,
+            Reg::R9,
+            Reg::R10,
+            Reg::R11,
+        ]
+    }
+
+    pub const fn callee_saved() -> [Reg; 7] {
+        [
+            Reg::Rsp,
+            Reg::Rbp,
+            Reg::Rbx,
+            Reg::R12,
+            Reg::R13,
+            Reg::R14,
+            Reg::R15,
+        ]
+    }
 }
 
 impl fmt::Display for Reg {

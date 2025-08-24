@@ -1,14 +1,14 @@
 use syntax::{BinaryOperation, UnaryOperation, lang_c, x86};
 
-pub fn select_instructions(prog: lang_c::Program) -> x86::VarProg {
-    let mut x86_prog = x86::VarProg::new();
+pub fn select_instructions(prog: lang_c::Program) -> x86::VarProgram {
+    let mut x86_prog = x86::VarProgram::new();
     for (label, tail) in prog.blocks {
         x86_prog.add_block(&label, select_tail(tail));
     }
     x86_prog
 }
 
-fn select_tail(tail: lang_c::Tail) -> x86::Block<x86::VarArg> {
+fn select_tail(tail: lang_c::Tail) -> Vec<x86::Instruction<x86::VarArg>> {
     let mut instrs = vec![];
     for stmt in tail.stmts {
         instrs.extend(select_stmt(stmt));
@@ -17,7 +17,7 @@ fn select_tail(tail: lang_c::Tail) -> x86::Block<x86::VarArg> {
     instrs
 }
 
-fn select_stmt(stmt: lang_c::Statement) -> x86::Block<x86::VarArg> {
+fn select_stmt(stmt: lang_c::Statement) -> Vec<x86::Instruction<x86::VarArg>> {
     match stmt {
         lang_c::Statement::Assign { var, bound } => {
             let (mut instrs, arg) = select_exp(bound);
@@ -30,7 +30,7 @@ fn select_stmt(stmt: lang_c::Statement) -> x86::Block<x86::VarArg> {
     }
 }
 
-fn select_return(exp: lang_c::Expression) -> x86::Block<x86::VarArg> {
+fn select_return(exp: lang_c::Expression) -> Vec<x86::Instruction<x86::VarArg>> {
     let (mut stmts, arg) = select_exp(exp);
     stmts.push(x86::Instruction::MovQ {
         src: arg,
@@ -39,7 +39,7 @@ fn select_return(exp: lang_c::Expression) -> x86::Block<x86::VarArg> {
     stmts
 }
 
-fn select_exp(exp: lang_c::Expression) -> (x86::Block<x86::VarArg>, x86::VarArg) {
+fn select_exp(exp: lang_c::Expression) -> (Vec<x86::Instruction<x86::VarArg>>, x86::VarArg) {
     match exp {
         lang_c::Expression::Atm(atm) => (vec![], select_atm(atm)),
         lang_c::Expression::InputInt => (

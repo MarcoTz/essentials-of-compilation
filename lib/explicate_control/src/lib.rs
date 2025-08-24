@@ -2,7 +2,7 @@ use syntax::{lang_c, lang_mon};
 
 pub fn explicate_control(prog: lang_mon::Program) -> lang_c::Program {
     let mut prog_c = lang_c::Program::new();
-    prog_c.add_block("main", explicate_exp(prog.exp));
+    prog_c.add_block("start", explicate_exp(prog.exp));
     prog_c
 }
 

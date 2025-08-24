@@ -12,3 +12,4 @@ explicate_control = { path="../explicate_control" }
 select_instructions = { path="../select_instructions" }
 assign_homes = { path="../assign_homes" }
 patch_instructions = { path="../patch_instructions" }
+generate_prelude_conclusion = { path="../generate_prelude_conclusion" }
