@@ -46,10 +46,11 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
             let arg_loc = select_atm(arg);
             match op {
                 UnaryOperation::Neg => vec![
-                    x86::Instruction::NegQ {
-                        arg: arg_loc.clone(),
+                    x86::Instruction::MovQ {
+                        src: arg_loc,
+                        dest: dest.clone(),
                     },
-                    x86::Instruction::MovQ { src: arg_loc, dest },
+                    x86::Instruction::NegQ { arg: dest },
                 ],
             }
         }
@@ -80,5 +81,88 @@ fn select_atm(atm: lang_c::Atom) -> x86::VarArg {
     match atm {
         lang_c::Atom::Integer(i) => x86::Arg::Immediate(i).into(),
         lang_c::Atom::Variable(v) => x86::VarArg::Var(v),
+    }
+}
+
+#[cfg(test)]
+mod select_instructions_tests {
+    use super::select_instructions;
+    use syntax::{BinaryOperation, UnaryOperation, lang_c, x86};
+
+    #[test]
+    fn select_sum() {
+        let mut prog = lang_c::Program::new();
+        prog.add_block(
+            "start",
+            lang_c::Tail {
+                stmts: vec![],
+                ret: lang_c::Expression::BinOp {
+                    fst: lang_c::Atom::Integer(10),
+                    op: BinaryOperation::Add,
+                    snd: lang_c::Atom::Integer(32),
+                },
+            },
+        );
+        let result = select_instructions(prog);
+        let mut expected = x86::VarProgram::new();
+        expected.add_block(
+            "start",
+            vec![
+                x86::Instruction::MovQ {
+                    src: x86::Arg::Immediate(10).into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+                x86::Instruction::AddQ {
+                    src: x86::Arg::Immediate(32).into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+            ],
+        );
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn select_neg_sum() {
+        let mut prog = lang_c::Program::new();
+        prog.add_block(
+            "start",
+            lang_c::Tail {
+                stmts: vec![lang_c::Statement::Assign {
+                    var: "x0".to_owned(),
+                    bound: lang_c::Expression::UnaryOp {
+                        arg: lang_c::Atom::Integer(10),
+                        op: UnaryOperation::Neg,
+                    },
+                }],
+                ret: lang_c::Expression::BinOp {
+                    fst: lang_c::Atom::Integer(52),
+                    op: BinaryOperation::Add,
+                    snd: lang_c::Atom::Variable("x0".to_owned()),
+                },
+            },
+        );
+        let result = select_instructions(prog);
+        let mut expected = x86::VarProgram::new();
+        expected.add_block(
+            "start",
+            vec![
+                x86::Instruction::MovQ {
+                    src: x86::Arg::Immediate(10).into(),
+                    dest: x86::VarArg::Var("x0".to_owned()).into(),
+                },
+                x86::Instruction::NegQ {
+                    arg: x86::VarArg::Var("x0".to_owned()).into(),
+                },
+                x86::Instruction::MovQ {
+                    src: x86::Arg::Immediate(52).into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+                x86::Instruction::AddQ {
+                    src: x86::VarArg::Var("x0".to_owned()).into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+            ],
+        );
+        assert_eq!(result, expected)
     }
 }

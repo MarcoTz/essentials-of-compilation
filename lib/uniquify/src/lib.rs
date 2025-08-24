@@ -36,3 +36,74 @@ fn uniquify_exp(exp: Expression, used_vars: &mut HashSet<String>) -> Expression 
         }
     }
 }
+
+#[cfg(test)]
+mod uniquify_tests {
+    use super::uniquify;
+    use syntax::{
+        BinaryOperation,
+        lang::{Expression, Program},
+    };
+
+    #[test]
+    fn uniqufy_let_let() {
+        let result = uniquify(Program::new(Expression::let_in(
+            "x",
+            Expression::lit(32),
+            Expression::bin(
+                Expression::let_in("x", Expression::lit(10), Expression::var("x")),
+                BinaryOperation::Add,
+                Expression::var("x"),
+            ),
+        )));
+        let expected = Program::new(Expression::let_in(
+            "x",
+            Expression::lit(32),
+            Expression::bin(
+                Expression::let_in("x0", Expression::lit(10), Expression::var("x0")),
+                BinaryOperation::Add,
+                Expression::var("x"),
+            ),
+        ));
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn uniquify_shadow() {
+        let result = uniquify(Program::new(Expression::let_in(
+            "x",
+            Expression::let_in(
+                "x",
+                Expression::lit(4),
+                Expression::bin(
+                    Expression::var("x"),
+                    BinaryOperation::Add,
+                    Expression::lit(1),
+                ),
+            ),
+            Expression::bin(
+                Expression::var("x"),
+                BinaryOperation::Add,
+                Expression::lit(2),
+            ),
+        )));
+        let expected = Program::new(Expression::let_in(
+            "x",
+            Expression::let_in(
+                "x0",
+                Expression::lit(4),
+                Expression::bin(
+                    Expression::var("x0"),
+                    BinaryOperation::Add,
+                    Expression::lit(1),
+                ),
+            ),
+            Expression::bin(
+                Expression::var("x"),
+                BinaryOperation::Add,
+                Expression::lit(2),
+            ),
+        ));
+        assert_eq!(result, expected)
+    }
+}

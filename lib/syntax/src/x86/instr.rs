@@ -1,7 +1,7 @@
 use super::arg::{Arg, VarArg};
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Instruction<Arg> {
     AddQ { src: Arg, dest: Arg },
     SubQ { src: Arg, dest: Arg },

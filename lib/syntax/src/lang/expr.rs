@@ -1,7 +1,7 @@
 use crate::{BinaryOperation, UnaryOperation};
 use std::{collections::HashSet, fmt};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Literal(i64),
     Variable(String),

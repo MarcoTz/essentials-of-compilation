@@ -1,14 +1,14 @@
 use super::reg::Reg;
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Arg {
     Immediate(i64),
     Register(Reg),
     Deref(Reg, i64),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum VarArg {
     Arg(Arg),
     Var(String),

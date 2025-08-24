@@ -6,7 +6,7 @@ mod expr;
 pub use atom::Atom;
 pub use expr::Expression;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
     pub exp: Expression,
 }

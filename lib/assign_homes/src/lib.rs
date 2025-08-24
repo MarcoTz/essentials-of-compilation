@@ -146,3 +146,51 @@ fn assign_arg(arg: VarArg, assignments: &HashMap<String, i64>) -> Arg {
         }
     }
 }
+
+#[cfg(test)]
+mod assign_homes_tests {
+    use super::assign_homes;
+    use std::collections::HashSet;
+    use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+    #[test]
+    fn assign_ab() {
+        let mut prog = VarProgram::new();
+        prog.add_block(
+            "start",
+            vec![
+                Instruction::MovQ {
+                    src: Arg::Immediate(42).into(),
+                    dest: VarArg::Var("a".to_owned()),
+                },
+                Instruction::MovQ {
+                    src: VarArg::Var("a".to_owned()),
+                    dest: VarArg::Var("b".to_owned()),
+                },
+                Instruction::MovQ {
+                    src: VarArg::Var("b".to_owned()),
+                    dest: Reg::Rax.into(),
+                },
+            ],
+        );
+        let result = assign_homes(prog);
+        let mut expected = Program::new(16, HashSet::new());
+        expected.add_block(
+            "start",
+            vec![
+                Instruction::MovQ {
+                    src: Arg::Immediate(42),
+                    dest: Arg::Deref(Reg::Rbp, -16),
+                },
+                Instruction::MovQ {
+                    src: Arg::Deref(Reg::Rbp, -16),
+                    dest: Arg::Deref(Reg::Rbp, -8),
+                },
+                Instruction::MovQ {
+                    src: Arg::Deref(Reg::Rbp, -8),
+                    dest: Reg::Rax.into(),
+                },
+            ],
+        );
+        assert_eq!(result, expected)
+    }
+}

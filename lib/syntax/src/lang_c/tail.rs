@@ -1,7 +1,7 @@
 use super::{Expression, Statement};
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Tail {
     pub stmts: Vec<Statement>,
     pub ret: Expression,

@@ -10,7 +10,7 @@ pub use expr::Expression;
 pub use stmt::Statement;
 pub use tail::Tail;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
     pub blocks: HashMap<String, Tail>,
 }

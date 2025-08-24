@@ -38,3 +38,56 @@ pub fn mon_to_c_atm(atm: lang_mon::Atom) -> lang_c::Atom {
         lang_mon::Atom::Variable(v) => lang_c::Atom::Variable(v),
     }
 }
+
+#[cfg(test)]
+mod explicate_control_tests {
+    use super::explicate_control;
+    use syntax::{BinaryOperation, lang_c, lang_mon};
+
+    #[test]
+    fn explicate_let() {
+        let result = explicate_control(lang_mon::Program::new(lang_mon::Expression::let_in(
+            "y",
+            lang_mon::Expression::let_in(
+                "x0",
+                lang_mon::Atom::Integer(20).into(),
+                lang_mon::Expression::let_in(
+                    "x1",
+                    lang_mon::Atom::Integer(22).into(),
+                    lang_mon::Expression::bin(
+                        lang_mon::Atom::Variable("x0".to_owned()).into(),
+                        BinaryOperation::Add,
+                        lang_mon::Atom::Variable("x1".to_owned()).into(),
+                    ),
+                ),
+            ),
+            lang_mon::Atom::Variable("y".to_owned()).into(),
+        )));
+        let mut expected = lang_c::Program::new();
+        expected.add_block(
+            "start",
+            lang_c::Tail {
+                stmts: vec![
+                    lang_c::Statement::Assign {
+                        var: "x0".to_owned(),
+                        bound: lang_c::Atom::Integer(20).into(),
+                    },
+                    lang_c::Statement::Assign {
+                        var: "x1".to_owned(),
+                        bound: lang_c::Atom::Integer(22).into(),
+                    },
+                    lang_c::Statement::Assign {
+                        var: "y".to_owned(),
+                        bound: lang_c::Expression::bin(
+                            lang_c::Atom::Variable("x0".to_owned()),
+                            BinaryOperation::Add,
+                            lang_c::Atom::Variable("x1".to_owned()),
+                        ),
+                    },
+                ],
+                ret: lang_c::Atom::Variable("y".to_owned()).into(),
+            },
+        );
+        assert_eq!(result, expected)
+    }
+}

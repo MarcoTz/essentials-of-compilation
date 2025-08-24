@@ -1,7 +1,7 @@
 use super::{Expression, Tail};
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Atom {
     Integer(i64),
     Variable(String),

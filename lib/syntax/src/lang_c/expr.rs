@@ -2,7 +2,7 @@ use super::{Atom, Tail};
 use crate::{BinaryOperation, UnaryOperation};
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Atm(Atom),
     InputInt,

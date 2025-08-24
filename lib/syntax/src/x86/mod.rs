@@ -11,12 +11,12 @@ pub use arg::{Arg, VarArg};
 pub use instr::Instruction;
 pub use reg::Reg;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VarProgram {
     pub blocks: HashMap<String, Vec<Instruction<VarArg>>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
     pub blocks: HashMap<String, Vec<Instruction<Arg>>>,
     pub stack_space: u64,

@@ -65,3 +65,44 @@ fn rco_expr(exp: lang::Expression, used_vars: &mut HashSet<String>) -> lang_mon:
         }
     }
 }
+
+#[cfg(test)]
+mod remove_complex_operands_tests {
+    use super::remove_complex_operands;
+    use syntax::{BinaryOperation, UnaryOperation, lang, lang_mon};
+
+    #[test]
+    fn remove_sum() {
+        let result = remove_complex_operands(lang::Program::new(lang::Expression::let_in(
+            "x",
+            lang::Expression::bin(
+                lang::Expression::lit(42),
+                BinaryOperation::Add,
+                lang::Expression::un(lang::Expression::lit(10), UnaryOperation::Neg),
+            ),
+            lang::Expression::bin(
+                lang::Expression::var("x"),
+                BinaryOperation::Add,
+                lang::Expression::lit(10),
+            ),
+        )));
+        let expected = lang_mon::Program::new(lang_mon::Expression::let_in(
+            "x",
+            lang_mon::Expression::let_in(
+                "x0",
+                lang_mon::Expression::un(lang_mon::Atom::Integer(10), UnaryOperation::Neg),
+                lang_mon::Expression::bin(
+                    lang_mon::Atom::Integer(42),
+                    BinaryOperation::Add,
+                    lang_mon::Atom::Variable("x0".to_owned()),
+                ),
+            ),
+            lang_mon::Expression::bin(
+                lang_mon::Atom::Variable("x".to_owned()),
+                BinaryOperation::Add,
+                lang_mon::Atom::Integer(10),
+            ),
+        ));
+        assert_eq!(result, expected)
+    }
+}
