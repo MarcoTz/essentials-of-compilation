@@ -10,6 +10,7 @@ pub enum Error {
     WriteFile(PathBuf),
     GetFileName(PathBuf),
     RunCommand(String),
+    RemoveFile(PathBuf),
 }
 
 impl fmt::Display for Error {
@@ -23,6 +24,7 @@ impl fmt::Display for Error {
             Error::WriteFile(path) => write!(f, "Could not write to file {path:?}"),
             Error::GetFileName(path) => write!(f, "Could not get file name of {path:?}"),
             Error::RunCommand(cmd) => write!(f, "Could not run command {cmd}"),
+            Error::RemoveFile(path) => write!(f, "Could not remove file {path:?}"),
         }
     }
 }

@@ -6,6 +6,7 @@ const DEFAULT_OBJECT_OUT: &str = "target/object";
 const OBJECT_EXT: &str = "o";
 const DEFAULT_EXE_OUT: &str = "target/exe";
 const EXE_EXT: &str = "";
+pub const C_RUNTIME: &str = "include/runtime.c";
 
 fn get_out(
     cli_arg: Option<PathBuf>,
@@ -33,4 +34,8 @@ pub fn get_object_out(cli_arg: Option<PathBuf>, prog_name: &OsStr) -> PathBuf {
 
 pub fn get_exe_out(cli_arg: Option<PathBuf>, prog_name: &OsStr) -> PathBuf {
     get_out(cli_arg, prog_name, DEFAULT_EXE_OUT, EXE_EXT)
+}
+
+pub fn get_runtime_object_out() -> PathBuf {
+    PathBuf::from(DEFAULT_OBJECT_OUT).join("runtime.o")
 }

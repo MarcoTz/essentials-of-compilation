@@ -24,6 +24,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         args.object_out,
         args.out,
     )?;
-    compiler.assemble()?;
+    compiler.link()?;
     Ok(())
 }

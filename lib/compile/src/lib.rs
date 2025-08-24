@@ -6,10 +6,10 @@ use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
 use select_instructions::select_instructions;
 use std::{
-    fs::{File, create_dir_all, read_to_string},
+    fs::{File, create_dir_all, read_to_string, remove_file},
     io::Write,
     path::PathBuf,
-    process::{Command, ExitStatus},
+    process::Command,
 };
 use syntax::{lang, lang_c, lang_mon, x86};
 use uniquify::uniquify;
@@ -18,7 +18,7 @@ mod errors;
 mod paths;
 
 pub use errors::Error;
-use paths::{get_asm_out, get_exe_out, get_object_out};
+use paths::{C_RUNTIME, get_asm_out, get_exe_out, get_object_out, get_runtime_object_out};
 
 pub struct Compiler {
     debug: bool,
@@ -48,8 +48,17 @@ impl Compiler {
             .file_stem()
             .ok_or(Error::GetFileName(source.clone()))?;
         let asm_out = get_asm_out(asm_out, prog_name);
+        if asm_out.exists() {
+            remove_file(&asm_out).map_err(|_| Error::RemoveFile(asm_out.clone()))?;
+        }
         let object_out = get_object_out(object_out, prog_name);
+        if object_out.exists() {
+            remove_file(&object_out).map_err(|_| Error::RemoveFile(object_out.clone()))?;
+        }
         let exe_out = get_exe_out(exe_out, prog_name);
+        if exe_out.exists() {
+            remove_file(&exe_out).map_err(|_| Error::RemoveFile(exe_out.clone()))?;
+        }
 
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
         Ok(Compiler {
@@ -229,6 +238,7 @@ impl Compiler {
     }
 
     pub fn assemble(&mut self) -> Result<(), Error> {
+        self.write_asm()?;
         if !self.asm_out.exists() {
             self.write_asm()?;
         }
@@ -250,6 +260,52 @@ impl Compiler {
             .map_err(|_| Error::RunCommand("gcc -c".to_owned()))?;
         if !res.success() {
             return Err(Error::RunCommand("gcc -c".to_owned()));
+        }
+        Ok(())
+    }
+
+    pub fn assemble_runtime(&self) -> Result<(), Error> {
+        let runtime_in = PathBuf::from(C_RUNTIME);
+        let runtime_out = get_runtime_object_out();
+        if runtime_out.exists() {
+            return Ok(());
+        }
+
+        let mut gcc_cmd = Command::new("gcc");
+        gcc_cmd
+            .arg("-c")
+            .arg(&runtime_in)
+            .arg("-o")
+            .arg(&runtime_out);
+        let res = gcc_cmd
+            .status()
+            .map_err(|_| Error::RunCommand("gcc -c".to_owned()))?;
+        if !res.success() {
+            return Err(Error::RunCommand("gcc -c".to_owned()))?;
+        }
+        Ok(())
+    }
+
+    pub fn link(&mut self) -> Result<(), Error> {
+        if !self.object_out.exists() {
+            self.assemble()?;
+        }
+        let runtime_out = get_runtime_object_out();
+        if !runtime_out.exists() {
+            self.assemble_runtime()?;
+        }
+
+        let mut gcc_cmd = Command::new("gcc");
+        gcc_cmd
+            .arg(&self.object_out)
+            .arg(&runtime_out)
+            .arg("-o")
+            .arg(&self.exe_out);
+        let res = gcc_cmd
+            .status()
+            .map_err(|_| Error::RunCommand("gcc".to_owned()))?;
+        if !res.success() {
+            return Err(Error::RunCommand("gcc".to_owned()));
         }
         Ok(())
     }
