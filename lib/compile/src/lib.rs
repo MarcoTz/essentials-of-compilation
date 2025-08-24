@@ -1,3 +1,4 @@
+use assign_homes::assign_homes;
 use explicate_control::explicate_control;
 use parser::parse_program;
 use remove_complex_operands::remove_complex_operands;
@@ -18,6 +19,7 @@ pub struct Compiler {
     monadic: Option<lang_mon::Program>,
     explicated: Option<lang_c::Program>,
     selected: Option<x86::VarProg>,
+    assigned: Option<x86::Prog>,
 }
 
 impl Compiler {
@@ -31,6 +33,7 @@ impl Compiler {
             monadic: None,
             explicated: None,
             selected: None,
+            assigned: None,
         })
     }
 
@@ -123,9 +126,25 @@ impl Compiler {
         }
         Ok(self.selected.as_ref().unwrap().clone())
     }
+
+    pub fn assign_homes(&mut self) -> Result<(), Error> {
+        let assigned = assign_homes(self.get_selected()?);
+        if self.debug {
+            println!("=== Assign Homes ===");
+            println!("{assigned}");
+            println!();
+        }
+        Ok(())
+    }
+
+    pub fn get_assigned(&mut self) -> Result<x86::Prog, Error> {
+        if self.assigned.is_none() {
+            self.assign_homes()?;
+        }
+        Ok(self.assigned.as_ref().unwrap().clone())
+    }
 }
 
-//let selected = select_instructions(explicated);
 //let assigned = assign_homes(selected);
 //let patched = patch_instructions(assigned);
 //let finalized = prelude_and_conclusion(patched);*/

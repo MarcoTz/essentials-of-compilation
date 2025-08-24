@@ -8,6 +8,7 @@ members = [
   "lib/remove_complex_operands",
   "lib/explicate_control",
   "lib/select_instructions",
+  "lib/assign_homes",
   "tests"
 ]
 

@@ -14,6 +14,6 @@ struct Args {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let mut compiler = Compiler::new(args.verbose, args.in_file)?;
-    compiler.select_instructions()?;
+    compiler.assign_homes()?;
     Ok(())
 }

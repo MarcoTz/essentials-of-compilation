@@ -12,7 +12,7 @@ pub type Block<Arg> = Vec<Instruction<Arg>>;
 
 #[derive(Debug, Clone)]
 pub struct Program<Arg> {
-    blocks: HashMap<String, Block<Arg>>,
+    pub blocks: HashMap<String, Block<Arg>>,
 }
 
 impl<Arg> Program<Arg> {
