@@ -50,8 +50,8 @@ impl Compiler {
         let asm_out = get_asm_out(asm_out, prog_name)?;
         let object_out = get_object_out(object_out, prog_name)?;
         let exe_out = get_exe_out(exe_out, prog_name)?;
-
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
+
         Ok(Compiler {
             debug,
             source: source_contents,
@@ -229,7 +229,6 @@ impl Compiler {
     }
 
     pub fn assemble(&mut self) -> Result<(), Error> {
-        self.write_asm()?;
         if !self.asm_out.exists() {
             self.write_asm()?;
         }
@@ -298,6 +297,21 @@ impl Compiler {
         if !res.success() {
             return Err(Error::RunCommand("gcc".to_owned()));
         }
+        Ok(())
+    }
+
+    pub fn compile(&mut self) -> Result<(), Error> {
+        self.parse()?;
+        self.uniquify()?;
+        self.remove_complex_operands()?;
+        self.explicate_control()?;
+        self.select_instructions()?;
+        self.assign_homes()?;
+        self.patch_instructions()?;
+        self.generate_prelude_conclusion()?;
+        self.write_asm()?;
+        self.assemble()?;
+        self.link()?;
         Ok(())
     }
 }

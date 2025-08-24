@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "apps/cli",
+  "lib/test_utils",
   "lib/syntax",
   "lib/parser",
   "lib/compile",

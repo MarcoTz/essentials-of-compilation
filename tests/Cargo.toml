@@ -4,9 +4,16 @@ version="0.0.1"
 edition="2024"
 
 [[test]]
-name="examples"
-path="examples.rs"
+name="compile_examples"
+path="compile_examples.rs"
+harness=false
+
+[[test]]
+name="parse_examples"
+path="parse_examples.rs"
 harness=false
 
 [dependencies]
 parser = { path = "../lib/parser" }
+compile = { path = "../lib/compile" }
+test_utils = { path = "../lib/test_utils" }
