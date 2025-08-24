@@ -19,64 +19,58 @@ fn select_tail(tail: lang_c::Tail) -> Vec<x86::Instruction<x86::VarArg>> {
 
 fn select_stmt(stmt: lang_c::Statement) -> Vec<x86::Instruction<x86::VarArg>> {
     match stmt {
-        lang_c::Statement::Assign { var, bound } => {
-            let (mut instrs, arg) = select_exp(bound);
-            instrs.push(x86::Instruction::MovQ {
-                src: arg,
-                dest: x86::VarArg::Var(var),
-            });
-            instrs
-        }
+        lang_c::Statement::Assign { var, bound } => select_exp(bound, x86::VarArg::Var(var)),
     }
 }
 
 fn select_return(exp: lang_c::Expression) -> Vec<x86::Instruction<x86::VarArg>> {
-    let (mut stmts, arg) = select_exp(exp);
-    stmts.push(x86::Instruction::MovQ {
-        src: arg,
-        dest: x86::Reg::Rax.into(),
-    });
-    stmts
+    select_exp(exp, x86::Reg::Rax.into())
 }
 
-fn select_exp(exp: lang_c::Expression) -> (Vec<x86::Instruction<x86::VarArg>>, x86::VarArg) {
+fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instruction<x86::VarArg>> {
     match exp {
-        lang_c::Expression::Atm(atm) => (vec![], select_atm(atm)),
-        lang_c::Expression::InputInt => (
-            vec![x86::Instruction::CallQ {
+        lang_c::Expression::Atm(atm) => vec![x86::Instruction::MovQ {
+            src: select_atm(atm),
+            dest,
+        }],
+        lang_c::Expression::InputInt => vec![
+            x86::Instruction::CallQ {
                 label: "input_int".to_owned(),
-            }],
-            x86::Reg::Rax.into(),
-        ),
+            },
+            x86::Instruction::MovQ {
+                src: x86::Reg::Rax.into(),
+                dest,
+            },
+        ],
         lang_c::Expression::UnaryOp { arg, op } => {
             let arg_loc = select_atm(arg);
             match op {
-                UnaryOperation::Neg => (
-                    vec![x86::Instruction::NegQ {
+                UnaryOperation::Neg => vec![
+                    x86::Instruction::NegQ {
                         arg: arg_loc.clone(),
-                    }],
-                    arg_loc,
-                ),
+                    },
+                    x86::Instruction::MovQ { src: arg_loc, dest },
+                ],
             }
         }
         lang_c::Expression::BinOp { fst, op, snd } => {
             let fst_loc = select_atm(fst);
             let snd_loc = select_atm(snd);
             match op {
-                BinaryOperation::Add => (
-                    vec![x86::Instruction::AddQ {
+                BinaryOperation::Add => vec![
+                    x86::Instruction::MovQ {
                         src: fst_loc,
-                        dest: snd_loc.clone(),
-                    }],
-                    snd_loc,
-                ),
-                BinaryOperation::Sub => (
-                    vec![x86::Instruction::SubQ {
+                        dest: dest.clone(),
+                    },
+                    x86::Instruction::AddQ { src: snd_loc, dest },
+                ],
+                BinaryOperation::Sub => vec![
+                    x86::Instruction::MovQ {
                         src: fst_loc,
-                        dest: snd_loc.clone(),
-                    }],
-                    snd_loc,
-                ),
+                        dest: dest.clone(),
+                    },
+                    x86::Instruction::SubQ { src: snd_loc, dest },
+                ],
             }
         }
     }

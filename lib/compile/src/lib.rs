@@ -47,18 +47,9 @@ impl Compiler {
         let prog_name = source
             .file_stem()
             .ok_or(Error::GetFileName(source.clone()))?;
-        let asm_out = get_asm_out(asm_out, prog_name);
-        if asm_out.exists() {
-            remove_file(&asm_out).map_err(|_| Error::RemoveFile(asm_out.clone()))?;
-        }
-        let object_out = get_object_out(object_out, prog_name);
-        if object_out.exists() {
-            remove_file(&object_out).map_err(|_| Error::RemoveFile(object_out.clone()))?;
-        }
-        let exe_out = get_exe_out(exe_out, prog_name);
-        if exe_out.exists() {
-            remove_file(&exe_out).map_err(|_| Error::RemoveFile(exe_out.clone()))?;
-        }
+        let asm_out = get_asm_out(asm_out, prog_name)?;
+        let object_out = get_object_out(object_out, prog_name)?;
+        let exe_out = get_exe_out(exe_out, prog_name)?;
 
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
         Ok(Compiler {
