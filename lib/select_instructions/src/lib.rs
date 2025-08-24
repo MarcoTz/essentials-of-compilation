@@ -1,4 +1,4 @@
-use syntax::{BinaryOperation, UnaryOperation, lang_c, x86};
+use syntax::{BinaryOperation, READ_INT_CALL, UnaryOperation, lang_c, x86};
 
 pub fn select_instructions(prog: lang_c::Program) -> x86::VarProgram {
     let mut x86_prog = x86::VarProgram::new();
@@ -33,9 +33,9 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
             src: select_atm(atm),
             dest,
         }],
-        lang_c::Expression::InputInt => vec![
+        lang_c::Expression::ReadInt => vec![
             x86::Instruction::CallQ {
-                label: "input_int".to_owned(),
+                label: READ_INT_CALL.to_owned(),
             },
             x86::Instruction::MovQ {
                 src: x86::Reg::Rax.into(),

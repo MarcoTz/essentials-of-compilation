@@ -10,7 +10,7 @@ fn rco_expr(exp: lang::Expression, used_vars: &mut HashSet<String>) -> lang_mon:
     match exp {
         lang::Expression::Literal(i) => lang_mon::Atom::Integer(i).into(),
         lang::Expression::Variable(v) => lang_mon::Atom::Variable(v).into(),
-        lang::Expression::InputInt => lang_mon::Expression::InputInt,
+        lang::Expression::ReadInt => lang_mon::Expression::ReadInt,
         lang::Expression::LetIn {
             var,
             bound_exp,

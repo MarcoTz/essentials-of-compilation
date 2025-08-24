@@ -9,7 +9,7 @@ pub fn explicate_control(prog: lang_mon::Program) -> lang_c::Program {
 pub fn explicate_exp(exp: lang_mon::Expression) -> lang_c::Tail {
     match exp {
         lang_mon::Expression::Atm(atm) => mon_to_c_atm(atm).into(),
-        lang_mon::Expression::InputInt => lang_c::Expression::InputInt.into(),
+        lang_mon::Expression::ReadInt => lang_c::Expression::ReadInt.into(),
         lang_mon::Expression::UnaryOp { arg, op } => {
             lang_c::Expression::un(mon_to_c_atm(arg), op).into()
         }

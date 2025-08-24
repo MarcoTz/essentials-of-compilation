@@ -64,7 +64,7 @@ fn parse_prim_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
         }
         Rule::let_in => parse_let_expr(pair),
         Rule::unary_op => parse_unary_expr(pair),
-        Rule::input_int => Ok(Expression::InputInt),
+        Rule::read_int => Ok(Expression::ReadInt),
         Rule::literal => {
             let num = pair.as_str().trim().parse::<i64>()?;
             Ok(Expression::lit(num))

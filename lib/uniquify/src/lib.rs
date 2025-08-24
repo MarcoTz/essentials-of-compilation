@@ -12,7 +12,7 @@ fn uniquify_exp(exp: Expression, used_vars: &mut HashSet<String>) -> Expression 
     match exp {
         Expression::Literal(_) => exp,
         Expression::Variable(_) => exp,
-        Expression::InputInt => exp,
+        Expression::ReadInt => exp,
         Expression::LetIn {
             var,
             bound_exp,

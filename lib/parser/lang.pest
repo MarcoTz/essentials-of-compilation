@@ -5,11 +5,11 @@ variable = @{ !(keyword ~ WHITESPACE) ~  (ASCII_ALPHA | "_") ~ (ASCII_ALPHA|ASCI
 literal = { ASCII_DIGIT+ }
 
 
-kw_input_int = _{ "input_int" }
+kw_read_int = _{ "read_int" }
 kw_let = _{ "let" }
 
 keyword = _{
-  kw_input_int
+  kw_read_int
   | kw_let
 }
 
@@ -22,7 +22,7 @@ prim_expression = {
   paren_exp
   | let_in
   | unary_op
-  | input_int
+  | read_int
   | literal
   | variable
 }
@@ -33,7 +33,7 @@ left_rec_expression = {
 
 paren_exp = { "(" ~ expression  ~ ")" }
 let_in = { kw_let ~ variable ~ "=" ~ expression ~ ";" ~ expression }
-input_int = { kw_input_int }
+read_int = { kw_read_int }
 unary_op = { un_op ~ expression }
 
 binary_op = { bin_op ~ expression }

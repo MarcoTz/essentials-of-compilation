@@ -1,11 +1,11 @@
-use crate::{BinaryOperation, UnaryOperation};
+use crate::{BinaryOperation, READ_INT_CALL, UnaryOperation};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Literal(i64),
     Variable(String),
-    InputInt,
+    ReadInt,
     LetIn {
         var: String,
         bound_exp: Box<Expression>,
@@ -64,7 +64,7 @@ impl Expression {
                     self
                 }
             }
-            Expression::InputInt => self,
+            Expression::ReadInt => self,
             Expression::LetIn {
                 var,
                 bound_exp,
@@ -91,7 +91,7 @@ impl Expression {
         match self {
             Expression::Literal(_) => HashSet::new(),
             Expression::Variable(v) => HashSet::from([v.clone()]),
-            Expression::InputInt => HashSet::new(),
+            Expression::ReadInt => HashSet::new(),
             Expression::LetIn {
                 var,
                 bound_exp,
@@ -108,7 +108,7 @@ impl fmt::Display for Expression {
         match self {
             Expression::Literal(lit) => write!(f, "{lit}"),
             Expression::Variable(v) => f.write_str(v),
-            Expression::InputInt => f.write_str("input_int"),
+            Expression::ReadInt => f.write_str(READ_INT_CALL),
             Expression::LetIn {
                 var,
                 bound_exp,

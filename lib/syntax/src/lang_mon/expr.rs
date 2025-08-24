@@ -1,11 +1,11 @@
 use super::Atom;
-use crate::{BinaryOperation, UnaryOperation};
+use crate::{BinaryOperation, READ_INT_CALL, UnaryOperation};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Atm(Atom),
-    InputInt,
+    ReadInt,
     UnaryOp {
         arg: Atom,
         op: UnaryOperation,
@@ -44,7 +44,7 @@ impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Expression::Atm(atm) => atm.fmt(f),
-            Expression::InputInt => f.write_str("input_int"),
+            Expression::ReadInt => f.write_str(READ_INT_CALL),
             Expression::LetIn {
                 var,
                 bound_exp,
