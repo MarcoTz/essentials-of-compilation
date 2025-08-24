@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
 
 pub fn assign_homes(prog: VarProgram) -> Program {
-    let vars = collect_vars(&prog);
     let used_callee = collect_callee(&prog);
+    let vars = collect_vars(&prog);
     let stack_space = vars.len() as u64 * 8;
-    let assignments = assign_vars(vars);
+    let assignments = assign_vars(vars, used_callee.len() as i64);
     let mut assigned = Program::new(stack_space, used_callee);
     for (label, instrs) in prog.blocks {
         assigned.add_block(
@@ -95,8 +95,8 @@ fn collect_arg(arg: &VarArg) -> HashSet<String> {
     }
 }
 
-fn assign_vars(vars: HashSet<String>) -> HashMap<String, i64> {
-    let mut offset = -8;
+fn assign_vars(vars: HashSet<String>, num_callee: i64) -> HashMap<String, i64> {
+    let mut offset = -8 * (num_callee + 1);
     let mut assignments = HashMap::new();
     for var in vars {
         assignments.insert(var, offset);
