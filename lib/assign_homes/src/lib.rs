@@ -173,24 +173,26 @@ mod assign_homes_tests {
             ],
         );
         let result = assign_homes(prog);
-        let mut expected = Program::new(16, HashSet::new());
-        expected.add_block(
-            "start",
+        let block_fun = |offset1: i64, offset2: i64| {
             vec![
                 Instruction::MovQ {
                     src: Arg::Immediate(42),
-                    dest: Arg::Deref(Reg::Rbp, -16),
+                    dest: Arg::Deref(Reg::Rbp, offset1),
                 },
                 Instruction::MovQ {
-                    src: Arg::Deref(Reg::Rbp, -16),
-                    dest: Arg::Deref(Reg::Rbp, -8),
+                    src: Arg::Deref(Reg::Rbp, offset1),
+                    dest: Arg::Deref(Reg::Rbp, offset2),
                 },
                 Instruction::MovQ {
-                    src: Arg::Deref(Reg::Rbp, -8),
+                    src: Arg::Deref(Reg::Rbp, offset2),
                     dest: Reg::Rax.into(),
                 },
-            ],
-        );
-        assert_eq!(result, expected)
+            ]
+        };
+        let mut expected1 = Program::new(16, HashSet::new());
+        expected1.add_block("start", block_fun(-8, -16));
+        let mut expected2 = Program::new(16, HashSet::new());
+        expected2.add_block("start", block_fun(-16, -8));
+        assert!(result == expected1 || result == expected2)
     }
 }
