@@ -5,9 +5,15 @@ use parser::parse_program;
 use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
 use select_instructions::select_instructions;
-use std::{fs::read_to_string, path::PathBuf};
+use std::{
+    fs::{File, create_dir_all, read_to_string},
+    io::Write,
+    path::PathBuf,
+};
 use syntax::{lang, lang_c, lang_mon, x86};
 use uniquify::uniquify;
+
+const DEFAULT_OUT: &str = "target/asm";
 
 mod errors;
 
@@ -24,10 +30,23 @@ pub struct Compiler {
     assigned: Option<x86::Program>,
     patched: Option<x86::Program>,
     finalized: Option<x86::Program>,
+    out_path: PathBuf,
 }
 
 impl Compiler {
-    pub fn new(debug: bool, source: PathBuf) -> Result<Compiler, Error> {
+    pub fn new(debug: bool, source: PathBuf, out_path: Option<PathBuf>) -> Result<Compiler, Error> {
+        let out_path = match out_path {
+            None => {
+                let mut path = PathBuf::from(DEFAULT_OUT).join(
+                    source
+                        .file_stem()
+                        .ok_or(Error::GetFileName(source.clone()))?,
+                );
+                path.set_extension("asm");
+                path
+            }
+            Some(path) => path,
+        };
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
         Ok(Compiler {
             debug,
@@ -40,6 +59,7 @@ impl Compiler {
             assigned: None,
             patched: None,
             finalized: None,
+            out_path,
         })
     }
 
@@ -185,5 +205,20 @@ impl Compiler {
             self.generate_prelude_conclusion()?;
         }
         Ok(self.finalized.as_ref().unwrap().clone())
+    }
+
+    pub fn write_asm(&mut self) -> Result<(), Error> {
+        let finalized = self.get_finalized()?;
+        let out_dir = self
+            .out_path
+            .parent()
+            .ok_or(Error::ParentNotFound(self.out_path.clone()))?;
+        create_dir_all(&out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
+        let mut out_file =
+            File::create(&self.out_path).map_err(|_| Error::CreateFile(self.out_path.clone()))?;
+        out_file
+            .write_all(&finalized.to_string().as_bytes())
+            .map_err(|_| Error::WriteFile(self.out_path.clone()))?;
+        Ok(())
     }
 }
