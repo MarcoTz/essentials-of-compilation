@@ -33,7 +33,7 @@ pub struct Compiler {
     finalized: Option<x86::Program>,
     asm_out: PathBuf,
     object_out: PathBuf,
-    exe_out: PathBuf,
+    pub exe_out: PathBuf,
 }
 
 impl Compiler {
