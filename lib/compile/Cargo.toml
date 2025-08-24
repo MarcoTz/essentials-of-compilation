@@ -11,3 +11,4 @@ remove_complex_operands = { path="../remove_complex_operands" }
 explicate_control = { path="../explicate_control" }
 select_instructions = { path="../select_instructions" }
 assign_homes = { path="../assign_homes" }
+patch_instructions = { path="../patch_instructions" }

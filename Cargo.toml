@@ -9,6 +9,8 @@ members = [
   "lib/explicate_control",
   "lib/select_instructions",
   "lib/assign_homes",
+  "lib/patch_instructions",
+  "lib/generate_prelude_conclusion",
   "tests"
 ]
 

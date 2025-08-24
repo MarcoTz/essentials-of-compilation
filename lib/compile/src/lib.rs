@@ -1,6 +1,7 @@
 use assign_homes::assign_homes;
 use explicate_control::explicate_control;
 use parser::parse_program;
+use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
 use select_instructions::select_instructions;
 use std::{fs::read_to_string, path::PathBuf};
@@ -20,6 +21,7 @@ pub struct Compiler {
     explicated: Option<lang_c::Program>,
     selected: Option<x86::VarProg>,
     assigned: Option<x86::Prog>,
+    patched: Option<x86::Prog>,
 }
 
 impl Compiler {
@@ -34,6 +36,7 @@ impl Compiler {
             explicated: None,
             selected: None,
             assigned: None,
+            patched: None,
         })
     }
 
@@ -134,6 +137,7 @@ impl Compiler {
             println!("{assigned}");
             println!();
         }
+        self.assigned = Some(assigned);
         Ok(())
     }
 
@@ -143,8 +147,24 @@ impl Compiler {
         }
         Ok(self.assigned.as_ref().unwrap().clone())
     }
+
+    pub fn patch_instructions(&mut self) -> Result<(), Error> {
+        let patched = patch_instructions(self.get_assigned()?);
+        if self.debug {
+            println!("=== Patch Instructions ===");
+            println!("{patched}");
+            println!();
+        }
+        self.patched = Some(patched);
+        Ok(())
+    }
+
+    pub fn get_patched(&mut self) -> Result<x86::Prog, Error> {
+        if self.patched.is_none() {
+            self.patch_instructions()?;
+        }
+        Ok(self.patched.as_ref().unwrap().clone())
+    }
 }
 
-//let assigned = assign_homes(selected);
-//let patched = patch_instructions(assigned);
 //let finalized = prelude_and_conclusion(patched);*/
