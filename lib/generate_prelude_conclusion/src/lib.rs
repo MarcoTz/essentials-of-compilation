@@ -18,7 +18,7 @@ pub fn generate_prelude_conclusion(prog: Program) -> Program {
             .into_iter()
             .map(|instr| patch_label_instr(instr))
             .collect();
-        if label == "main" {
+        if label == "start" {
             generated_block.push(Instruction::Jump {
                 label: patch_label("conclusion"),
             })

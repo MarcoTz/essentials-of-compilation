@@ -71,7 +71,7 @@ impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, ".global main")?;
         for (label, instrs) in self.blocks.iter() {
-            write!(
+            writeln!(
                 f,
                 "{label}:\n{}",
                 instrs

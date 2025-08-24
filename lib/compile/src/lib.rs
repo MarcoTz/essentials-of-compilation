@@ -9,15 +9,16 @@ use std::{
     fs::{File, create_dir_all, read_to_string},
     io::Write,
     path::PathBuf,
+    process::{Command, ExitStatus},
 };
 use syntax::{lang, lang_c, lang_mon, x86};
 use uniquify::uniquify;
 
-const DEFAULT_OUT: &str = "target/asm";
-
 mod errors;
+mod paths;
 
 pub use errors::Error;
+use paths::{get_asm_out, get_exe_out, get_object_out};
 
 pub struct Compiler {
     debug: bool,
@@ -30,23 +31,26 @@ pub struct Compiler {
     assigned: Option<x86::Program>,
     patched: Option<x86::Program>,
     finalized: Option<x86::Program>,
-    out_path: PathBuf,
+    asm_out: PathBuf,
+    object_out: PathBuf,
+    exe_out: PathBuf,
 }
 
 impl Compiler {
-    pub fn new(debug: bool, source: PathBuf, out_path: Option<PathBuf>) -> Result<Compiler, Error> {
-        let out_path = match out_path {
-            None => {
-                let mut path = PathBuf::from(DEFAULT_OUT).join(
-                    source
-                        .file_stem()
-                        .ok_or(Error::GetFileName(source.clone()))?,
-                );
-                path.set_extension("asm");
-                path
-            }
-            Some(path) => path,
-        };
+    pub fn new(
+        debug: bool,
+        source: PathBuf,
+        asm_out: Option<PathBuf>,
+        object_out: Option<PathBuf>,
+        exe_out: Option<PathBuf>,
+    ) -> Result<Compiler, Error> {
+        let prog_name = source
+            .file_stem()
+            .ok_or(Error::GetFileName(source.clone()))?;
+        let asm_out = get_asm_out(asm_out, prog_name);
+        let object_out = get_object_out(object_out, prog_name);
+        let exe_out = get_exe_out(exe_out, prog_name);
+
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
         Ok(Compiler {
             debug,
@@ -59,7 +63,9 @@ impl Compiler {
             assigned: None,
             patched: None,
             finalized: None,
-            out_path,
+            asm_out,
+            object_out,
+            exe_out,
         })
     }
 
@@ -210,15 +216,41 @@ impl Compiler {
     pub fn write_asm(&mut self) -> Result<(), Error> {
         let finalized = self.get_finalized()?;
         let out_dir = self
-            .out_path
+            .asm_out
             .parent()
-            .ok_or(Error::ParentNotFound(self.out_path.clone()))?;
+            .ok_or(Error::ParentNotFound(self.asm_out.clone()))?;
         create_dir_all(&out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
         let mut out_file =
-            File::create(&self.out_path).map_err(|_| Error::CreateFile(self.out_path.clone()))?;
+            File::create(&self.asm_out).map_err(|_| Error::CreateFile(self.asm_out.clone()))?;
         out_file
             .write_all(&finalized.to_string().as_bytes())
-            .map_err(|_| Error::WriteFile(self.out_path.clone()))?;
+            .map_err(|_| Error::WriteFile(self.asm_out.clone()))?;
+        Ok(())
+    }
+
+    pub fn assemble(&mut self) -> Result<(), Error> {
+        if !self.asm_out.exists() {
+            self.write_asm()?;
+        }
+        let out_dir = self
+            .object_out
+            .parent()
+            .ok_or(Error::ParentNotFound(self.object_out.clone()))?;
+        create_dir_all(&out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
+        let mut gcc_cmd = Command::new("gcc");
+        gcc_cmd
+            .arg("-c")
+            .arg("-x")
+            .arg("assembler")
+            .arg(&self.asm_out)
+            .arg("-o")
+            .arg(&self.object_out);
+        let res = gcc_cmd
+            .status()
+            .map_err(|_| Error::RunCommand("gcc -c".to_owned()))?;
+        if !res.success() {
+            return Err(Error::RunCommand("gcc -c".to_owned()));
+        }
         Ok(())
     }
 }
