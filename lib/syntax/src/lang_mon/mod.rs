@@ -20,7 +20,7 @@ impl Program {
 impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for exp in self.exps.iter() {
-            write!(f, "{exp};")?;
+            writeln!(f, "{exp};")?;
         }
         Ok(())
     }

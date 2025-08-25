@@ -27,6 +27,7 @@ fn rco_expr(
             } else {
                 let mut exps = exps;
                 let fresh = fresh_var(used_vars);
+                used_vars.insert(fresh.clone());
                 let assignment = lang_mon::Expression::let_in(&fresh, last);
                 exps.push(assignment);
                 (
@@ -48,6 +49,7 @@ fn rco_expr(
                 atm
             } else {
                 let fst_var = fresh_var(used_vars);
+                used_vars.insert(fst_var.clone());
                 exps.push(lang_mon::Expression::let_in(&fst_var, fst_last));
                 lang_mon::Atom::Variable(fst_var)
             };
@@ -56,6 +58,7 @@ fn rco_expr(
                 atm
             } else {
                 let snd_var = fresh_var(used_vars);
+                used_vars.insert(snd_var.clone());
                 exps.push(lang_mon::Expression::let_in(&snd_var, snd_last));
                 lang_mon::Atom::Variable(snd_var)
             };
@@ -68,6 +71,7 @@ fn rco_expr(
             } else {
                 let mut exps = exps;
                 let arg_var = fresh_var(used_vars);
+                used_vars.insert(arg_var.clone());
                 exps.push(lang_mon::Expression::let_in(&arg_var, last));
                 (
                     exps,
