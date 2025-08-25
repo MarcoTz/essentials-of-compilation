@@ -13,10 +13,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         print!("Compiling {}", example.name);
         compiler.compile()?;
         println!("... Ok");
+        print!("Checking output of {}", example.name);
         let mut check_cmd = Command::new(compiler.exe_out);
         let output = check_cmd.output()?;
         assert!(output.status.success());
-        assert_eq!(output.stdout, example.expected.as_bytes())
+        assert_eq!(str::from_utf8(&output.stdout).unwrap(), example.expected);
+        println!("... Ok");
     }
     Ok(())
 }

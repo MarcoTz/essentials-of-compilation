@@ -26,8 +26,7 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
         if pair.as_rule() == Rule::EOI {
             break;
         }
-        let expr_pair = pair_to_n_inner(pair, &[Rule::expression])?.remove(0);
-        let exp = parse_expression(expr_pair)?;
+        let exp = parse_expression(pair)?;
         exps.push(exp);
     }
     if let Some(p) = prog_inner.next() {

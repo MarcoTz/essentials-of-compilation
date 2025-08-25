@@ -26,7 +26,7 @@ pub fn load_examples() -> Result<Vec<Example>, Box<dyn std::error::Error>> {
 
         let mut example_expected = example_dir.join(example_base);
         example_expected.set_extension("expected");
-        let expected = read_to_string(example_expected)?;
+        let expected = read_to_string(example_expected)?.trim().to_owned();
 
         examples.push(Example {
             name: example_base.to_str().unwrap().to_owned(),

@@ -1,2 +1,2 @@
 let x = 12 + 20;
-10 + x
+print_int(10 + x);
