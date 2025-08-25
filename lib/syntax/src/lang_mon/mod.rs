@@ -8,17 +8,20 @@ pub use expr::Expression;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
-    pub exp: Expression,
+    pub exps: Vec<Expression>,
 }
 
 impl Program {
-    pub fn new(exp: Expression) -> Program {
-        Program { exp }
+    pub fn new(exps: Vec<Expression>) -> Program {
+        Program { exps }
     }
 }
 
 impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.exp.fmt(f)
+        for exp in self.exps.iter() {
+            write!(f, "{exp};")?;
+        }
+        Ok(())
     }
 }

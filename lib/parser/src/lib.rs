@@ -19,9 +19,21 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
     if let Some(p) = pairs.next() {
         return Err(Error::remaining(p.as_rule()));
     }
-    let expr_pair = pair_to_n_inner(prog_pair, &[Rule::expression, Rule::EOI])?.remove(0);
-    let exp = parse_expression(expr_pair)?;
-    Ok(Program::new(exp))
+
+    let mut exps = vec![];
+    let mut prog_inner = prog_pair.into_inner();
+    while let Some(pair) = prog_inner.next() {
+        if pair.as_rule() == Rule::EOI {
+            break;
+        }
+        let expr_pair = pair_to_n_inner(pair, &[Rule::expression])?.remove(0);
+        let exp = parse_expression(expr_pair)?;
+        exps.push(exp);
+    }
+    if let Some(p) = prog_inner.next() {
+        return Err(Error::remaining(p.as_rule()));
+    }
+    Ok(Program::new(exps))
 }
 
 fn parse_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
@@ -65,6 +77,7 @@ fn parse_prim_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
         Rule::let_in => parse_let_expr(pair),
         Rule::unary_op => parse_unary_expr(pair),
         Rule::read_int => Ok(Expression::ReadInt),
+        Rule::print => parse_print(pair),
         Rule::literal => {
             let num = pair.as_str().trim().parse::<i64>()?;
             Ok(Expression::lit(num))
@@ -108,15 +121,19 @@ fn pair_to_n_inner<'a>(
     Ok(rules)
 }
 
+fn parse_print(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
+    let exp_rule = pair_to_n_inner(pair, &[Rule::expression])?.remove(0);
+    let exp = parse_expression(exp_rule)?;
+    Ok(Expression::Print(Box::new(exp)))
+}
+
 fn parse_let_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
-    let mut inner = pair_to_n_inner(pair, &[Rule::variable, Rule::expression, Rule::expression])?;
+    let mut inner = pair_to_n_inner(pair, &[Rule::variable, Rule::expression])?;
     let var_pair = inner.remove(0);
     let var = var_pair.as_str().trim();
     let bound_pair = inner.remove(0);
     let bound_expr = parse_expression(bound_pair)?;
-    let in_pair = inner.remove(0);
-    let in_expr = parse_expression(in_pair)?;
-    Ok(Expression::let_in(var, bound_expr, in_expr))
+    Ok(Expression::let_in(var, bound_expr))
 }
 
 fn parse_unary_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {

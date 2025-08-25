@@ -6,21 +6,28 @@ pub use expr::Expression;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
-    pub exp: Expression,
+    pub exps: Vec<Expression>,
 }
 
 impl Program {
-    pub fn new(exp: Expression) -> Program {
-        Program { exp }
+    pub fn new(exps: Vec<Expression>) -> Program {
+        Program { exps }
     }
 
     pub fn used_vars(&self) -> HashSet<String> {
-        self.exp.used_vars()
+        let mut used = HashSet::new();
+        for exp in self.exps.iter() {
+            used.extend(exp.used_vars().into_iter());
+        }
+        used
     }
 }
 
 impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.exp.fmt(f)
+        for exp in self.exps.iter() {
+            writeln!(f, "{exp};")?;
+        }
+        Ok(())
     }
 }

@@ -6,7 +6,7 @@ use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
 use select_instructions::select_instructions;
 use std::{
-    fs::{File, create_dir_all, read_to_string, remove_file},
+    fs::{File, create_dir_all, read_to_string},
     io::Write,
     path::PathBuf,
     process::Command,

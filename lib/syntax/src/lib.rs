@@ -5,6 +5,7 @@ pub mod lang_mon;
 pub mod x86;
 
 pub const READ_INT_CALL: &str = "read_int";
+pub const PRINT_CALL: &str = "print_int";
 
 mod ops;
 pub use ops::{BinaryOperation, UnaryOperation};

@@ -1,4 +1,4 @@
-use crate::{BinaryOperation, READ_INT_CALL, UnaryOperation};
+use crate::{BinaryOperation, PRINT_CALL, READ_INT_CALL, UnaryOperation};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -6,10 +6,10 @@ pub enum Expression {
     Literal(i64),
     Variable(String),
     ReadInt,
+    Print(Box<Expression>),
     LetIn {
         var: String,
-        bound_exp: Box<Expression>,
-        in_exp: Box<Expression>,
+        bound: Box<Expression>,
     },
     BinOp {
         fst: Box<Expression>,
@@ -31,11 +31,10 @@ impl Expression {
         Expression::Variable(v.to_owned())
     }
 
-    pub fn let_in(v: &str, bound_exp: Expression, in_exp: Expression) -> Expression {
+    pub fn let_in(v: &str, bound_exp: Expression) -> Expression {
         Expression::LetIn {
             var: v.to_owned(),
-            bound_exp: Box::new(bound_exp),
-            in_exp: Box::new(in_exp),
+            bound: Box::new(bound_exp),
         }
     }
 
@@ -65,18 +64,10 @@ impl Expression {
                 }
             }
             Expression::ReadInt => self,
-            Expression::LetIn {
-                var,
-                bound_exp,
-                in_exp,
-            } => {
-                let bound_subst = bound_exp.subst_var(old, new);
-                if old == var {
-                    Expression::let_in(&var, bound_subst, *in_exp)
-                } else {
-                    let in_subst = in_exp.subst_var(old, new);
-                    Expression::let_in(&var, bound_subst, in_subst)
-                }
+            Expression::Print(exp) => Expression::Print(Box::new(exp.subst_var(old, new))),
+            Expression::LetIn { var, bound } => {
+                let bound_subst = bound.subst_var(old, new);
+                Expression::let_in(&var, bound_subst)
             }
             Expression::BinOp { fst, op, snd } => {
                 let fst_subst = fst.subst_var(old, new);
@@ -92,11 +83,8 @@ impl Expression {
             Expression::Literal(_) => HashSet::new(),
             Expression::Variable(v) => HashSet::from([v.clone()]),
             Expression::ReadInt => HashSet::new(),
-            Expression::LetIn {
-                var,
-                bound_exp,
-                in_exp,
-            } => &(&HashSet::from([var.clone()]) | &bound_exp.used_vars()) | &in_exp.used_vars(),
+            Expression::Print(exp) => exp.used_vars(),
+            Expression::LetIn { var, bound } => &HashSet::from([var.clone()]) | &bound.used_vars(),
             Expression::BinOp { fst, snd, .. } => &fst.used_vars() | &snd.used_vars(),
             Expression::UnOp { arg, .. } => arg.used_vars(),
         }
@@ -109,11 +97,8 @@ impl fmt::Display for Expression {
             Expression::Literal(lit) => write!(f, "{lit}"),
             Expression::Variable(v) => f.write_str(v),
             Expression::ReadInt => f.write_str(READ_INT_CALL),
-            Expression::LetIn {
-                var,
-                bound_exp,
-                in_exp,
-            } => write!(f, "let {var} = {bound_exp};\n{in_exp}"),
+            Expression::Print(exp) => write!(f, "{PRINT_CALL}({exp})"),
+            Expression::LetIn { var, bound } => write!(f, "let {var} = {bound}"),
             Expression::BinOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
             Expression::UnOp { arg, op } => write!(f, "{op}{arg}"),
         }

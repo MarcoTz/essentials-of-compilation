@@ -15,6 +15,7 @@ pub enum Expression {
         op: BinaryOperation,
         snd: Atom,
     },
+    Unit,
 }
 
 impl Expression {
@@ -34,6 +35,7 @@ impl fmt::Display for Expression {
             Expression::ReadInt => f.write_str(READ_INT_CALL),
             Expression::UnaryOp { arg, op } => write!(f, "{op}({arg})"),
             Expression::BinOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
+            Expression::Unit => f.write_str("()"),
         }
     }
 }

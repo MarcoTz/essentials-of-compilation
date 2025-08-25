@@ -1,11 +1,12 @@
 use super::Atom;
-use crate::{BinaryOperation, READ_INT_CALL, UnaryOperation};
+use crate::{BinaryOperation, PRINT_CALL, READ_INT_CALL, UnaryOperation};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Atm(Atom),
     ReadInt,
+    Print(Atom),
     UnaryOp {
         arg: Atom,
         op: UnaryOperation,
@@ -17,8 +18,7 @@ pub enum Expression {
     },
     LetIn {
         var: String,
-        bound_exp: Box<Expression>,
-        in_exp: Box<Expression>,
+        bound: Box<Expression>,
     },
 }
 
@@ -31,11 +31,10 @@ impl Expression {
         Expression::BinaryOp { fst, op, snd }
     }
 
-    pub fn let_in(var: &str, bound_exp: Expression, in_exp: Expression) -> Expression {
+    pub fn let_in(var: &str, bound_exp: Expression) -> Expression {
         Expression::LetIn {
             var: var.to_owned(),
-            bound_exp: Box::new(bound_exp),
-            in_exp: Box::new(in_exp),
+            bound: Box::new(bound_exp),
         }
     }
 }
@@ -45,11 +44,8 @@ impl fmt::Display for Expression {
         match self {
             Expression::Atm(atm) => atm.fmt(f),
             Expression::ReadInt => f.write_str(READ_INT_CALL),
-            Expression::LetIn {
-                var,
-                bound_exp,
-                in_exp,
-            } => write!(f, "let {var} = {bound_exp};\n{in_exp}"),
+            Expression::Print(atm) => write!(f, "{PRINT_CALL}({atm})"),
+            Expression::LetIn { var, bound } => write!(f, "let {var} = {bound}"),
             Expression::UnaryOp { arg, op } => write!(f, "{op}({arg})"),
             Expression::BinaryOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
         }

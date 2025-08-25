@@ -20,6 +20,7 @@ fn select_tail(tail: lang_c::Tail) -> Vec<x86::Instruction<x86::VarArg>> {
 fn select_stmt(stmt: lang_c::Statement) -> Vec<x86::Instruction<x86::VarArg>> {
     match stmt {
         lang_c::Statement::Assign { var, bound } => select_exp(bound, x86::VarArg::Var(var)),
+        lang_c::Statement::Print(exp) => select_exp(exp, x86::Reg::Rdi.into()),
     }
 }
 
@@ -74,6 +75,7 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
                 ],
             }
         }
+        lang_c::Expression::Unit => vec![],
     }
 }
 

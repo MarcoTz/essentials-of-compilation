@@ -1,11 +1,12 @@
 WHITESPACE = _{ " " | "\n" | "\t" }
-program = { SOI ~ expression ~ EOI }
+program = { SOI ~ (expression ~ ";")+ ~ EOI }
 
 variable = @{ !(keyword ~ WHITESPACE) ~  (ASCII_ALPHA | "_") ~ (ASCII_ALPHA|ASCII_DIGIT|"_")* }
 literal = { ASCII_DIGIT+ }
 
 
 kw_read_int = _{ "read_int" }
+kw_print = _{ "print_int" }
 kw_let = _{ "let" }
 
 keyword = _{
@@ -23,6 +24,7 @@ prim_expression = {
   | let_in
   | unary_op
   | read_int
+  | print
   | literal
   | variable
 }
@@ -32,8 +34,8 @@ left_rec_expression = {
 }
 
 paren_exp = { "(" ~ expression  ~ ")" }
-let_in = { kw_let ~ variable ~ "=" ~ expression ~ ";" ~ expression }
+let_in = { kw_let ~ variable ~ "=" ~ expression}
 read_int = { kw_read_int }
+print = { kw_print ~ "(" ~ expression ~ ")" }
 unary_op = { un_op ~ expression }
-
 binary_op = { bin_op ~ expression }
