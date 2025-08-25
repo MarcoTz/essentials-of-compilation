@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 use syntax::{
     fresh_var,
     lang::{Expression, Program},
@@ -6,36 +6,38 @@ use syntax::{
 
 pub fn uniquify(prog: Program) -> Program {
     let mut exps = vec![];
-    let mut used = HashSet::new();
+    let mut subst = HashMap::new();
     for exp in prog.exps {
-        exps.push(uniquify_exp(exp, &mut used));
+        exps.push(uniquify_exp(exp, &mut subst));
     }
     Program::new(exps)
 }
 
-fn uniquify_exp(exp: Expression, used_vars: &mut HashSet<String>) -> Expression {
+fn uniquify_exp(exp: Expression, substitutions: &mut HashMap<String, String>) -> Expression {
     match exp {
         Expression::Literal(_) => exp,
-        Expression::Variable(_) => exp,
+        Expression::Variable(ref v) => {
+            if let Some(v1) = substitutions.get(v) {
+                Expression::Variable(v1.clone())
+            } else {
+                exp
+            }
+        }
         Expression::ReadInt => exp,
         Expression::Print(exp) => {
-            let exp_unique = uniquify_exp(*exp, used_vars);
+            let exp_unique = uniquify_exp(*exp, substitutions);
             Expression::Print(Box::new(exp_unique))
         }
         Expression::LetIn { var, bound } => {
-            let new_var = if used_vars.contains(&var) {
-                fresh_var(used_vars)
-            } else {
-                used_vars.insert(var.clone());
-                var.clone()
-            };
-            let bound_unique = uniquify_exp(bound.subst_var(&var, &new_var), used_vars);
-            Expression::let_in(&new_var, bound_unique)
+            let bound_unique = uniquify_exp(*bound, substitutions);
+            let fresh = fresh_var(&substitutions.values().cloned().collect());
+            substitutions.insert(var, fresh.clone());
+            Expression::let_in(&fresh, bound_unique)
         }
-        Expression::UnOp { arg, op } => Expression::un(uniquify_exp(*arg, used_vars), op),
+        Expression::UnOp { arg, op } => Expression::un(uniquify_exp(*arg, substitutions), op),
         Expression::BinOp { fst, op, snd } => {
-            let fst_unique = uniquify_exp(*fst, used_vars);
-            let snd_unique = uniquify_exp(*snd, used_vars);
+            let fst_unique = uniquify_exp(*fst, substitutions);
+            let snd_unique = uniquify_exp(*snd, substitutions);
             Expression::bin(fst_unique, op, snd_unique)
         }
     }
@@ -61,12 +63,12 @@ mod uniquify_tests {
             ),
         ]));
         let expected = Program::new(vec![
-            Expression::let_in("x", Expression::lit(32)),
-            Expression::let_in("x0", Expression::lit(10)),
+            Expression::let_in("x0", Expression::lit(32)),
+            Expression::let_in("x1", Expression::lit(10)),
             Expression::bin(
-                Expression::var("x0"),
+                Expression::var("x1"),
                 BinaryOperation::Add,
-                Expression::var("x"),
+                Expression::var("x1"),
             ),
         ]);
         assert_eq!(result, expected)
@@ -93,7 +95,7 @@ mod uniquify_tests {
         let expected = Program::new(vec![
             Expression::let_in("x0", Expression::lit(4)),
             Expression::let_in(
-                "x",
+                "x1",
                 Expression::bin(
                     Expression::var("x0"),
                     BinaryOperation::Add,
@@ -101,7 +103,7 @@ mod uniquify_tests {
                 ),
             ),
             Expression::bin(
-                Expression::var("x"),
+                Expression::var("x1"),
                 BinaryOperation::Add,
                 Expression::lit(2),
             ),

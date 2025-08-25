@@ -1,4 +1,4 @@
-use syntax::{BinaryOperation, READ_INT_CALL, UnaryOperation, lang_c, x86};
+use syntax::{BinaryOperation, PRINT_CALL, READ_INT_CALL, UnaryOperation, lang_c, x86};
 
 pub fn select_instructions(prog: lang_c::Program) -> x86::VarProgram {
     let mut x86_prog = x86::VarProgram::new();
@@ -20,7 +20,13 @@ fn select_tail(tail: lang_c::Tail) -> Vec<x86::Instruction<x86::VarArg>> {
 fn select_stmt(stmt: lang_c::Statement) -> Vec<x86::Instruction<x86::VarArg>> {
     match stmt {
         lang_c::Statement::Assign { var, bound } => select_exp(bound, x86::VarArg::Var(var)),
-        lang_c::Statement::Print(exp) => select_exp(exp, x86::Reg::Rdi.into()),
+        lang_c::Statement::Print(exp) => {
+            let mut exp_instrs = select_exp(exp, x86::Reg::Rdi.into());
+            exp_instrs.push(x86::Instruction::CallQ {
+                label: PRINT_CALL.to_owned(),
+            });
+            exp_instrs
+        }
     }
 }
 
