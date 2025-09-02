@@ -9,6 +9,7 @@ members = [
   "lib/remove_complex_operands",
   "lib/explicate_control",
   "lib/select_instructions",
+  "lib/uncover_live",
   "lib/assign_homes",
   "lib/patch_instructions",
   "lib/generate_prelude_conclusion",

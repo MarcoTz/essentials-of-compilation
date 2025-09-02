@@ -1,14 +1,14 @@
 use super::reg::Reg;
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Arg {
     Immediate(i64),
     Register(Reg),
     Deref(Reg, i64),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum VarArg {
     Arg(Arg),
     Var(String),
@@ -36,5 +36,23 @@ impl fmt::Display for VarArg {
 impl From<Arg> for VarArg {
     fn from(arg: Arg) -> VarArg {
         VarArg::Arg(arg)
+    }
+}
+
+impl From<&str> for VarArg {
+    fn from(var: &str) -> VarArg {
+        VarArg::Var(var.to_owned())
+    }
+}
+
+impl From<i64> for Arg {
+    fn from(i: i64) -> Arg {
+        Arg::Immediate(i)
+    }
+}
+
+impl From<i64> for VarArg {
+    fn from(i: i64) -> VarArg {
+        VarArg::Arg(i.into())
     }
 }
