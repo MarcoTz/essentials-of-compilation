@@ -4,12 +4,8 @@ use syntax::{
     x86::{Arg, Instruction, Reg, VarArg, VarProgram},
 };
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum Location {
-    Variable(String),
-    Register(Reg),
-    Stack(i64),
-}
+mod location;
+use location::Location;
 
 pub fn uncover_live(prog: &VarProgram) -> HashMap<String, Vec<HashSet<Location>>> {
     let mut live = HashMap::new();
@@ -59,10 +55,10 @@ fn live_before(
 
 fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
     match instr {
-        Instruction::AddQ { dest, .. } => set_from_arg(dest),
-        Instruction::SubQ { dest, .. } => set_from_arg(dest),
-        Instruction::NegQ { arg } => set_from_arg(arg),
-        Instruction::MovQ { dest, .. } => set_from_arg(dest),
+        Instruction::AddQ { dest, .. } => arg_locations(dest),
+        Instruction::SubQ { dest, .. } => arg_locations(dest),
+        Instruction::NegQ { arg } => arg_locations(arg),
+        Instruction::MovQ { dest, .. } => arg_locations(dest),
         Instruction::PushQ { .. } => HashSet::new(),
         Instruction::PopQ { .. } => HashSet::new(),
         Instruction::CallQ { .. } => Reg::caller_saved()
@@ -76,12 +72,12 @@ fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
 
 fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
     match instr {
-        Instruction::AddQ { src, dest } => &set_from_arg(src) | &set_from_arg(dest),
-        Instruction::SubQ { dest, src } => &set_from_arg(src) | &set_from_arg(dest),
-        Instruction::NegQ { arg } => set_from_arg(arg),
-        Instruction::MovQ { src, .. } => set_from_arg(src),
-        Instruction::PushQ { arg } => set_from_arg(arg),
-        Instruction::PopQ { arg } => set_from_arg(arg),
+        Instruction::AddQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
+        Instruction::SubQ { dest, src } => &arg_locations(src) | &arg_locations(dest),
+        Instruction::NegQ { arg } => arg_locations(arg),
+        Instruction::MovQ { src, .. } => arg_locations(src),
+        Instruction::PushQ { arg } => arg_locations(arg),
+        Instruction::PopQ { arg } => arg_locations(arg),
         Instruction::CallQ { label } => {
             if label == PRINT_CALL {
                 HashSet::from([Location::Register(Reg::Rdi)])
@@ -94,24 +90,12 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
     }
 }
 
-fn set_from_arg(arg: &VarArg) -> HashSet<Location> {
+fn arg_locations(arg: &VarArg) -> HashSet<Location> {
     match arg {
         VarArg::Var(v) => HashSet::from([Location::Variable(v.clone())]),
         VarArg::Arg(Arg::Register(r)) => HashSet::from([Location::Register(r.clone())]),
         VarArg::Arg(Arg::Deref(_, offset)) => HashSet::from([Location::Stack(*offset)]),
         _ => HashSet::new(),
-    }
-}
-
-impl From<Reg> for Location {
-    fn from(reg: Reg) -> Location {
-        Location::Register(reg)
-    }
-}
-
-impl From<&str> for Location {
-    fn from(var: &str) -> Location {
-        Location::Variable(var.to_owned())
     }
 }
 
