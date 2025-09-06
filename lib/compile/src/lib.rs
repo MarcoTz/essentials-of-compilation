@@ -74,7 +74,7 @@ impl Compiler {
         if self.debug {
             println!("=== Parsed ===");
             println!("{parsed}");
-            println!("");
+            println!();
         }
         self.parsed = Some(parsed);
         Ok(())
@@ -219,11 +219,11 @@ impl Compiler {
             .asm_out
             .parent()
             .ok_or(Error::ParentNotFound(self.asm_out.clone()))?;
-        create_dir_all(&out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
+        create_dir_all(out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
         let mut out_file =
             File::create(&self.asm_out).map_err(|_| Error::CreateFile(self.asm_out.clone()))?;
         out_file
-            .write_all(&finalized.to_string().as_bytes())
+            .write_all(finalized.to_string().as_bytes())
             .map_err(|_| Error::WriteFile(self.asm_out.clone()))?;
         Ok(())
     }
@@ -236,7 +236,7 @@ impl Compiler {
             .object_out
             .parent()
             .ok_or(Error::ParentNotFound(self.object_out.clone()))?;
-        create_dir_all(&out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
+        create_dir_all(out_dir).map_err(|_| Error::CreateDir(out_dir.to_path_buf()))?;
         let mut gcc_cmd = Command::new("gcc");
         gcc_cmd
             .arg("-c")

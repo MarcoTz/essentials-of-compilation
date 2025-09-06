@@ -67,7 +67,7 @@ fn collect_callee_arg(arg: &VarArg) -> HashSet<Reg> {
 fn collect_vars(prog: &VarProgram) -> HashSet<String> {
     let mut vars = HashSet::new();
     for (_, instrs) in prog.blocks.iter() {
-        for var_set in instrs.iter().map(|instr| collect_instr(instr)) {
+        for var_set in instrs.iter().map(collect_instr) {
             vars.extend(var_set.into_iter());
         }
     }

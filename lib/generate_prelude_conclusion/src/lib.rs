@@ -4,8 +4,8 @@ pub fn generate_prelude_conclusion(prog: Program) -> Program {
     let prelude = generate_prelude(&prog);
     let conclusion = generate_conclusion(&prog);
     let mut finalized = Program::new(prog.stack_space, prog.used_callee);
-    finalized.add_block(&"main", prelude);
-    finalized.add_block(&"conclusion", conclusion);
+    finalized.add_block("main", prelude);
+    finalized.add_block("conclusion", conclusion);
     for (label, block) in prog.blocks {
         let mut generated_block = block;
         if label == "start" {
@@ -41,9 +41,9 @@ fn generate_prelude(prog: &Program) -> Vec<Instruction<Arg>> {
             arg: callee_saved.clone().into(),
         });
     }
-    let used_space = used_space(&prog);
+    let used_space = used_space(prog);
     prelude.push(Instruction::SubQ {
-        src: Arg::Immediate(used_space as i64),
+        src: Arg::Immediate(used_space),
         dest: Reg::Rsp.into(),
     });
     prelude.push(Instruction::Jump {

@@ -1,0 +1,8 @@
+[package]
+name="interference_graph"
+version="0.0.1"
+edition="2024"
+
+[dependencies]
+syntax = { path="../syntax" }
+uncover_live = {path="../uncover_live"}

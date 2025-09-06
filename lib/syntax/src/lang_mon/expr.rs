@@ -24,7 +24,7 @@ pub enum Expression {
 
 impl Expression {
     pub fn un(arg: Atom, op: UnaryOperation) -> Expression {
-        Expression::UnaryOp { arg: arg, op }
+        Expression::UnaryOp { arg, op }
     }
 
     pub fn bin(fst: Atom, op: BinaryOperation, snd: Atom) -> Expression {

@@ -22,7 +22,7 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
 
     let mut exps = vec![];
     let mut prog_inner = prog_pair.into_inner();
-    while let Some(pair) = prog_inner.next() {
+    for pair in prog_inner.by_ref() {
         if pair.as_rule() == Rule::EOI {
             break;
         }

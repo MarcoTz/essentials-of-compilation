@@ -35,3 +35,9 @@ impl fmt::Display for Program {
         Ok(())
     }
 }
+
+impl Default for Program {
+    fn default() -> Program {
+        Program::new()
+    }
+}
