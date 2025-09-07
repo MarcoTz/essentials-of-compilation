@@ -11,6 +11,7 @@ members = [
   "lib/select_instructions",
   "lib/uncover_live",
   "lib/interference_graph",
+  "lib/color_graph",
   "lib/assign_homes",
   "lib/patch_instructions",
   "lib/generate_prelude_conclusion",

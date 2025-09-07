@@ -1,11 +1,29 @@
+use color_graph::{Coloring, color_to_arg};
 use std::collections::{HashMap, HashSet};
 use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+use uncover_live::Location;
 
-pub fn assign_homes(prog: VarProgram) -> Program {
+fn coloring_to_assignment(coloring: Coloring) -> HashMap<String, Arg> {
+    let mut assignments = HashMap::new();
+    for (loc, color) in coloring {
+        let arg = color_to_arg(color);
+        match (loc, &arg) {
+            (Location::Variable(v), _) => {
+                assignments.insert(v, arg);
+            }
+            (Location::Register(reg1), Arg::Register(reg2)) if reg1 == *reg2 => (),
+            (Location::Stack(offset1), Arg::Deref(Reg::Rbp, offset2)) if offset1 == *offset2 => (),
+            (loc, _) => panic!("Locations {loc} and {arg} do not match"),
+        }
+    }
+    assignments
+}
+
+pub fn assign_homes(prog: VarProgram, coloring: Coloring) -> Program {
     let used_callee = collect_callee(&prog);
     let vars = collect_vars(&prog);
     let stack_space = vars.len() as u64 * 8;
-    let assignments = assign_vars(vars, used_callee.len() as i64);
+    let assignments = coloring_to_assignment(coloring);
     let mut assigned = Program::new(stack_space, used_callee);
     for (label, instrs) in prog.blocks {
         assigned.add_block(
@@ -95,19 +113,9 @@ fn collect_arg(arg: &VarArg) -> HashSet<String> {
     }
 }
 
-fn assign_vars(vars: HashSet<String>, num_callee: i64) -> HashMap<String, i64> {
-    let mut offset = -8 * (num_callee + 1);
-    let mut assignments = HashMap::new();
-    for var in vars {
-        assignments.insert(var, offset);
-        offset -= 8;
-    }
-    assignments
-}
-
 fn assign_instr(
     instr: Instruction<VarArg>,
-    assignments: &HashMap<String, i64>,
+    assignments: &HashMap<String, Arg>,
 ) -> Instruction<Arg> {
     match instr {
         Instruction::AddQ { src, dest } => Instruction::AddQ {
@@ -137,20 +145,17 @@ fn assign_instr(
     }
 }
 
-fn assign_arg(arg: VarArg, assignments: &HashMap<String, i64>) -> Arg {
+fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Arg {
     match arg {
         VarArg::Arg(arg) => arg,
-        VarArg::Var(v) => {
-            let offset = assignments.get(&v).unwrap();
-            Arg::Deref(Reg::Rbp, *offset)
-        }
+        VarArg::Var(v) => assignments.get(&v).unwrap().clone(),
     }
 }
 
 #[cfg(test)]
 mod assign_homes_tests {
     use super::assign_homes;
-    use std::collections::HashSet;
+    use std::collections::{HashMap, HashSet};
     use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
     #[test]
     fn assign_ab() {
@@ -172,7 +177,7 @@ mod assign_homes_tests {
                 },
             ],
         );
-        let result = assign_homes(prog);
+        let result = assign_homes(prog, HashMap::from([("a".into(), 11), ("b".into(), 12)]));
         let block_fun = |offset1: i64, offset2: i64| {
             vec![
                 Instruction::MovQ {

@@ -4,7 +4,7 @@ use uncover_live::{AnnotProg, LiveInstruction, Location, written_locations};
 
 mod edge;
 mod graph;
-use graph::InterferenceGraph;
+pub use graph::InterferenceGraph;
 
 pub fn build_graph(prog: &AnnotProg) -> InterferenceGraph {
     let mut graph = InterferenceGraph::new();

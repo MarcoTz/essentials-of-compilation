@@ -2,9 +2,9 @@ use crate::edge::Edge;
 use std::{collections::HashSet, fmt};
 use uncover_live::Location;
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct InterferenceGraph {
-    verts: HashSet<Location>,
+    pub verts: HashSet<Location>,
     edges: HashSet<Edge>,
 }
 
@@ -24,6 +24,19 @@ impl InterferenceGraph {
         self.add_vert(left.clone());
         self.add_vert(right.clone());
         self.edges.insert(Edge::new(left, right));
+    }
+
+    pub fn adjacent(&self, vert: &Location) -> HashSet<Location> {
+        let mut adj = HashSet::new();
+        for edg in self.edges.iter() {
+            if edg.left == *vert {
+                adj.insert(edg.right.clone());
+            }
+            if edg.right == *vert {
+                adj.insert(edg.left.clone());
+            }
+        }
+        adj
     }
 }
 

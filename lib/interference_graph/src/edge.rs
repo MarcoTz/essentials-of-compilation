@@ -4,10 +4,10 @@ use std::{
 };
 use uncover_live::Location;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Edge {
-    left: Location,
-    right: Location,
+    pub left: Location,
+    pub right: Location,
 }
 
 impl Edge {

@@ -1,6 +1,8 @@
 use assign_homes::assign_homes;
+use color_graph::{Coloring, color_graph};
 use explicate_control::explicate_control;
 use generate_prelude_conclusion::generate_prelude_conclusion;
+use interference_graph::{InterferenceGraph, build_graph};
 use parser::parse_program;
 use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
@@ -12,6 +14,7 @@ use std::{
     process::Command,
 };
 use syntax::{lang, lang_c, lang_mon, x86};
+use uncover_live::{AnnotProg, uncover_live};
 use uniquify::uniquify;
 
 mod errors;
@@ -28,6 +31,9 @@ pub struct Compiler {
     monadic: Option<lang_mon::Program>,
     explicated: Option<lang_c::Program>,
     selected: Option<x86::VarProgram>,
+    uncovered: Option<AnnotProg>,
+    interference_graph: Option<InterferenceGraph>,
+    coloring: Option<Coloring>,
     assigned: Option<x86::Program>,
     patched: Option<x86::Program>,
     finalized: Option<x86::Program>,
@@ -60,6 +66,9 @@ impl Compiler {
             monadic: None,
             explicated: None,
             selected: None,
+            uncovered: None,
+            interference_graph: None,
+            coloring: None,
             assigned: None,
             patched: None,
             finalized: None,
@@ -159,8 +168,57 @@ impl Compiler {
         Ok(self.selected.as_ref().unwrap().clone())
     }
 
+    pub fn uncover_live(&mut self) -> Result<(), Error> {
+        let uncovered = uncover_live(self.get_selected()?);
+        if self.debug {
+            println!("=== Uncover Live ===");
+            println!("{uncovered}");
+            println!();
+        }
+        self.uncovered = Some(uncovered);
+        Ok(())
+    }
+
+    pub fn get_uncovered(&mut self) -> Result<AnnotProg, Error> {
+        if self.uncovered.is_none() {
+            self.uncover_live()?;
+        }
+        Ok(self.uncovered.as_ref().unwrap().clone())
+    }
+
+    pub fn build_graph(&mut self) -> Result<(), Error> {
+        let built = build_graph(&self.get_uncovered()?);
+        if self.debug {
+            println!("=== Interference Graph ===");
+            println!("{built}");
+            println!();
+        }
+        self.interference_graph = Some(built);
+        Ok(())
+    }
+
+    pub fn get_graph(&mut self) -> Result<InterferenceGraph, Error> {
+        if self.interference_graph.is_none() {
+            self.build_graph()?;
+        }
+        Ok(self.interference_graph.as_ref().unwrap().clone())
+    }
+
+    pub fn color_graph(&mut self) -> Result<(), Error> {
+        let coloring = color_graph(&self.get_graph()?);
+        self.coloring = Some(coloring);
+        Ok(())
+    }
+
+    pub fn get_coloring(&mut self) -> Result<Coloring, Error> {
+        if self.coloring.is_none() {
+            self.color_graph()?;
+        }
+        Ok(self.coloring.as_ref().unwrap().clone())
+    }
+
     pub fn assign_homes(&mut self) -> Result<(), Error> {
-        let assigned = assign_homes(self.get_selected()?);
+        let assigned = assign_homes(self.get_selected()?, self.get_coloring()?);
         if self.debug {
             println!("=== Assign Homes ===");
             println!("{assigned}");
