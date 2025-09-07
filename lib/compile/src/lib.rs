@@ -1,8 +1,11 @@
-use assign_homes::assign_homes;
-use color_graph::{Coloring, color_graph};
+use assign_homes::{
+    assign_homes,
+    color_graph::{Coloring, color_graph},
+    interference_graph::{InterferenceGraph, build_graph},
+    uncover_live::{AnnotProg, uncover_live},
+};
 use explicate_control::explicate_control;
 use generate_prelude_conclusion::generate_prelude_conclusion;
-use interference_graph::{InterferenceGraph, build_graph};
 use parser::parse_program;
 use patch_instructions::patch_instructions;
 use remove_complex_operands::remove_complex_operands;
@@ -14,7 +17,6 @@ use std::{
     process::Command,
 };
 use syntax::{lang, lang_c, lang_mon, x86};
-use uncover_live::{AnnotProg, uncover_live};
 use uniquify::uniquify;
 
 mod errors;

@@ -1,8 +1,8 @@
+use crate::uncover_live::Location;
 use std::{
     fmt,
     hash::{DefaultHasher, Hash, Hasher},
 };
-use uncover_live::Location;
 
 #[derive(Debug, Clone)]
 pub struct Edge {

@@ -1,6 +1,6 @@
-use crate::edge::Edge;
+use super::edge::Edge;
+use crate::uncover_live::Location;
 use std::{collections::HashSet, fmt};
-use uncover_live::Location;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct InterferenceGraph {

@@ -1,9 +1,0 @@
-[package]
-name="color_graph"
-version="0.0.1"
-edition="2024"
-
-[dependencies]
-syntax = { path="../syntax" }
-interference_graph = { path="../interference_graph" }
-uncover_live = { path="../uncover_live" }

@@ -1,7 +1,7 @@
-use interference_graph::InterferenceGraph;
+use crate::interference_graph::InterferenceGraph;
+use crate::uncover_live::Location;
 use std::collections::{HashMap, HashSet};
 use syntax::x86::{Arg, Reg};
-use uncover_live::Location;
 
 type Color = i64;
 pub type Coloring = HashMap<Location, Color>;

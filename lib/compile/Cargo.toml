@@ -10,9 +10,6 @@ uniquify = { path="../uniquify" }
 remove_complex_operands = { path="../remove_complex_operands" }
 explicate_control = { path="../explicate_control" }
 select_instructions = { path="../select_instructions" }
-uncover_live = { path="../uncover_live" }
-interference_graph = { path="../interference_graph" }
-color_graph = { path="../color_graph" }
 assign_homes = { path="../assign_homes" }
 patch_instructions = { path="../patch_instructions" }
 generate_prelude_conclusion = { path="../generate_prelude_conclusion" }

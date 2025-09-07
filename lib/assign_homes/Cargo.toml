@@ -5,6 +5,3 @@ edition="2024"
 
 [dependencies]
 syntax = { path="../syntax" }
-color_graph = { path="../color_graph" }
-interference_graph = { path="../interference_graph" }
-uncover_live = { path="../uncover_live" }

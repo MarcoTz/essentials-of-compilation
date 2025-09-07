@@ -1,6 +1,10 @@
 use color_graph::{Coloring, color_to_arg};
 use std::collections::{HashMap, HashSet};
 use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+
+pub mod color_graph;
+pub mod interference_graph;
+pub mod uncover_live;
 use uncover_live::Location;
 
 fn coloring_to_assignment(coloring: Coloring) -> HashMap<String, Arg> {

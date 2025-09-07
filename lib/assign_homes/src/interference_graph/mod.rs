@@ -1,6 +1,6 @@
+use crate::uncover_live::{AnnotProg, LiveInstruction, Location, written_locations};
 use std::collections::HashSet;
 use syntax::x86::Instruction;
-use uncover_live::{AnnotProg, LiveInstruction, Location, written_locations};
 
 mod edge;
 mod graph;
