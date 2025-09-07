@@ -1,9 +1,10 @@
 use crate::{
     colors::{Color, Coloring, empty_coloring, saturation},
+    errors::Error,
     graph::InterferenceGraph,
 };
 
-pub fn color_graph(graph: &InterferenceGraph) -> Coloring {
+pub fn color_graph(graph: &InterferenceGraph) -> Result<Coloring, Error> {
     let mut vert_set = graph.verts.clone();
     let mut coloring = empty_coloring();
     while !vert_set.is_empty() {
@@ -14,7 +15,7 @@ pub fn color_graph(graph: &InterferenceGraph) -> Coloring {
                     .len()
                     .cmp(&saturation(graph, v2, &coloring).len())
             })
-            .unwrap()
+            .ok_or(Error::NextVertex)?
             .clone();
         vert_set.remove(&next);
         let adjacent_colors: Vec<Color> = graph
@@ -29,7 +30,7 @@ pub fn color_graph(graph: &InterferenceGraph) -> Coloring {
         }
         coloring.insert(next, next_color);
     }
-    coloring
+    Ok(coloring)
 }
 
 #[cfg(test)]
@@ -55,7 +56,7 @@ mod color_graph_tests {
         graph.add_edge("x".into(), Reg::Rsp.into());
         graph.add_edge("w".into(), Reg::Rsp.into());
         graph.add_edge("w".into(), "v".into());
-        let result = color_graph(&graph);
+        let result = color_graph(&graph).unwrap();
         let expected = HashMap::from([
             (Reg::Rax.into(), -1),
             (Reg::Rsp.into(), -2),

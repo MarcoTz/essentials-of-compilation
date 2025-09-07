@@ -1,11 +1,14 @@
-use crate::program::{AnnotProg, LiveInstruction, Location, location::arg_locations};
+use crate::{
+    errors::Error,
+    program::{AnnotProg, LiveInstruction, Location, location::arg_locations},
+};
 use std::collections::{HashMap, HashSet};
 use syntax::{
     PRINT_CALL,
     x86::{Instruction, Reg, VarArg, VarProgram},
 };
 
-pub fn uncover_live(prog: VarProgram) -> AnnotProg {
+pub fn uncover_live(prog: VarProgram) -> Result<AnnotProg, Error> {
     let mut annot = AnnotProg::new();
     let mut label2live = HashMap::new();
     label2live.insert(
@@ -13,24 +16,24 @@ pub fn uncover_live(prog: VarProgram) -> AnnotProg {
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
     for (label, instrs) in prog.blocks {
-        let uncovered = uncover_block(instrs, &label2live);
+        let uncovered = uncover_block(instrs, &label2live)?;
         label2live.insert(label.clone(), (uncovered[0]).live_before.clone());
         annot.add_block(&label, uncovered);
     }
-    annot
+    Ok(annot)
 }
 
 fn uncover_block(
     mut block: Vec<Instruction<VarArg>>,
     label2live: &HashMap<String, HashSet<Location>>,
-) -> Vec<LiveInstruction> {
+) -> Result<Vec<LiveInstruction>, Error> {
     let mut live_sets = vec![];
     let mut last_after = HashSet::new();
 
     let num_instrs = block.len();
     for _ in 0..num_instrs {
         let curr_instr = block.remove(block.len() - 1);
-        let current_live = live_before(&curr_instr, &last_after, label2live);
+        let current_live = live_before(&curr_instr, &last_after, label2live)?;
         live_sets.push(LiveInstruction::new(
             curr_instr,
             current_live.clone(),
@@ -39,20 +42,23 @@ fn uncover_block(
         last_after = current_live;
     }
     live_sets.reverse();
-    live_sets
+    Ok(live_sets)
 }
 
 fn live_before(
     instr: &Instruction<VarArg>,
     live_after: &HashSet<Location>,
     label2live: &HashMap<String, HashSet<Location>>,
-) -> HashSet<Location> {
+) -> Result<HashSet<Location>, Error> {
     if let Instruction::Jump { label } = instr {
-        return label2live.get(label).unwrap().clone();
+        return Ok(label2live
+            .get(label)
+            .ok_or(Error::MissingLiveBefore(label.clone()))?
+            .clone());
     }
     let written = written_locations(instr);
     let read = read_locations(instr);
-    &(live_after - &written) | &read
+    Ok(&(live_after - &written) | &read)
 }
 
 pub fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
@@ -111,7 +117,7 @@ mod uncover_live_tests {
                 Instruction::add("b", "c"),
             ],
         );
-        let result = uncover_live(example);
+        let result = uncover_live(example).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
             "main",
@@ -166,7 +172,7 @@ mod uncover_live_tests {
                 Instruction::jmp("conclusion"),
             ],
         );
-        let result = uncover_live(example);
+        let result = uncover_live(example).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
             "main",

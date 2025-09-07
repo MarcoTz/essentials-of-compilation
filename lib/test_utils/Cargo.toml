@@ -2,3 +2,7 @@
 name="test_utils"
 version="0.0.1"
 edition="2024"
+
+[dependencies]
+parser = { path="../parser" }
+compile = { path="../compile" }

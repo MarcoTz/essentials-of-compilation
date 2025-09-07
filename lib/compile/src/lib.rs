@@ -168,7 +168,7 @@ impl Compiler {
     }
 
     pub fn uncover_live(&mut self) -> Result<(), Error> {
-        let uncovered = uncover_live(self.get_selected()?);
+        let uncovered = uncover_live(self.get_selected()?)?;
         if self.debug {
             println!("=== Uncover Live ===");
             println!("{uncovered}");
@@ -204,7 +204,7 @@ impl Compiler {
     }
 
     pub fn color_graph(&mut self) -> Result<(), Error> {
-        let coloring = color_graph(&self.get_graph()?);
+        let coloring = color_graph(&self.get_graph()?)?;
         self.coloring = Some(coloring);
         Ok(())
     }
@@ -217,7 +217,7 @@ impl Compiler {
     }
 
     pub fn assign_homes(&mut self) -> Result<(), Error> {
-        let assigned = assign_homes(self.get_selected()?, self.get_coloring()?);
+        let assigned = assign_homes(self.get_selected()?, self.get_coloring()?)?;
         if self.debug {
             println!("=== Assign Homes ===");
             println!("{assigned}");

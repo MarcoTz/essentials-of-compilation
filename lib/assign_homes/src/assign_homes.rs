@@ -1,23 +1,24 @@
-use crate::colors::{Coloring, coloring_to_assignment};
+use crate::{
+    colors::{Coloring, coloring_to_assignment},
+    errors::Error,
+};
 use std::collections::{HashMap, HashSet};
 use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
 
-pub fn assign_homes(prog: VarProgram, coloring: Coloring) -> Program {
+pub fn assign_homes(prog: VarProgram, coloring: Coloring) -> Result<Program, Error> {
     let used_callee = collect_callee(&prog);
     let vars = collect_vars(&prog);
     let stack_space = vars.len() as u64 * 8;
     let assignments = coloring_to_assignment(coloring);
     let mut assigned = Program::new(stack_space, used_callee);
     for (label, instrs) in prog.blocks {
-        assigned.add_block(
-            &label,
-            instrs
-                .into_iter()
-                .map(|instr| assign_instr(instr, &assignments))
-                .collect(),
-        );
+        let assigned_instrs = instrs
+            .into_iter()
+            .map(|instr| assign_instr(instr, &assignments))
+            .collect::<Result<Vec<_>, Error>>()?;
+        assigned.add_block(&label, assigned_instrs);
     }
-    assigned
+    Ok(assigned)
 }
 
 fn collect_callee(prog: &VarProgram) -> HashSet<Reg> {
@@ -94,38 +95,38 @@ fn collect_arg(arg: &VarArg) -> HashSet<String> {
 fn assign_instr(
     instr: Instruction<VarArg>,
     assignments: &HashMap<String, Arg>,
-) -> Instruction<Arg> {
+) -> Result<Instruction<Arg>, Error> {
     match instr {
-        Instruction::AddQ { src, dest } => Instruction::AddQ {
-            src: assign_arg(src, assignments),
-            dest: assign_arg(dest, assignments),
-        },
-        Instruction::SubQ { src, dest } => Instruction::SubQ {
-            src: assign_arg(src, assignments),
-            dest: assign_arg(dest, assignments),
-        },
-        Instruction::NegQ { arg } => Instruction::NegQ {
-            arg: assign_arg(arg, assignments),
-        },
-        Instruction::MovQ { src, dest } => Instruction::MovQ {
-            src: assign_arg(src, assignments),
-            dest: assign_arg(dest, assignments),
-        },
-        Instruction::PushQ { arg } => Instruction::PushQ {
-            arg: assign_arg(arg, assignments),
-        },
-        Instruction::PopQ { arg } => Instruction::PopQ {
-            arg: assign_arg(arg, assignments),
-        },
-        Instruction::CallQ { label } => Instruction::CallQ { label },
-        Instruction::RetQ => Instruction::RetQ,
-        Instruction::Jump { label } => Instruction::Jump { label },
+        Instruction::AddQ { src, dest } => Ok(Instruction::AddQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::SubQ { src, dest } => Ok(Instruction::SubQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::NegQ { arg } => Ok(Instruction::NegQ {
+            arg: assign_arg(arg, assignments)?,
+        }),
+        Instruction::MovQ { src, dest } => Ok(Instruction::MovQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::PushQ { arg } => Ok(Instruction::PushQ {
+            arg: assign_arg(arg, assignments)?,
+        }),
+        Instruction::PopQ { arg } => Ok(Instruction::PopQ {
+            arg: assign_arg(arg, assignments)?,
+        }),
+        Instruction::CallQ { label } => Ok(Instruction::CallQ { label }),
+        Instruction::RetQ => Ok(Instruction::RetQ),
+        Instruction::Jump { label } => Ok(Instruction::Jump { label }),
     }
 }
-fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Arg {
+fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Result<Arg, Error> {
     match arg {
-        VarArg::Arg(arg) => arg,
-        VarArg::Var(v) => assignments.get(&v).unwrap().clone(),
+        VarArg::Arg(arg) => Ok(arg),
+        VarArg::Var(v) => Ok(assignments.get(&v).ok_or(Error::NoAssignment(v))?.clone()),
     }
 }
 
@@ -154,7 +155,8 @@ mod assign_homes_tests {
                 },
             ],
         );
-        let result = assign_homes(prog, HashMap::from([("a".into(), 11), ("b".into(), 12)]));
+        let result =
+            assign_homes(prog, HashMap::from([("a".into(), 11), ("b".into(), 12)])).unwrap();
         let block_fun = |offset1: i64, offset2: i64| {
             vec![
                 Instruction::MovQ {

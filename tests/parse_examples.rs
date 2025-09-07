@@ -1,9 +1,8 @@
 use parser::parse_program;
-use std::env::{current_dir, set_current_dir};
-use test_utils::load_examples;
+use test_utils::{Error, load_examples, set_working_dir};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    set_current_dir(current_dir()?.parent().unwrap())?;
+fn main() -> Result<(), Error> {
+    set_working_dir()?;
     let examples = load_examples()?;
     for example in examples {
         print!("Parsing {}", example.name);

@@ -3,6 +3,7 @@ use std::{fmt, path::PathBuf};
 #[derive(Debug)]
 pub enum Error {
     Parse(parser::Error),
+    AssignHomes(assign_homes::Error),
     ReadFile(PathBuf),
     ParentNotFound(PathBuf),
     CreateDir(PathBuf),
@@ -17,6 +18,7 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Parse(err) => write!(f, "Error during parsing:\n{err}"),
+            Error::AssignHomes(err) => write!(f, "Error during assign homes:\n{err}"),
             Error::ReadFile(path) => write!(f, "Could not read source file {path:?}"),
             Error::ParentNotFound(path) => write!(f, "Could not find parent of {path:?}"),
             Error::CreateDir(path) => write!(f, "Could not create dir {path:?}"),
@@ -34,5 +36,11 @@ impl std::error::Error for Error {}
 impl From<parser::Error> for Error {
     fn from(err: parser::Error) -> Error {
         Error::Parse(err)
+    }
+}
+
+impl From<assign_homes::Error> for Error {
+    fn from(err: assign_homes::Error) -> Error {
+        Error::AssignHomes(err)
     }
 }
