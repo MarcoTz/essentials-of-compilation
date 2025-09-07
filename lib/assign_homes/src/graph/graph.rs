@@ -1,5 +1,5 @@
 use super::edge::Edge;
-use crate::uncover_live::Location;
+use crate::program::Location;
 use std::{collections::HashSet, fmt};
 
 #[derive(PartialEq, Eq, Debug, Clone)]

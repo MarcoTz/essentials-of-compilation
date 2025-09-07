@@ -1,4 +1,4 @@
-use crate::uncover_live::Location;
+use crate::program::Location;
 use std::{
     fmt,
     hash::{DefaultHasher, Hash, Hasher},

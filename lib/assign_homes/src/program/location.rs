@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{collections::HashSet, fmt};
 use syntax::x86::{Arg, Reg, VarArg};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -16,6 +16,15 @@ impl Location {
             VarArg::Arg(Arg::Deref(_, offset)) => Some(Location::Stack(offset)),
             _ => None,
         }
+    }
+}
+
+pub fn arg_locations(arg: &VarArg) -> HashSet<Location> {
+    match arg {
+        VarArg::Var(v) => HashSet::from([Location::Variable(v.clone())]),
+        VarArg::Arg(Arg::Register(r)) => HashSet::from([Location::Register(r.clone())]),
+        VarArg::Arg(Arg::Deref(_, offset)) => HashSet::from([Location::Stack(*offset)]),
+        _ => HashSet::new(),
     }
 }
 

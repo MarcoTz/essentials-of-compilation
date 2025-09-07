@@ -1,4 +1,7 @@
-use crate::uncover_live::{AnnotProg, LiveInstruction, Location, written_locations};
+use crate::{
+    program::{AnnotProg, LiveInstruction, Location},
+    uncover_live::written_locations,
+};
 use std::collections::HashSet;
 use syntax::x86::Instruction;
 
@@ -64,9 +67,9 @@ fn mov_edges(
 #[cfg(test)]
 mod interference_graph_tests {
     use super::{InterferenceGraph, build_graph};
+    use crate::program::{AnnotProg, LiveInstruction};
     use std::collections::HashSet;
     use syntax::x86::{Instruction, Reg};
-    use uncover_live::{AnnotProg, LiveInstruction};
 
     #[test]
     fn build_example() {

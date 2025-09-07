@@ -1,15 +1,9 @@
+use crate::program::{AnnotProg, LiveInstruction, Location, location::arg_locations};
 use std::collections::{HashMap, HashSet};
 use syntax::{
     PRINT_CALL,
-    x86::{Arg, Instruction, Reg, VarArg, VarProgram},
+    x86::{Instruction, Reg, VarArg, VarProgram},
 };
-
-mod annot_prog;
-mod live_instruction;
-mod location;
-pub use annot_prog::AnnotProg;
-pub use live_instruction::LiveInstruction;
-pub use location::Location;
 
 pub fn uncover_live(prog: VarProgram) -> AnnotProg {
     let mut annot = AnnotProg::new();
@@ -98,19 +92,10 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
     }
 }
 
-fn arg_locations(arg: &VarArg) -> HashSet<Location> {
-    match arg {
-        VarArg::Var(v) => HashSet::from([Location::Variable(v.clone())]),
-        VarArg::Arg(Arg::Register(r)) => HashSet::from([Location::Register(r.clone())]),
-        VarArg::Arg(Arg::Deref(_, offset)) => HashSet::from([Location::Stack(*offset)]),
-        _ => HashSet::new(),
-    }
-}
-
 #[cfg(test)]
 mod uncover_live_tests {
     use super::{AnnotProg, LiveInstruction, uncover_live};
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
     use syntax::x86::{Instruction, Reg, VarProgram};
 
     #[test]

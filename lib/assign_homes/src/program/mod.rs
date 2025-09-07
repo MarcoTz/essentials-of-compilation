@@ -1,5 +1,9 @@
-use super::LiveInstruction;
 use std::{collections::HashMap, fmt};
+
+mod live_instruction;
+pub mod location;
+pub use live_instruction::LiveInstruction;
+pub use location::Location;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AnnotProg {

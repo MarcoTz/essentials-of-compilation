@@ -1,8 +1,5 @@
 use assign_homes::{
-    assign_homes,
-    color_graph::{Coloring, color_graph},
-    interference_graph::{InterferenceGraph, build_graph},
-    uncover_live::{AnnotProg, uncover_live},
+    AnnotProg, Coloring, InterferenceGraph, assign_homes, build_graph, color_graph, uncover_live,
 };
 use explicate_control::explicate_control;
 use generate_prelude_conclusion::generate_prelude_conclusion;
