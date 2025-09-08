@@ -1,7 +1,8 @@
-use std::{fmt, path::PathBuf};
+use std::{convert::Infallible, fmt, path::PathBuf};
 
 #[derive(Debug)]
 pub enum Error {
+    Infallible,
     Parse(parser::Error),
     AssignHomes(assign_homes::Error),
     ReadFile(PathBuf),
@@ -17,6 +18,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Error::Infallible => f.write_str(""),
             Error::Parse(err) => write!(f, "Error during parsing:\n{err}"),
             Error::AssignHomes(err) => write!(f, "Error during assign homes:\n{err}"),
             Error::ReadFile(path) => write!(f, "Could not read source file {path:?}"),
@@ -32,6 +34,12 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+impl From<Infallible> for Error {
+    fn from(_: Infallible) -> Error {
+        Error::Infallible
+    }
+}
 
 impl From<parser::Error> for Error {
     fn from(err: parser::Error) -> Error {

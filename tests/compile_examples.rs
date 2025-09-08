@@ -6,23 +6,24 @@ fn main() -> Result<(), Error> {
     set_working_dir()?;
     let examples = load_examples()?;
     for example in examples {
-        let mut compiler = Compiler::new(false, example.path, None, None, None)?;
+        let compiler = Compiler::new(false, example.path, None, None, None)?;
+        let exe_path = compiler.paths.exe_out.clone();
         print!("Compiling {}", example.name);
-        compiler.compile()?;
+        compiler.run()?;
         println!("... Ok");
         print!("Checking output of {}", example.name);
-        let mut check_cmd = Command::new(&compiler.exe_out);
+        let mut check_cmd = Command::new(&exe_path);
         let output = check_cmd
             .output()
-            .map_err(|_| Error::ReadCommandOut(format!("{:?}", compiler.exe_out)))?;
+            .map_err(|_| Error::ReadCommandOut(format!("{:?}", exe_path)))?;
         if !output.status.success() {
-            return Err(Error::RunCommand(format!("{:?}", compiler.exe_out)));
+            return Err(Error::RunCommand(format!("{:?}", exe_path)));
         }
         let result = str::from_utf8(&output.stdout)
-            .map_err(|_| Error::ReadCommandOut(format!("{:?}", compiler.exe_out)))?;
+            .map_err(|_| Error::ReadCommandOut(format!("{:?}", exe_path)))?;
         if result != example.expected {
             return Err(Error::unexpected(
-                format!("{:?}", compiler.exe_out),
+                format!("{:?}", exe_path),
                 &result,
                 &example.expected,
             ));

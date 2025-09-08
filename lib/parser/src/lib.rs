@@ -11,7 +11,7 @@ pub use errors::Error;
 
 #[derive(Parser)]
 #[grammar = "../lang.pest"]
-struct LangParser;
+pub struct LangParser;
 
 pub fn parse_program(input: &str) -> Result<Program, Error> {
     let mut pairs = LangParser::parse(Rule::program, input)?;

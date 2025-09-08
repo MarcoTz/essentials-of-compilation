@@ -1,11 +1,12 @@
 use crate::{
     colors::{Coloring, coloring_to_assignment},
     errors::Error,
+    program::AnnotProg,
 };
 use std::collections::{HashMap, HashSet};
-use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+use syntax::x86::{Arg, Instruction, Program, Reg, VarArg};
 
-pub fn assign_homes(prog: VarProgram, coloring: Coloring) -> Result<Program, Error> {
+pub fn assign_homes(prog: AnnotProg, coloring: Coloring) -> Result<Program, Error> {
     let used_callee = collect_callee(&prog);
     let vars = collect_vars(&prog);
     let stack_space = vars.len() as u64 * 8;
@@ -14,18 +15,18 @@ pub fn assign_homes(prog: VarProgram, coloring: Coloring) -> Result<Program, Err
     for (label, instrs) in prog.blocks {
         let assigned_instrs = instrs
             .into_iter()
-            .map(|instr| assign_instr(instr, &assignments))
+            .map(|instr| assign_instr(instr.instr, &assignments))
             .collect::<Result<Vec<_>, Error>>()?;
         assigned.add_block(&label, assigned_instrs);
     }
     Ok(assigned)
 }
 
-fn collect_callee(prog: &VarProgram) -> HashSet<Reg> {
+fn collect_callee(prog: &AnnotProg) -> HashSet<Reg> {
     let mut callee = HashSet::new();
     for (_, block) in prog.blocks.iter() {
         for instr in block.iter() {
-            callee = &callee | &collect_callee_instr(instr);
+            callee = &callee | &collect_callee_instr(&instr.instr);
         }
     }
     callee
@@ -63,10 +64,10 @@ fn collect_callee_arg(arg: &VarArg) -> HashSet<Reg> {
         }
     }
 }
-fn collect_vars(prog: &VarProgram) -> HashSet<String> {
+fn collect_vars(prog: &AnnotProg) -> HashSet<String> {
     let mut vars = HashSet::new();
     for (_, instrs) in prog.blocks.iter() {
-        for var_set in instrs.iter().map(collect_instr) {
+        for var_set in instrs.iter().map(|instr| collect_instr(&instr.instr)) {
             vars.extend(var_set.into_iter());
         }
     }
@@ -132,31 +133,48 @@ fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Result<Arg, Er
 
 #[cfg(test)]
 mod assign_homes_tests {
-    use super::assign_homes;
+    use super::{Coloring, assign_homes};
+    use crate::program::{AnnotProg, LiveInstruction};
     use std::collections::{HashMap, HashSet};
     use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+
     #[test]
     fn assign_ab() {
-        let mut prog = VarProgram::new();
+        let mut prog = AnnotProg::new();
         prog.add_block(
             "start",
             vec![
-                Instruction::MovQ {
-                    src: Arg::Immediate(42).into(),
-                    dest: VarArg::Var("a".to_owned()),
+                LiveInstruction {
+                    instr: Instruction::MovQ {
+                        src: Arg::Immediate(42).into(),
+                        dest: VarArg::Var("a".to_owned()),
+                    },
+                    live_before: HashSet::new(),
+                    live_after: HashSet::new(),
                 },
-                Instruction::MovQ {
-                    src: VarArg::Var("a".to_owned()),
-                    dest: VarArg::Var("b".to_owned()),
+                LiveInstruction {
+                    instr: Instruction::MovQ {
+                        src: VarArg::Var("a".to_owned()),
+                        dest: VarArg::Var("b".to_owned()),
+                    },
+                    live_before: HashSet::new(),
+                    live_after: HashSet::new(),
                 },
-                Instruction::MovQ {
-                    src: VarArg::Var("b".to_owned()),
-                    dest: Reg::Rax.into(),
+                LiveInstruction {
+                    instr: Instruction::MovQ {
+                        src: VarArg::Var("b".to_owned()),
+                        dest: Reg::Rax.into(),
+                    },
+                    live_before: HashSet::new(),
+                    live_after: HashSet::new(),
                 },
             ],
         );
-        let result =
-            assign_homes(prog, HashMap::from([("a".into(), 11), ("b".into(), 12)])).unwrap();
+        let result = assign_homes(
+            prog,
+            Coloring(HashMap::from([("a".into(), 11), ("b".into(), 12)])),
+        )
+        .unwrap();
         let block_fun = |offset1: i64, offset2: i64| {
             vec![
                 Instruction::MovQ {

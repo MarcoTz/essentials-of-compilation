@@ -1,9 +1,13 @@
 use crate::{graph::InterferenceGraph, program::Location};
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt,
+};
 use syntax::x86::{Arg, Reg};
 
 pub type Color = i64;
-pub type Coloring = HashMap<Location, Color>;
+#[derive(Debug, PartialEq)]
+pub struct Coloring(pub HashMap<Location, Color>);
 
 pub fn color_to_arg(color: Color) -> Arg {
     match color {
@@ -28,14 +32,14 @@ pub fn color_to_arg(color: Color) -> Arg {
     }
 }
 
-pub fn empty_coloring() -> HashMap<Location, Color> {
-    HashMap::from([
+pub fn empty_coloring() -> Coloring {
+    Coloring(HashMap::from([
         (Reg::Rax.into(), -1),
         (Reg::Rsp.into(), -2),
         (Reg::Rbp.into(), -3),
         (Reg::R11.into(), -4),
         (Reg::R15.into(), -5),
-    ])
+    ]))
 }
 
 pub fn saturation(
@@ -45,7 +49,7 @@ pub fn saturation(
 ) -> HashSet<Color> {
     let mut colors = HashSet::new();
     for v in graph.adjacent(vert) {
-        if let Some(c) = coloring.get(&v) {
+        if let Some(c) = coloring.0.get(&v) {
             colors.insert(*c);
         }
     }
@@ -54,7 +58,7 @@ pub fn saturation(
 
 pub fn coloring_to_assignment(coloring: Coloring) -> HashMap<String, Arg> {
     let mut assignments = HashMap::new();
-    for (loc, color) in coloring {
+    for (loc, color) in coloring.0 {
         let arg = color_to_arg(color);
         match (loc, &arg) {
             (Location::Variable(v), _) => {
@@ -66,4 +70,13 @@ pub fn coloring_to_assignment(coloring: Coloring) -> HashMap<String, Arg> {
         }
     }
     assignments
+}
+
+impl fmt::Display for Coloring {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for (loc, color) in self.0.iter() {
+            writeln!(f, "{loc} -> {color}")?;
+        }
+        Ok(())
+    }
 }
