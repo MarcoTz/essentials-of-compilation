@@ -5,6 +5,7 @@ use std::{convert::Infallible, fmt};
 
 pub struct BuildGraph;
 
+#[derive(Debug)]
 pub struct Built {
     pub prog: AnnotProg,
     pub graph: InterferenceGraph,

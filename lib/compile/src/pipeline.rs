@@ -7,6 +7,7 @@ use crate::{
     },
 };
 
+#[derive(Debug)]
 pub enum Pipeline {
     Parse(<Parse as Pass>::Input),
     Uniquify(<Uniquify as Pass>::Input),

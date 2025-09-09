@@ -5,6 +5,7 @@ use std::fmt;
 
 pub struct ColorGraph;
 
+#[derive(Debug)]
 pub struct Colored {
     pub prog: AnnotProg,
     pub color: Coloring,

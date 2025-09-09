@@ -30,7 +30,13 @@ fn build_block(block: &[LiveInstruction], graph: &mut InterferenceGraph) {
         }
         let written = written_locations(&instr.instr);
         for write_loc in written.iter() {
+            if let Location::Variable(_) = write_loc {
+                graph.add_vert(write_loc.clone());
+            }
             for after_loc in instr.live_after.iter() {
+                if let Location::Variable(_) = after_loc {
+                    graph.add_vert(after_loc.clone());
+                }
                 if write_loc != after_loc {
                     graph.add_edge(write_loc.clone(), after_loc.clone())
                 }
@@ -49,6 +55,9 @@ fn mov_edges(
         Some(dst) => dst,
         None => return,
     };
+    if let Location::Variable(_) = dest {
+        graph.add_vert(dest.clone());
+    }
 
     for after in live_after {
         if *after == dest {
@@ -57,6 +66,9 @@ fn mov_edges(
         if let Some(ref s) = src
             && after == s
         {
+            if let Location::Variable(_) = *s {
+                graph.add_vert(s.clone());
+            }
             continue;
         }
 
