@@ -16,6 +16,7 @@ pub fn uniquify(prog: Program) -> Program {
 fn uniquify_exp(exp: Expression, substitutions: &mut HashMap<String, String>) -> Expression {
     match exp {
         Expression::Literal(_) => exp,
+        Expression::Bool(_) => exp,
         Expression::Variable(ref v) => {
             if let Some(v1) = substitutions.get(v) {
                 Expression::Variable(v1.clone())
@@ -39,6 +40,21 @@ fn uniquify_exp(exp: Expression, substitutions: &mut HashMap<String, String>) ->
             let fst_unique = uniquify_exp(*fst, substitutions);
             let snd_unique = uniquify_exp(*snd, substitutions);
             Expression::bin(fst_unique, op, snd_unique)
+        }
+        Expression::Cmp { left, cmp, right } => {
+            let left_unique = uniquify_exp(*left, substitutions);
+            let right_unique = uniquify_exp(*right, substitutions);
+            Expression::cmp(left_unique, cmp, right_unique)
+        }
+        Expression::If {
+            cond_exp,
+            then_exp,
+            else_exp,
+        } => {
+            let cond_unique = uniquify_exp(*cond_exp, substitutions);
+            let then_unique = uniquify_exp(*then_exp, substitutions);
+            let else_unique = uniquify_exp(*else_exp, substitutions);
+            Expression::if_exp(cond_unique, then_unique, else_unique)
         }
     }
 }
