@@ -1,5 +1,5 @@
 use super::Atom;
-use crate::{BinaryOperation, PRINT_CALL, READ_INT_CALL, UnaryOperation};
+use crate::{BinaryOperation, Comparator, PRINT_CALL, READ_INT_CALL, UnaryOperation};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,9 +16,19 @@ pub enum Expression {
         op: BinaryOperation,
         snd: Atom,
     },
+    Cmp {
+        left: Atom,
+        cmp: Comparator,
+        right: Atom,
+    },
     LetIn {
         var: String,
         bound: Box<Expression>,
+    },
+    If {
+        cond_exp: Box<Expression>,
+        then_block: Vec<Expression>,
+        else_block: Vec<Expression>,
     },
 }
 
@@ -37,6 +47,22 @@ impl Expression {
             bound: Box::new(bound_exp),
         }
     }
+
+    pub fn cmp(left: Atom, cmp: Comparator, right: Atom) -> Expression {
+        Expression::Cmp { left, cmp, right }
+    }
+
+    pub fn if_exp(
+        cond_exp: Expression,
+        then_block: Vec<Expression>,
+        else_block: Vec<Expression>,
+    ) -> Expression {
+        Expression::If {
+            cond_exp: Box::new(cond_exp),
+            then_block,
+            else_block,
+        }
+    }
 }
 
 impl fmt::Display for Expression {
@@ -48,6 +74,25 @@ impl fmt::Display for Expression {
             Expression::LetIn { var, bound } => write!(f, "let {var} = {bound}"),
             Expression::UnaryOp { arg, op } => write!(f, "{op}({arg})"),
             Expression::BinaryOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
+            Expression::Cmp { left, cmp, right } => write!(f, "{left} {cmp} {right}"),
+            Expression::If {
+                cond_exp,
+                then_block,
+                else_block,
+            } => write!(
+                f,
+                "if {cond_exp} {{ {} }} else {{ {} }}",
+                then_block
+                    .iter()
+                    .map(|exp| exp.to_string())
+                    .collect::<Vec<_>>()
+                    .join(";\n"),
+                else_block
+                    .iter()
+                    .map(|exp| exp.to_string())
+                    .collect::<Vec<_>>()
+                    .join(";\n")
+            ),
         }
     }
 }

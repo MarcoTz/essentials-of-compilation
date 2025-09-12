@@ -142,17 +142,26 @@ fn parse_let_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
 }
 
 fn parse_if_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
-    let mut inner = pair_to_n_inner(
-        pair,
-        &[Rule::expression, Rule::expression, Rule::expression],
-    )?;
-    let cond_pair = inner.remove(0);
+    let mut then_exps = vec![];
+    let mut else_exps = vec![];
+    let mut inner = pair.into_inner();
+    let cond_pair = inner.next().ok_or(Error::missing(Rule::expression))?;
     let cond_expr = parse_expression(cond_pair)?;
-    let then_pair = inner.remove(0);
-    let then_expr = parse_expression(then_pair)?;
-    let else_pair = inner.remove(0);
-    let else_expr = parse_expression(else_pair)?;
-    Ok(Expression::if_exp(cond_expr, then_expr, else_expr))
+    let mut current_then = true;
+    while let Some(next) = inner.next() {
+        if next.as_rule() == Rule::else_start {
+            current_then = false;
+            continue;
+        }
+        let exp = parse_expression(next)?;
+        if current_then {
+            then_exps.push(exp);
+        } else {
+            else_exps.push(exp);
+        }
+    }
+
+    Ok(Expression::if_exp(cond_expr, then_exps, else_exps))
 }
 
 fn parse_unary_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {

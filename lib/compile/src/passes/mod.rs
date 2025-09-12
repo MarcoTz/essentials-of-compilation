@@ -51,5 +51,6 @@ pub use parse::Parse;
 pub use patch_instructions::PatchInstructions;
 pub use remove_complex_operands::RemoveComplexOperands;
 pub use select_instructions::SelectInstructions;
+pub use typecheck::Typecheck;
 pub use uncover_live::UncoverLive;
 pub use uniquify::Uniquify;

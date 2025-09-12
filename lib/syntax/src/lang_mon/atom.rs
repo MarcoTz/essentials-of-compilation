@@ -5,6 +5,7 @@ use std::fmt;
 pub enum Atom {
     Integer(i64),
     Variable(String),
+    Bool(bool),
 }
 
 impl fmt::Display for Atom {
@@ -12,6 +13,7 @@ impl fmt::Display for Atom {
         match self {
             Atom::Integer(i) => write!(f, "{i}"),
             Atom::Variable(v) => f.write_str(v),
+            Atom::Bool(b) => write!(f, "{b}"),
         }
     }
 }

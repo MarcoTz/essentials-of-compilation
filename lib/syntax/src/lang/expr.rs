@@ -28,8 +28,8 @@ pub enum Expression {
     },
     If {
         cond_exp: Box<Expression>,
-        then_exp: Box<Expression>,
-        else_exp: Box<Expression>,
+        then_block: Vec<Expression>,
+        else_block: Vec<Expression>,
     },
 }
 
@@ -53,11 +53,15 @@ impl Expression {
         }
     }
 
-    pub fn if_exp(cond: Expression, then: Expression, else_exp: Expression) -> Expression {
+    pub fn if_exp(
+        cond: Expression,
+        then: Vec<Expression>,
+        else_exp: Vec<Expression>,
+    ) -> Expression {
         Expression::If {
             cond_exp: Box::new(cond),
-            then_exp: Box::new(then),
-            else_exp: Box::new(else_exp),
+            then_block: then,
+            else_block: else_exp,
         }
     }
 
@@ -112,12 +116,18 @@ impl Expression {
             }
             Expression::If {
                 cond_exp,
-                then_exp,
-                else_exp,
+                then_block,
+                else_block,
             } => Expression::if_exp(
                 cond_exp.subst_var(old, new),
-                then_exp.subst_var(old, new),
-                else_exp.subst_var(old, new),
+                then_block
+                    .into_iter()
+                    .map(|exp| exp.subst_var(old, new))
+                    .collect(),
+                else_block
+                    .into_iter()
+                    .map(|exp| exp.subst_var(old, new))
+                    .collect(),
             ),
         }
     }
@@ -135,9 +145,17 @@ impl Expression {
             Expression::Cmp { left, right, .. } => &left.used_vars() | &right.used_vars(),
             Expression::If {
                 cond_exp,
-                then_exp,
-                else_exp,
-            } => &(&cond_exp.used_vars() | &then_exp.used_vars()) | &else_exp.used_vars(),
+                then_block,
+                else_block,
+            } => {
+                &(&cond_exp.used_vars()
+                    | &then_block
+                        .into_iter()
+                        .fold(HashSet::new(), |used, next| &used | &next.used_vars()))
+                    | &else_block
+                        .into_iter()
+                        .fold(HashSet::new(), |used, next| &used | &next.used_vars())
+            }
         }
     }
 }
@@ -156,9 +174,22 @@ impl fmt::Display for Expression {
             Expression::Cmp { left, cmp, right } => write!(f, "{left}{cmp}{right}"),
             Expression::If {
                 cond_exp,
-                then_exp,
-                else_exp,
-            } => write!(f, "if {cond_exp} {{ {then_exp} }} else {{ {else_exp} }}"),
+                then_block,
+                else_block,
+            } => write!(
+                f,
+                "if {cond_exp} {{ {} }} else {{ {} }}",
+                then_block
+                    .iter()
+                    .map(|exp| exp.to_string())
+                    .collect::<Vec<_>>()
+                    .join(";\n"),
+                else_block
+                    .iter()
+                    .map(|exp| exp.to_string())
+                    .collect::<Vec<_>>()
+                    .join(";\n")
+            ),
         }
     }
 }

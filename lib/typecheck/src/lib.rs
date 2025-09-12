@@ -85,20 +85,31 @@ fn check_exp(exp: &Expression, var_types: &mut HashMap<String, Type>) -> Result<
         }
         Expression::If {
             cond_exp,
-            then_exp,
-            else_exp,
+            then_block,
+            else_block,
         } => {
             let cond_ty = check_exp(cond_exp, var_types)?;
             if cond_ty != Type::Bool {
                 return Err(Error::mismatch(cond_ty, Type::Bool));
             }
             let mut then_vars = var_types.clone();
-            let then_ty = check_exp(then_exp, &mut then_vars)?;
-            let else_ty = check_exp(else_exp, var_types)?;
-            if then_ty != else_ty {
-                return Err(Error::mismatch(then_ty, else_ty));
+            let mut then_types = vec![];
+            for then_exp in then_block.iter() {
+                let then_ty = check_exp(then_exp, &mut then_vars)?;
+                then_types.push(then_ty);
             }
-            Ok(then_ty)
+
+            let mut else_types = vec![];
+            for else_exp in else_block.iter() {
+                let else_ty = check_exp(else_exp, var_types)?;
+                else_types.push(else_ty);
+            }
+            let then_last = then_types.last().ok_or(Error::EmptyBlock)?;
+            let else_last = else_types.last().ok_or(Error::EmptyBlock)?;
+            if then_last != else_last {
+                return Err(Error::mismatch(then_last.clone(), else_last.clone()));
+            }
+            Ok(then_last.clone())
         }
     }
 }

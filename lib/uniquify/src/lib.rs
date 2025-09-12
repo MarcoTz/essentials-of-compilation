@@ -48,12 +48,18 @@ fn uniquify_exp(exp: Expression, substitutions: &mut HashMap<String, String>) ->
         }
         Expression::If {
             cond_exp,
-            then_exp,
-            else_exp,
+            then_block,
+            else_block,
         } => {
             let cond_unique = uniquify_exp(*cond_exp, substitutions);
-            let then_unique = uniquify_exp(*then_exp, substitutions);
-            let else_unique = uniquify_exp(*else_exp, substitutions);
+            let mut then_unique = vec![];
+            for then_exp in then_block {
+                then_unique.push(uniquify_exp(then_exp, substitutions));
+            }
+            let mut else_unique = vec![];
+            for else_exp in else_block {
+                else_unique.push(uniquify_exp(else_exp, substitutions));
+            }
             Expression::if_exp(cond_unique, then_unique, else_unique)
         }
     }

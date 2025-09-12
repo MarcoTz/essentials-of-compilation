@@ -1,5 +1,6 @@
 WHITESPACE = _{ " " | "\n" | "\t" }
-program = { SOI ~ (expression ~ ";")+ ~ EOI }
+program = { SOI ~ block ~ EOI }
+block = _{ (expression ~ ";")+ }
 
 variable = @{ !(keyword ~ WHITESPACE) ~  (ASCII_ALPHA | "_") ~ (ASCII_ALPHA|ASCII_DIGIT|"_")* }
 literal = { ASCII_DIGIT+ }
@@ -45,7 +46,8 @@ left_rec_expression = {
 }
 
 paren_exp = { "(" ~ expression  ~ ")" }
-if_exp = {kw_if ~ expression ~ "{" ~ expression ~ "}" ~ kw_else ~ "{" ~ expression ~ "}" }
+else_start = { kw_else }
+if_exp = {kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
 let_in = { kw_let ~ variable ~ "=" ~ expression}
 read_int = { kw_read_int }
 print = { kw_print ~ "(" ~ expression ~ ")" }

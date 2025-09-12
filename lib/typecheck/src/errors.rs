@@ -5,6 +5,7 @@ use syntax::lang::Type;
 pub enum Error {
     FreeVar(String),
     TypeMismatch { fst: Type, snd: Type },
+    EmptyBlock,
 }
 
 impl Error {
@@ -18,6 +19,7 @@ impl fmt::Display for Error {
         match self {
             Error::FreeVar(v) => write!(f, "Free variable {v}"),
             Error::TypeMismatch { fst, snd } => write!(f, "Type mismatch {fst} != {snd}"),
+            Error::EmptyBlock => write!(f, "Cannot have block with no expressions"),
         }
     }
 }

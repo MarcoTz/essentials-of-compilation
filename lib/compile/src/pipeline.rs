@@ -2,7 +2,7 @@ use crate::{
     CompilerPaths, Error,
     passes::{
         Assemble, AssignHomes, BuildGraph, ColorGraph, ExplicateControl, GeneratePreludeConclusion,
-        Link, Parse, Pass, PatchInstructions, RemoveComplexOperands, SelectInstructions,
+        Link, Parse, Pass, PatchInstructions, RemoveComplexOperands, SelectInstructions, Typecheck,
         UncoverLive, Uniquify,
     },
 };
