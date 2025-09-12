@@ -1,10 +1,10 @@
 use crate::{
     colors::{Color, Coloring, empty_coloring, saturation},
     errors::Error,
-    graph::InterferenceGraph,
+    graph::LocationGraph,
 };
 
-pub fn color_graph(graph: InterferenceGraph) -> Result<Coloring, Error> {
+pub fn color_graph(graph: LocationGraph) -> Result<Coloring, Error> {
     let mut vert_set = graph.verts.clone();
     let mut coloring = empty_coloring();
     while !vert_set.is_empty() {
@@ -36,13 +36,13 @@ pub fn color_graph(graph: InterferenceGraph) -> Result<Coloring, Error> {
 #[cfg(test)]
 mod color_graph_tests {
     use super::{Coloring, color_graph};
-    use crate::graph::InterferenceGraph;
+    use crate::graph::LocationGraph;
     use std::collections::HashMap;
     use syntax::x86::Reg;
 
     #[test]
     fn color_example() {
-        let mut graph = InterferenceGraph::new();
+        let mut graph = LocationGraph::new();
         graph.add_edge("t".into(), Reg::Rax.into());
         graph.add_edge("t".into(), "z".into());
         graph.add_edge("t".into(), Reg::Rsp.into());

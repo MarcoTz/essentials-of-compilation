@@ -1,6 +1,6 @@
 use super::Pass;
 use crate::CompilerPaths;
-use assign_homes::{AnnotProg, InterferenceGraph, build_graph};
+use assign_homes::{AnnotProg, LocationGraph, build_interference_graph};
 use std::{convert::Infallible, fmt};
 
 pub struct BuildGraph;
@@ -8,7 +8,7 @@ pub struct BuildGraph;
 #[derive(Debug)]
 pub struct Built {
     pub prog: AnnotProg,
-    pub graph: InterferenceGraph,
+    pub graph: LocationGraph,
 }
 
 impl Pass for BuildGraph {
@@ -21,7 +21,7 @@ impl Pass for BuildGraph {
     }
 
     fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        let graph = build_graph(&input);
+        let graph = build_interference_graph(&input);
         Ok(Built { prog: input, graph })
     }
 }

@@ -1,4 +1,4 @@
-use crate::{graph::InterferenceGraph, program::Location};
+use crate::{graph::LocationGraph, program::Location};
 use std::{
     collections::{HashMap, HashSet},
     fmt,
@@ -42,11 +42,7 @@ pub fn empty_coloring() -> Coloring {
     ]))
 }
 
-pub fn saturation(
-    graph: &InterferenceGraph,
-    vert: &Location,
-    coloring: &Coloring,
-) -> HashSet<Color> {
+pub fn saturation(graph: &LocationGraph, vert: &Location, coloring: &Coloring) -> HashSet<Color> {
     let mut colors = HashSet::new();
     for v in graph.adjacent(vert) {
         if let Some(c) = coloring.0.get(&v) {

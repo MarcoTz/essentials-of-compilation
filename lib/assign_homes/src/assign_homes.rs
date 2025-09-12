@@ -136,7 +136,7 @@ mod assign_homes_tests {
     use super::{Coloring, assign_homes};
     use crate::program::{AnnotProg, LiveInstruction};
     use std::collections::{HashMap, HashSet};
-    use syntax::x86::{Arg, Instruction, Program, Reg, VarArg, VarProgram};
+    use syntax::x86::{Arg, Instruction, Program, Reg, VarArg};
 
     #[test]
     fn assign_ab() {
