@@ -36,6 +36,7 @@ mod parse;
 mod patch_instructions;
 mod remove_complex_operands;
 mod select_instructions;
+mod typecheck;
 mod uncover_live;
 mod uniquify;
 

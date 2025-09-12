@@ -10,6 +10,7 @@ use crate::{
 #[derive(Debug)]
 pub enum Pipeline {
     Parse(<Parse as Pass>::Input),
+    Typecheck(<Typecheck as Pass>::Input),
     Uniquify(<Uniquify as Pass>::Input),
     RemoveComplexOperands(<RemoveComplexOperands as Pass>::Input),
     ExplicateControl(<ExplicateControl as Pass>::Input),
@@ -29,7 +30,10 @@ impl Pipeline {
         match self {
             Pipeline::Parse(input) => {
                 let output = <Parse as Pass>::run_debug(input, comp, debug)?;
-
+                Ok(Some(Pipeline::Typecheck(output)))
+            }
+            Pipeline::Typecheck(input) => {
+                let output = <Typecheck as Pass>::run_debug(input, comp, debug)?;
                 Ok(Some(Pipeline::Uniquify(output)))
             }
             Pipeline::Uniquify(input) => {

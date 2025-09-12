@@ -4,6 +4,7 @@ mod expr;
 mod types;
 
 pub use expr::Expression;
+pub use types::Type;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
