@@ -8,34 +8,48 @@ literal = { ASCII_DIGIT+ }
 kw_read_int = _{ "read_int" }
 kw_print = _{ "print_int" }
 kw_let = _{ "let" }
+kw_true = _{ "true" }
+kw_false = _{ "false" }
+kw_if = _{ "if" }
+kw_else = _{ "else"}
 
 keyword = _{
   kw_read_int
   | kw_let
+  | kw_true
+  | kw_false
+  | kw_if
 }
 
-bin_op = { "+" | "-" }
-un_op = { "-" }
+bin_op = { "+" | "-" | "&&" | "||" }
+un_op = { "-" | "!" }
+cmp = { "==" | "<=" | "<" | ">=" | ">" }
 
 expression = { prim_expression ~ left_rec_expression? }
 
 prim_expression = {
   paren_exp
   | let_in
+  | if_exp
   | unary_op
   | read_int
   | print
   | literal
+  | bool
   | variable
 }
 
 left_rec_expression = { 
   binary_op
+  | cmp_op
 }
 
 paren_exp = { "(" ~ expression  ~ ")" }
+if_exp = {kw_if ~ expression ~ "{" ~ expression ~ "}" ~ kw_else ~ "{" ~ expression ~ "}" }
 let_in = { kw_let ~ variable ~ "=" ~ expression}
 read_int = { kw_read_int }
 print = { kw_print ~ "(" ~ expression ~ ")" }
 unary_op = { un_op ~ expression }
+bool = { kw_true | kw_false }
 binary_op = { bin_op ~ expression }
+cmp_op = { cmp ~ expression }

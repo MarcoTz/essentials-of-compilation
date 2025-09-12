@@ -1,5 +1,5 @@
 use crate::Rule;
-use std::{fmt, num::ParseIntError};
+use std::{fmt, num::ParseIntError, str::ParseBoolError};
 
 #[derive(Debug)]
 pub enum Error {
@@ -8,6 +8,7 @@ pub enum Error {
     RemainingInput { rule: Rule },
     UnexpectedRule { rule: Rule, expected: String },
     ParseInt { reason: String },
+    ParseBool,
     UnknownSymbol { sym: String },
 }
 
@@ -44,6 +45,7 @@ impl fmt::Display for Error {
                 write!(f, "Unexpected rule {rule:?}, expected {expected}")
             }
             Error::ParseInt { reason } => write!(f, "Could not parse integer ({reason})"),
+            Error::ParseBool => f.write_str("Could not parse bool"),
             Error::UnknownSymbol { sym } => write!(f, "Unknown symbol {sym}"),
         }
     }
@@ -65,5 +67,11 @@ impl From<ParseIntError> for Error {
         Error::ParseInt {
             reason: format!("{:?}", err.kind()),
         }
+    }
+}
+
+impl From<ParseBoolError> for Error {
+    fn from(_: ParseBoolError) -> Error {
+        Error::ParseBool
     }
 }

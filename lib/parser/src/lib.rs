@@ -1,7 +1,7 @@
 use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
 use syntax::{
-    BinaryOperation, UnaryOperation,
+    BinaryOperation, Comparator, UnaryOperation,
     lang::{Expression, Program},
 };
 
@@ -73,6 +73,7 @@ fn parse_prim_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
             let expr_pair = pair_to_n_inner(pair, &[Rule::expression])?.remove(0);
             parse_expression(expr_pair)
         }
+        Rule::if_exp => parse_if_expr(pair),
         Rule::let_in => parse_let_expr(pair),
         Rule::unary_op => parse_unary_expr(pair),
         Rule::read_int => Ok(Expression::ReadInt),
@@ -80,6 +81,10 @@ fn parse_prim_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
         Rule::literal => {
             let num = pair.as_str().trim().parse::<i64>()?;
             Ok(Expression::lit(num))
+        }
+        Rule::bool => {
+            let b = pair.as_str().trim().parse::<bool>()?;
+            Ok(Expression::bool(b))
         }
         Rule::variable => {
             let var = pair.as_str().trim();
@@ -92,6 +97,7 @@ fn parse_prim_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
 fn parse_leftrec_expression(pair: Pair<'_, Rule>, expr: Expression) -> Result<Expression, Error> {
     match pair.as_rule() {
         Rule::binary_op => parse_binary_expr(pair, expr),
+        Rule::cmp_op => parse_cmp_expr(pair, expr),
         r => Err(Error::unexpected(r, "Left Recursive Expression")),
     }
 }
@@ -135,6 +141,20 @@ fn parse_let_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
     Ok(Expression::let_in(var, bound_expr))
 }
 
+fn parse_if_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
+    let mut inner = pair_to_n_inner(
+        pair,
+        &[Rule::expression, Rule::expression, Rule::expression],
+    )?;
+    let cond_pair = inner.remove(0);
+    let cond_expr = parse_expression(cond_pair)?;
+    let then_pair = inner.remove(0);
+    let then_expr = parse_expression(then_pair)?;
+    let else_pair = inner.remove(0);
+    let else_expr = parse_expression(else_pair)?;
+    Ok(Expression::if_exp(cond_expr, then_expr, else_expr))
+}
+
 fn parse_unary_expr(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
     let mut inner = pair_to_n_inner(pair, &[Rule::un_op, Rule::expression])?;
     let op_pair = inner.remove(0);
@@ -153,6 +173,15 @@ fn parse_binary_expr(pair: Pair<'_, Rule>, fst: Expression) -> Result<Expression
     Ok(Expression::bin(fst, op, snd_expr))
 }
 
+fn parse_cmp_expr(pair: Pair<'_, Rule>, left: Expression) -> Result<Expression, Error> {
+    let mut inner = pair_to_n_inner(pair, &[Rule::cmp_op, Rule::expression])?;
+    let cmp_pair = inner.remove(0);
+    let cmp = parse_cmp(cmp_pair)?;
+    let right_pair = inner.remove(0);
+    let right = parse_expression(right_pair)?;
+    Ok(Expression::cmp(left, cmp, right))
+}
+
 fn parse_un_op(pair: Pair<'_, Rule>) -> Result<UnaryOperation, Error> {
     match pair.as_str().trim() {
         "-" => Ok(UnaryOperation::Neg),
@@ -164,6 +193,19 @@ fn parse_bin_op(pair: Pair<'_, Rule>) -> Result<BinaryOperation, Error> {
     match pair.as_str().trim() {
         "+" => Ok(BinaryOperation::Add),
         "-" => Ok(BinaryOperation::Sub),
+        "&&" => Ok(BinaryOperation::And),
+        "||" => Ok(BinaryOperation::Or),
+        s => Err(Error::unknown(s)),
+    }
+}
+
+fn parse_cmp(pair: Pair<'_, Rule>) -> Result<Comparator, Error> {
+    match pair.as_str().trim() {
+        "==" => Ok(Comparator::Eq),
+        "<" => Ok(Comparator::Lt),
+        "<=" => Ok(Comparator::Leq),
+        ">" => Ok(Comparator::Gt),
+        ">=" => Ok(Comparator::Geq),
         s => Err(Error::unknown(s)),
     }
 }
