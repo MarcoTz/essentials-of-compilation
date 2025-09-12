@@ -21,7 +21,7 @@ impl Pass for ColorGraph {
     }
 
     fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        let coloring = color_graph(input.graph)?;
+        let coloring = color_graph(input.interference_graph, input.move_graph)?;
         Ok(Colored {
             prog: input.prog,
             color: coloring,
