@@ -8,7 +8,7 @@ pub const READ_INT_CALL: &str = "read_int";
 pub const PRINT_CALL: &str = "print_int";
 
 mod ops;
-pub use ops::{BinaryOperation, UnaryOperation};
+pub use ops::{BinaryOperation, Comparator, UnaryOperation};
 
 pub fn fresh_var(used_vars: &HashSet<String>) -> String {
     let mut num = 0;

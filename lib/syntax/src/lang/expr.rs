@@ -1,9 +1,10 @@
-use crate::{BinaryOperation, PRINT_CALL, READ_INT_CALL, UnaryOperation};
+use crate::{BinaryOperation, Comparator, PRINT_CALL, READ_INT_CALL, UnaryOperation};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     Literal(i64),
+    Bool(bool),
     Variable(String),
     ReadInt,
     Print(Box<Expression>),
@@ -20,11 +21,25 @@ pub enum Expression {
         arg: Box<Expression>,
         op: UnaryOperation,
     },
+    Cmp {
+        left: Box<Expression>,
+        cmp: Comparator,
+        right: Box<Expression>,
+    },
+    If {
+        cond_exp: Box<Expression>,
+        then_exp: Box<Expression>,
+        else_exp: Box<Expression>,
+    },
 }
 
 impl Expression {
     pub fn lit(i: i64) -> Expression {
         Expression::Literal(i)
+    }
+
+    pub fn bool(b: bool) -> Expression {
+        Expression::Bool(b)
     }
 
     pub fn var(v: &str) -> Expression {
@@ -35,6 +50,14 @@ impl Expression {
         Expression::LetIn {
             var: v.to_owned(),
             bound: Box::new(bound_exp),
+        }
+    }
+
+    pub fn if_exp(cond: Expression, then: Expression, else_exp: Expression) -> Expression {
+        Expression::If {
+            cond_exp: Box::new(cond),
+            then_exp: Box::new(then),
+            else_exp: Box::new(else_exp),
         }
     }
 
@@ -53,9 +76,18 @@ impl Expression {
         }
     }
 
+    pub fn cmp(left: Expression, cmp: Comparator, right: Expression) -> Expression {
+        Expression::Cmp {
+            left: Box::new(left),
+            cmp,
+            right: Box::new(right),
+        }
+    }
+
     pub fn subst_var(self, old: &str, new: &str) -> Expression {
         match self {
             Expression::Literal(_) => self,
+            Expression::Bool(_) => self,
             Expression::Variable(ref v) => {
                 if v == old {
                     Expression::var(new)
@@ -75,18 +107,37 @@ impl Expression {
                 Expression::bin(fst_subst, op, snd_subst)
             }
             Expression::UnOp { arg, op } => Expression::un(arg.subst_var(old, new), op),
+            Expression::Cmp { left, cmp, right } => {
+                Expression::cmp(left.subst_var(old, new), cmp, right.subst_var(old, new))
+            }
+            Expression::If {
+                cond_exp,
+                then_exp,
+                else_exp,
+            } => Expression::if_exp(
+                cond_exp.subst_var(old, new),
+                then_exp.subst_var(old, new),
+                else_exp.subst_var(old, new),
+            ),
         }
     }
 
     pub fn used_vars(&self) -> HashSet<String> {
         match self {
             Expression::Literal(_) => HashSet::new(),
+            Expression::Bool(_) => HashSet::new(),
             Expression::Variable(v) => HashSet::from([v.clone()]),
             Expression::ReadInt => HashSet::new(),
             Expression::Print(exp) => exp.used_vars(),
             Expression::LetIn { var, bound } => &HashSet::from([var.clone()]) | &bound.used_vars(),
             Expression::BinOp { fst, snd, .. } => &fst.used_vars() | &snd.used_vars(),
             Expression::UnOp { arg, .. } => arg.used_vars(),
+            Expression::Cmp { left, right, .. } => &left.used_vars() | &right.used_vars(),
+            Expression::If {
+                cond_exp,
+                then_exp,
+                else_exp,
+            } => &(&cond_exp.used_vars() | &then_exp.used_vars()) | &else_exp.used_vars(),
         }
     }
 }
@@ -95,12 +146,19 @@ impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Expression::Literal(lit) => write!(f, "{lit}"),
+            Expression::Bool(b) => write!(f, "{b}"),
             Expression::Variable(v) => f.write_str(v),
             Expression::ReadInt => f.write_str(READ_INT_CALL),
             Expression::Print(exp) => write!(f, "{PRINT_CALL}({exp})"),
             Expression::LetIn { var, bound } => write!(f, "let {var} = {bound}"),
             Expression::BinOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
             Expression::UnOp { arg, op } => write!(f, "{op}{arg}"),
+            Expression::Cmp { left, cmp, right } => write!(f, "{left}{cmp}{right}"),
+            Expression::If {
+                cond_exp,
+                then_exp,
+                else_exp,
+            } => write!(f, "if {cond_exp} {{ {then_exp} }} else {{ {else_exp} }}"),
         }
     }
 }

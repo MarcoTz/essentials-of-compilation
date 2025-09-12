@@ -1,6 +1,7 @@
 use std::{collections::HashSet, fmt};
 
 mod expr;
+mod types;
 
 pub use expr::Expression;
 
