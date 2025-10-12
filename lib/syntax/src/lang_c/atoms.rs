@@ -40,3 +40,15 @@ impl From<Atom> for Continuation {
         Continuation::Return(atm)
     }
 }
+
+impl From<i64> for Atom {
+    fn from(i: i64) -> Atom {
+        Atom::Integer(i)
+    }
+}
+
+impl From<&str> for Atom {
+    fn from(var: &str) -> Atom {
+        Atom::Variable(var.to_owned())
+    }
+}

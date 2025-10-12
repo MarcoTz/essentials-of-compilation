@@ -199,11 +199,7 @@ mod select_instructions_tests {
             lang_c::Tail {
                 stmts: vec![lang_c::Statement::assign(
                     "x0",
-                    lang_c::Expression::BinOp {
-                        fst: lang_c::Atom::Integer(10),
-                        op: BinaryOperation::Add,
-                        snd: lang_c::Atom::Integer(32),
-                    },
+                    lang_c::Expression::bin(10.into(), BinaryOperation::Add, 32.into()),
                 )],
                 cont: lang_c::Continuation::Return(lang_c::Atom::Variable("x0".to_owned())),
             },
@@ -214,13 +210,18 @@ mod select_instructions_tests {
             "start",
             vec![
                 x86::Instruction::MovQ {
-                    src: x86::Arg::Immediate(10).into(),
-                    dest: x86::Reg::Rax.into(),
+                    src: 10.into(),
+                    dest: "x0".into(),
                 },
                 x86::Instruction::AddQ {
-                    src: x86::Arg::Immediate(32).into(),
+                    src: 32.into(),
+                    dest: "x0".into(),
+                },
+                x86::Instruction::MovQ {
+                    src: "x0".into(),
                     dest: x86::Reg::Rax.into(),
                 },
+                x86::Instruction::RetQ,
             ],
         );
         assert_eq!(result, expected)
@@ -243,9 +244,9 @@ mod select_instructions_tests {
                     lang_c::Statement::assign(
                         "x1",
                         lang_c::Expression::BinOp {
-                            fst: lang_c::Atom::Integer(52),
+                            fst: 52.into(),
                             op: BinaryOperation::Add,
-                            snd: lang_c::Atom::Variable("x0".to_owned()),
+                            snd: "x0".into(),
                         },
                     ),
                 ],
@@ -258,20 +259,23 @@ mod select_instructions_tests {
             "start",
             vec![
                 x86::Instruction::MovQ {
-                    src: x86::Arg::Immediate(10).into(),
-                    dest: x86::VarArg::Var("x0".to_owned()).into(),
+                    src: 10.into(),
+                    dest: "x0".into(),
                 },
-                x86::Instruction::NegQ {
-                    arg: x86::VarArg::Var("x0".to_owned()).into(),
-                },
+                x86::Instruction::NegQ { arg: "x0".into() },
                 x86::Instruction::MovQ {
-                    src: x86::Arg::Immediate(52).into(),
-                    dest: x86::Reg::Rax.into(),
+                    src: 52.into(),
+                    dest: "x1".into(),
                 },
                 x86::Instruction::AddQ {
-                    src: x86::VarArg::Var("x0".to_owned()).into(),
+                    src: "x0".into(),
+                    dest: "x1".into(),
+                },
+                x86::Instruction::MovQ {
+                    src: "x1".into(),
                     dest: x86::Reg::Rax.into(),
                 },
+                x86::Instruction::RetQ,
             ],
         );
         assert_eq!(result, expected)
