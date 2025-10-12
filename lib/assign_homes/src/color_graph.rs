@@ -16,9 +16,9 @@ pub fn color_graph(
         let next_candidates = get_next_candidates(&vert_set, &interference_graph, &coloring)?;
         for candidate in next_candidates.iter() {
             if let Some(color) =
-                get_move_related(&candidate, &interference_graph, &move_graph, &coloring)
+                get_move_related(candidate, &interference_graph, &move_graph, &coloring)
             {
-                vert_set.remove(&candidate);
+                vert_set.remove(candidate);
                 coloring.0.insert(candidate.clone(), color);
                 continue 'outer;
             }
@@ -27,7 +27,7 @@ pub fn color_graph(
         let adjacent_colors: Vec<&Color> = interference_graph
             .verts
             .iter()
-            .filter_map(|vert| coloring.0.get(&vert))
+            .filter_map(|vert| coloring.0.get(vert))
             .collect();
         let mut next_color = 0;
         while adjacent_colors.contains(&&next_color) {
@@ -49,7 +49,7 @@ fn get_next_candidates(
         .map(|vert| {
             (
                 vert,
-                saturation(&interference_graph, vert, coloring).len() as usize,
+                saturation(interference_graph, vert, coloring).len() as usize,
             )
         })
         .collect();
@@ -73,18 +73,16 @@ fn get_move_related(
     move_graph: &LocationGraph,
     coloring: &Coloring,
 ) -> Option<Color> {
-    if let Location::Variable(_) = loc {
-        ()
-    } else {
+    if !matches!(loc, Location::Variable(_)) {
         return None;
     };
-    let interfering = interference_graph.adjacent(&loc);
+    let interfering = interference_graph.adjacent(loc);
     let interfering_colors: Vec<Color> = interfering
         .iter()
-        .filter_map(|vert| coloring.0.get(&vert))
+        .filter_map(|vert| coloring.0.get(vert))
         .copied()
         .collect();
-    for move_related in move_graph.adjacent(&loc) {
+    for move_related in move_graph.adjacent(loc) {
         if interfering.contains(&move_related) {
             continue;
         }
@@ -93,7 +91,7 @@ fn get_move_related(
         } else {
             continue;
         };
-        if interfering_colors.contains(&related_color) {
+        if interfering_colors.contains(related_color) {
             continue;
         }
         return Some(*related_color);

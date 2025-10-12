@@ -73,7 +73,7 @@ pub fn assemble_runtime() -> Result<(), Error> {
         .status()
         .map_err(|_| Error::RunCommand("gcc -c".to_owned()))?;
     if !res.success() {
-        return Err(Error::RunCommand("gcc -c".to_owned()))?;
+        Err(Error::RunCommand("gcc -c".to_owned()))?;
     }
     Ok(())
 }

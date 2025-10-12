@@ -155,7 +155,7 @@ fn parse_if(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
     let cond_pair = inner.next().ok_or(Error::missing(Rule::expression))?;
     let cond_expr = parse_expression(cond_pair)?;
     let mut current_then = true;
-    while let Some(next) = inner.next() {
+    for next in inner {
         if next.as_rule() == Rule::else_start {
             current_then = false;
             continue;

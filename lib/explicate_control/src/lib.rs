@@ -43,6 +43,12 @@ impl ExplicateState {
     }
 }
 
+impl Default for ExplicateState {
+    fn default() -> ExplicateState {
+        ExplicateState::new()
+    }
+}
+
 enum StmtOrCont {
     Stmt(lang_c::Statement),
     Cont(lang_c::Continuation),

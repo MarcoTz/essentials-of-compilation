@@ -19,15 +19,15 @@ fn build_block(block: &[LiveInstruction], graph: &mut LocationGraph) {
 }
 
 fn build_instr(instr: &LiveInstruction, graph: &mut LocationGraph) {
-    match &instr.instr {
-        Instruction::MovQ {
-            src: VarArg::Var(v1),
-            dest: VarArg::Var(v2),
-        } => graph.add_edge(
+    if let Instruction::MovQ {
+        src: VarArg::Var(v1),
+        dest: VarArg::Var(v2),
+    } = &instr.instr
+    {
+        graph.add_edge(
             Location::Variable(v1.clone()),
             Location::Variable(v2.clone()),
-        ),
-        _ => (),
+        )
     }
 }
 

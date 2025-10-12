@@ -123,7 +123,7 @@ fn exp_to_atm(
     exp: lang_mon::Expression,
     used_vars: &mut HashSet<String>,
 ) -> (lang_mon::Statement, lang_mon::Atom) {
-    let new_var = fresh_var(&used_vars);
+    let new_var = fresh_var(used_vars);
     let let_exp = lang_mon::Statement::assign(&new_var, exp);
     used_vars.insert(new_var.clone());
     let atm = lang_mon::Atom::Variable(new_var);

@@ -37,6 +37,6 @@ impl From<Atom> for Tail {
 
 impl From<Atom> for Continuation {
     fn from(atm: Atom) -> Continuation {
-        Continuation::Return(atm.into())
+        Continuation::Return(atm)
     }
 }
