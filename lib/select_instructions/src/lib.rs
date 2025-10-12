@@ -148,7 +148,14 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
                     left: left_dest,
                     right: right_dest,
                 },
-                x86::Instruction::SetCC { cc, dest },
+                x86::Instruction::SetCC {
+                    cc,
+                    dest: x86::ByteReg::Ah.into(),
+                },
+                x86::Instruction::MovZBQ {
+                    src: x86::ByteReg::Ah.into(),
+                    dest,
+                },
             ]
         }
     }

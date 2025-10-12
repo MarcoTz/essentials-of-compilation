@@ -1,4 +1,4 @@
-mod assign_homes;
+mod assign;
 mod color_graph;
 mod colors;
 mod errors;
@@ -8,7 +8,7 @@ mod move_graph;
 mod program;
 mod uncover_live;
 
-pub use assign_homes::assign_homes;
+pub use assign::assign_homes;
 pub use color_graph::color_graph;
 pub use colors::Coloring;
 pub use errors::Error;

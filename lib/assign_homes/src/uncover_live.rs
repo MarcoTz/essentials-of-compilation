@@ -15,10 +15,10 @@ pub fn uncover_live(prog: VarProgram) -> Result<AnnotProg, Error> {
         "conclusion".to_owned(),
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
-    for (label, instrs) in prog.blocks {
-        let uncovered = uncover_block(instrs, &label2live)?;
-        label2live.insert(label.clone(), (uncovered[0]).live_before.clone());
-        annot.add_block(&label, uncovered);
+    for block in prog.blocks {
+        let uncovered = uncover_block(block.instrs, &label2live)?;
+        label2live.insert(block.label.clone(), (uncovered[0]).live_before.clone());
+        annot.add_block(&block.label, uncovered);
     }
     Ok(annot)
 }
@@ -75,6 +75,14 @@ pub fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
             .collect(),
         Instruction::RetQ => HashSet::new(),
         Instruction::Jump { .. } => HashSet::new(),
+        Instruction::XorQ { dest, .. } => arg_locations(dest),
+        Instruction::CmpQ { .. } => HashSet::new(),
+        Instruction::SetCC { dest, .. } => arg_locations(dest),
+        Instruction::MovZBQ { dest, .. } => arg_locations(dest),
+        Instruction::JumpCC { .. } => HashSet::new(),
+        Instruction::NotQ { arg } => arg_locations(arg),
+        Instruction::AndQ { dest, .. } => arg_locations(dest),
+        Instruction::OrQ { dest, .. } => arg_locations(dest),
     }
 }
 
@@ -95,6 +103,14 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
         }
         Instruction::RetQ => HashSet::new(),
         Instruction::Jump { .. } => HashSet::new(),
+        Instruction::XorQ { src, dest, .. } => &arg_locations(src) | &arg_locations(dest),
+        Instruction::CmpQ { left, right } => &arg_locations(left) | &arg_locations(right),
+        Instruction::SetCC { .. } => HashSet::new(),
+        Instruction::MovZBQ { src, .. } => arg_locations(src),
+        Instruction::JumpCC { .. } => HashSet::new(),
+        Instruction::NotQ { arg } => arg_locations(arg),
+        Instruction::AndQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
+        Instruction::OrQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{Arg, Block, Instruction, Reg};
+use super::{Arg, Block, Reg};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15,10 +15,6 @@ impl Program {
             blocks: vec![],
             used_callee,
         }
-    }
-
-    pub fn add_block(&mut self, label: &str, block: Vec<Instruction<Arg>>) {
-        self.blocks.push(Block::new(label, block));
     }
 }
 

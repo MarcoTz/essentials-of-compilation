@@ -1,4 +1,5 @@
 use super::Pass;
+use crate::CompilerPaths;
 use syntax::lang::Program;
 use typecheck::typecheck;
 
@@ -13,7 +14,7 @@ impl Pass for Typecheck {
         "Typecheck"
     }
 
-    fn run(input: Self::Input) -> Result<Self::Output, Self::Error> {
+    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
         typecheck(&input)?;
         Ok(input)
     }

@@ -1,20 +1,20 @@
-use syntax::x86::{Arg, Instruction, Program, Reg};
+use syntax::x86::{Arg, Block, Instruction, Program, Reg};
 
 pub fn generate_prelude_conclusion(prog: Program) -> Program {
     let prelude = generate_prelude(&prog);
     let conclusion = generate_conclusion(&prog);
     let mut finalized = Program::new(prog.stack_space, prog.used_callee);
-    finalized.add_block("main", prelude);
-    finalized.add_block("conclusion", conclusion);
-    for (label, block) in prog.blocks {
-        let mut generated_block = block;
-        if label == "start" {
-            generated_block.push(Instruction::Jump {
+    finalized.blocks.push(Block::new("main", prelude));
+    finalized.blocks.push(Block::new("conclusion", conclusion));
+    for mut block in prog.blocks {
+        if block.label == "start" {
+            block.instrs.push(Instruction::Jump {
                 label: "conclusion".to_owned(),
-            })
+            });
         }
-
-        finalized.add_block(&label, generated_block);
+        finalized
+            .blocks
+            .push(Block::new(&block.label, block.instrs));
     }
     finalized
 }
@@ -79,7 +79,7 @@ fn generate_conclusion(prog: &Program) -> Vec<Instruction<Arg>> {
 mod generate_prelude_conclusion_tests {
     use super::generate_prelude_conclusion;
     use std::collections::HashSet;
-    use syntax::x86::{Arg, Instruction, Program, Reg};
+    use syntax::x86::{Arg, Block, Instruction, Program, Reg};
 
     #[test]
     fn generate_exmaple() {
@@ -121,15 +121,15 @@ mod generate_prelude_conclusion_tests {
             },
         ];
         let mut prog = Program::new(8, HashSet::from([Reg::Rbx]));
-        prog.add_block("start", start.clone());
+        prog.blocks.push(Block::new("start", start.clone()));
         let result = generate_prelude_conclusion(prog);
         let mut expected = Program::new(8, HashSet::from([Reg::Rbx]));
         let mut start_block = start;
         start_block.push(Instruction::Jump {
             label: "conclusion".to_owned(),
         });
-        expected.add_block("start", start_block);
-        expected.add_block(
+        expected.blocks.push(Block::new("start", start_block));
+        expected.blocks.push(Block::new(
             "main",
             vec![
                 Instruction::PushQ {
@@ -150,8 +150,8 @@ mod generate_prelude_conclusion_tests {
                     label: "start".to_owned(),
                 },
             ],
-        );
-        expected.add_block(
+        ));
+        expected.blocks.push(Block::new(
             "conclusion",
             vec![
                 Instruction::AddQ {
@@ -170,7 +170,7 @@ mod generate_prelude_conclusion_tests {
                 },
                 Instruction::RetQ,
             ],
-        );
+        ));
         assert_eq!(result, expected)
     }
 }

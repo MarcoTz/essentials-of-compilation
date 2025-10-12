@@ -3,8 +3,13 @@ use crate::{
     errors::Error,
     program::AnnotProg,
 };
-use std::collections::{HashMap, HashSet};
-use syntax::x86::{Arg, Instruction, Program, Reg, VarArg};
+use std::collections::HashMap;
+use syntax::x86::{Arg, Block, Instruction, Program, VarArg};
+
+mod collect_callee;
+mod collect_vars;
+use collect_callee::collect_callee;
+use collect_vars::collect_vars;
 
 pub fn assign_homes(prog: AnnotProg, coloring: Coloring) -> Result<Program, Error> {
     let used_callee = collect_callee(&prog);
@@ -17,80 +22,9 @@ pub fn assign_homes(prog: AnnotProg, coloring: Coloring) -> Result<Program, Erro
             .into_iter()
             .map(|instr| assign_instr(instr.instr, &assignments))
             .collect::<Result<Vec<_>, Error>>()?;
-        assigned.add_block(&label, assigned_instrs);
+        assigned.blocks.push(Block::new(&label, assigned_instrs));
     }
     Ok(assigned)
-}
-
-fn collect_callee(prog: &AnnotProg) -> HashSet<Reg> {
-    let mut callee = HashSet::new();
-    for (_, block) in prog.blocks.iter() {
-        for instr in block.iter() {
-            callee = &callee | &collect_callee_instr(&instr.instr);
-        }
-    }
-    callee
-}
-fn collect_callee_instr(instr: &Instruction<VarArg>) -> HashSet<Reg> {
-    match instr {
-        Instruction::AddQ { src, dest } => &collect_callee_arg(src) | &collect_callee_arg(dest),
-        Instruction::SubQ { src, dest } => &collect_callee_arg(src) | &collect_callee_arg(dest),
-        Instruction::NegQ { arg } => collect_callee_arg(arg),
-        Instruction::MovQ { src, dest } => &collect_callee_arg(src) | &collect_callee_arg(dest),
-        Instruction::PushQ { arg } => collect_callee_arg(arg),
-        Instruction::PopQ { arg } => collect_callee_arg(arg),
-        Instruction::CallQ { .. } => HashSet::new(),
-        Instruction::RetQ => HashSet::new(),
-        Instruction::Jump { .. } => HashSet::new(),
-    }
-}
-fn collect_callee_arg(arg: &VarArg) -> HashSet<Reg> {
-    match arg {
-        VarArg::Var(_) => HashSet::new(),
-        VarArg::Arg(Arg::Immediate(_)) => HashSet::new(),
-        VarArg::Arg(Arg::Register(reg)) => {
-            if Reg::callee_saved().contains(reg) {
-                HashSet::from([reg.clone()])
-            } else {
-                HashSet::new()
-            }
-        }
-        VarArg::Arg(Arg::Deref(reg, _)) => {
-            if Reg::callee_saved().contains(reg) {
-                HashSet::from([reg.clone()])
-            } else {
-                HashSet::new()
-            }
-        }
-    }
-}
-fn collect_vars(prog: &AnnotProg) -> HashSet<String> {
-    let mut vars = HashSet::new();
-    for (_, instrs) in prog.blocks.iter() {
-        for var_set in instrs.iter().map(|instr| collect_instr(&instr.instr)) {
-            vars.extend(var_set.into_iter());
-        }
-    }
-    vars
-}
-fn collect_instr(instr: &Instruction<VarArg>) -> HashSet<String> {
-    match instr {
-        Instruction::AddQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
-        Instruction::SubQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
-        Instruction::NegQ { arg } => collect_arg(arg),
-        Instruction::MovQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
-        Instruction::PushQ { arg } => collect_arg(arg),
-        Instruction::PopQ { arg } => collect_arg(arg),
-        Instruction::CallQ { .. } => HashSet::new(),
-        Instruction::RetQ => HashSet::new(),
-        Instruction::Jump { .. } => HashSet::new(),
-    }
-}
-fn collect_arg(arg: &VarArg) -> HashSet<String> {
-    match arg {
-        VarArg::Arg(_) => HashSet::new(),
-        VarArg::Var(v) => HashSet::from([v.clone()]),
-    }
 }
 
 fn assign_instr(
@@ -122,6 +56,34 @@ fn assign_instr(
         Instruction::CallQ { label } => Ok(Instruction::CallQ { label }),
         Instruction::RetQ => Ok(Instruction::RetQ),
         Instruction::Jump { label } => Ok(Instruction::Jump { label }),
+        Instruction::XorQ { src, dest } => Ok(Instruction::XorQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::CmpQ { left, right } => Ok(Instruction::CmpQ {
+            left: assign_arg(left, assignments)?,
+            right: assign_arg(right, assignments)?,
+        }),
+        Instruction::SetCC { cc, dest } => Ok(Instruction::SetCC {
+            cc,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::MovZBQ { src, dest } => Ok(Instruction::MovZBQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::JumpCC { cc, label } => Ok(Instruction::JumpCC { cc, label }),
+        Instruction::NotQ { arg } => Ok(Instruction::NotQ {
+            arg: assign_arg(arg, assignments)?,
+        }),
+        Instruction::AndQ { src, dest } => Ok(Instruction::AddQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
+        Instruction::OrQ { src, dest } => Ok(Instruction::OrQ {
+            src: assign_arg(src, assignments)?,
+            dest: assign_arg(dest, assignments)?,
+        }),
     }
 }
 fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Result<Arg, Error> {
@@ -136,7 +98,7 @@ mod assign_homes_tests {
     use super::{Coloring, assign_homes};
     use crate::program::{AnnotProg, LiveInstruction};
     use std::collections::{HashMap, HashSet};
-    use syntax::x86::{Arg, Instruction, Program, Reg, VarArg};
+    use syntax::x86::{Arg, Block, Instruction, Program, Reg, VarArg};
 
     #[test]
     fn assign_ab() {
@@ -192,9 +154,13 @@ mod assign_homes_tests {
             ]
         };
         let mut expected1 = Program::new(16, HashSet::new());
-        expected1.add_block("start", block_fun(-8, -16));
+        expected1
+            .blocks
+            .push(Block::new("start", block_fun(-8, -16)));
         let mut expected2 = Program::new(16, HashSet::new());
-        expected2.add_block("start", block_fun(-16, -8));
+        expected2
+            .blocks
+            .push(Block::new("start", block_fun(-16, -8)));
         assert!(result == expected1 || result == expected2)
     }
 }

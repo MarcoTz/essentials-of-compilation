@@ -3,8 +3,8 @@ use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Block<Arg> {
-    label: String,
-    instrs: Vec<Instruction<Arg>>,
+    pub label: String,
+    pub instrs: Vec<Instruction<Arg>>,
 }
 
 impl<Arg> Block<Arg> {

@@ -35,7 +35,7 @@ impl Pass for BuildGraph {
 impl fmt::Display for Built {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Interference Graph:")?;
-        self.interference_graph.fmt(f);
+        self.interference_graph.fmt(f)?;
         writeln!(f, "Move GFraph:")?;
         self.move_graph.fmt(f)
     }

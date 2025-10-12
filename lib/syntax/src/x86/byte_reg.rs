@@ -1,3 +1,4 @@
+use super::{Arg, VarArg};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -24,5 +25,17 @@ impl fmt::Display for ByteReg {
             ByteReg::Dh => f.write_str("dh"),
             ByteReg::Dl => f.write_str("dl"),
         }
+    }
+}
+
+impl From<ByteReg> for Arg {
+    fn from(br: ByteReg) -> Arg {
+        Arg::ByteReg(br)
+    }
+}
+
+impl From<ByteReg> for VarArg {
+    fn from(br: ByteReg) -> VarArg {
+        VarArg::Arg(br.into())
     }
 }

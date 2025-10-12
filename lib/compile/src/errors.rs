@@ -6,6 +6,7 @@ pub enum Error {
     Parse(parser::Error),
     AssignHomes(assign_homes::Error),
     Typecheck(typecheck::Error),
+    ExplicateControl(explicate_control::Error),
     ReadFile(PathBuf),
     ParentNotFound(PathBuf),
     CreateDir(PathBuf),
@@ -23,6 +24,7 @@ impl fmt::Display for Error {
             Error::Parse(err) => write!(f, "Error during parsing:\n{err}"),
             Error::AssignHomes(err) => write!(f, "Error during assign homes:\n{err}"),
             Error::Typecheck(err) => write!(f, "Error during typechecking:\n{err}"),
+            Error::ExplicateControl(err) => write!(f, "Error in explicate control:\n{err}"),
             Error::ReadFile(path) => write!(f, "Could not read source file {path:?}"),
             Error::ParentNotFound(path) => write!(f, "Could not find parent of {path:?}"),
             Error::CreateDir(path) => write!(f, "Could not create dir {path:?}"),
@@ -58,5 +60,11 @@ impl From<assign_homes::Error> for Error {
 impl From<typecheck::Error> for Error {
     fn from(err: typecheck::Error) -> Error {
         Error::Typecheck(err)
+    }
+}
+
+impl From<explicate_control::Error> for Error {
+    fn from(err: explicate_control::Error) -> Error {
+        Error::ExplicateControl(err)
     }
 }
