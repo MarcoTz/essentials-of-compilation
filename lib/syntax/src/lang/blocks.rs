@@ -1,4 +1,4 @@
-use super::Statement;
+use super::{Program, Statement};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9,6 +9,12 @@ pub struct Block {
 impl Block {
     pub fn new(stmts: Vec<Statement>) -> Block {
         Block { stmts }
+    }
+}
+
+impl From<Block> for Program {
+    fn from(b: Block) -> Program {
+        Program { main: b }
     }
 }
 
