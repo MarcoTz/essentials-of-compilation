@@ -1,13 +1,13 @@
 WHITESPACE = _{ " " | "\n" | "\t" }
 program = { SOI ~ block ~ EOI }
-block = _{ (expression ~ ";")+ }
+block = _{ (statement ~ ";")* }
 
 variable = @{ !(keyword ~ WHITESPACE) ~  (ASCII_ALPHA | "_") ~ (ASCII_ALPHA|ASCII_DIGIT|"_")* }
 literal = { ASCII_DIGIT+ }
 
-
 kw_read_int = _{ "read_int" }
 kw_print = _{ "print_int" }
+kw_return = _{ "return" }
 kw_let = _{ "let" }
 kw_true = _{ "true" }
 kw_false = _{ "false" }
@@ -16,25 +16,39 @@ kw_else = _{ "else"}
 
 keyword = _{
   kw_read_int
+  | kw_print
+  | kw_return
   | kw_let
   | kw_true
   | kw_false
   | kw_if
+  | kw_else
 }
 
 bin_op = { "+" | "-" | "&&" | "||" }
 un_op = { "-" | "!" }
 cmp = { "==" | "<=" | "<" | ">=" | ">" }
 
+statement = { 
+  if_statement
+  | let_statement
+  | print_statement
+  | paren_statement
+}
+
+paren_statement = { "(" ~ statement ~ ")" }
+
+if_statement = {kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
+else_start = { kw_else }
+let_statement = { kw_let ~ variable ~ "=" ~ expression}
+print_statement = { kw_print ~ "(" ~ expression ~ ")" }
+
 expression = { prim_expression ~ left_rec_expression? }
 
 prim_expression = {
   paren_exp
-  | let_in
-  | if_exp
   | unary_op
   | read_int
-  | print
   | literal
   | bool
   | variable
@@ -46,11 +60,7 @@ left_rec_expression = {
 }
 
 paren_exp = { "(" ~ expression  ~ ")" }
-else_start = { kw_else }
-if_exp = {kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
-let_in = { kw_let ~ variable ~ "=" ~ expression}
 read_int = { kw_read_int }
-print = { kw_print ~ "(" ~ expression ~ ")" }
 unary_op = { un_op ~ expression }
 bool = { kw_true | kw_false }
 binary_op = { bin_op ~ expression }

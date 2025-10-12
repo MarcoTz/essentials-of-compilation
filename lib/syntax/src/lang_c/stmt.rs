@@ -1,11 +1,11 @@
-use super::Expression;
+use super::{Atom, Expression};
 use crate::PRINT_CALL;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     Assign { var: String, bound: Expression },
-    Print(Expression),
+    Print(Atom),
 }
 
 impl Statement {
