@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use syntax::{
     BinaryOperation, UnaryOperation,
-    lang::{Expression, Program, Type},
+    lang::{Block, Expression, Program, Statement, Type},
 };
 
 mod errors;
@@ -9,10 +9,64 @@ pub use errors::Error;
 
 pub fn typecheck(prog: &Program) -> Result<(), Error> {
     let mut var_types = HashMap::new();
-    for exp in prog.exps.iter() {
-        let _ = check_exp(exp, &mut var_types)?;
-    }
+    check_block(&prog.main, &mut var_types)?;
     Ok(())
+}
+
+fn check_block(
+    block: &Block,
+    var_types: &mut HashMap<String, Type>,
+) -> Result<Option<Type>, Error> {
+    let mut ret_ty = None;
+    for stmt in block.stmts.iter() {
+        ret_ty = check_stmt(stmt, var_types)?;
+    }
+    Ok(ret_ty)
+}
+
+fn check_stmt(
+    stmt: &Statement,
+    var_types: &mut HashMap<String, Type>,
+) -> Result<Option<Type>, Error> {
+    match stmt {
+        Statement::Return(exp) => {
+            let exp_ty = check_exp(exp, var_types)?;
+            Ok(Some(exp_ty))
+        }
+        Statement::Print(exp) => {
+            let exp_ty = check_exp(exp, var_types)?;
+            if exp_ty == Type::Integer {
+                Ok(None)
+            } else {
+                Err(Error::mismatch(exp_ty, Type::Integer))
+            }
+        }
+        Statement::LetBinding { var, bound } => {
+            let bound_ty = check_exp(bound, var_types)?;
+            var_types.insert(var.clone(), bound_ty);
+            Ok(None)
+        }
+        Statement::If {
+            cond_exp,
+            then_block,
+            else_block,
+        } => {
+            let cond_ty = check_exp(cond_exp, var_types)?;
+            if cond_ty != Type::Bool {
+                return Err(Error::mismatch(cond_ty, Type::Bool));
+            }
+            let then_ty = check_block(then_block, &mut var_types.clone())?;
+            let else_ty = check_block(else_block, var_types)?;
+            match (then_ty, else_ty) {
+                (Some(ty1), Some(ty2)) if ty1 == ty2 => Ok(Some(ty1)),
+                (None, None) => Ok(None),
+                (ty1, ty2) => Err(Error::mismatch(
+                    ty1.unwrap_or(Type::Unit),
+                    ty2.unwrap_or(Type::Unit),
+                )),
+            }
+        }
+    }
 }
 
 fn check_exp(exp: &Expression, var_types: &mut HashMap<String, Type>) -> Result<Type, Error> {
@@ -21,15 +75,6 @@ fn check_exp(exp: &Expression, var_types: &mut HashMap<String, Type>) -> Result<
         Expression::Bool(_) => Ok(Type::Bool),
         Expression::Variable(v) => var_types.get(v).cloned().ok_or(Error::FreeVar(v.clone())),
         Expression::ReadInt => Ok(Type::Integer),
-        Expression::Print(exp) => {
-            let _ = check_exp(exp, var_types)?;
-            Ok(Type::Unit)
-        }
-        Expression::LetIn { var, bound } => {
-            let bound_ty = check_exp(bound, var_types)?;
-            var_types.insert(var.clone(), bound_ty);
-            Ok(Type::Unit)
-        }
         Expression::BinOp { fst, op, snd } => {
             let fst_ty = check_exp(fst, var_types)?;
             let snd_ty = check_exp(snd, var_types)?;
@@ -82,34 +127,6 @@ fn check_exp(exp: &Expression, var_types: &mut HashMap<String, Type>) -> Result<
                 return Err(Error::mismatch(left_ty, Type::Integer));
             }
             Ok(Type::Bool)
-        }
-        Expression::If {
-            cond_exp,
-            then_block,
-            else_block,
-        } => {
-            let cond_ty = check_exp(cond_exp, var_types)?;
-            if cond_ty != Type::Bool {
-                return Err(Error::mismatch(cond_ty, Type::Bool));
-            }
-            let mut then_vars = var_types.clone();
-            let mut then_types = vec![];
-            for then_exp in then_block.iter() {
-                let then_ty = check_exp(then_exp, &mut then_vars)?;
-                then_types.push(then_ty);
-            }
-
-            let mut else_types = vec![];
-            for else_exp in else_block.iter() {
-                let else_ty = check_exp(else_exp, var_types)?;
-                else_types.push(else_ty);
-            }
-            let then_last = then_types.last().ok_or(Error::EmptyBlock)?;
-            let else_last = else_types.last().ok_or(Error::EmptyBlock)?;
-            if then_last != else_last {
-                return Err(Error::mismatch(then_last.clone(), else_last.clone()));
-            }
-            Ok(then_last.clone())
         }
     }
 }
