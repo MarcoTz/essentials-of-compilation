@@ -24,9 +24,9 @@ fn uniquify_stmt(stmt: Statement, substitutions: &mut HashMap<String, String>) -
         Statement::Return(exp) => Statement::Return(uniquify_exp(exp, substitutions)),
         Statement::Print(exp) => Statement::Print(uniquify_exp(exp, substitutions)),
         Statement::Assignment { var, bound } => {
-            let bound_unique = uniquify_exp(bound, substitutions);
+            let new_bound = uniquify_exp(bound, substitutions);
             let new_var = fresh_var(&substitutions.values().cloned().collect());
-            let new_bound = bound_unique.subst_var(&var, &new_var);
+            substitutions.insert(var, new_var.clone());
             Statement::assign(&new_var, new_bound)
         }
         Statement::If {
