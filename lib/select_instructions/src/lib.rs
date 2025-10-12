@@ -13,7 +13,7 @@ fn select_tail(tail: lang_c::Tail) -> Vec<x86::Instruction<x86::VarArg>> {
     for stmt in tail.stmts {
         instrs.extend(select_stmt(stmt));
     }
-    instrs.extend(select_return(tail.ret));
+    instrs.extend(select_return(tail.cont));
     instrs
 }
 
@@ -104,7 +104,7 @@ mod select_instructions_tests {
             "start",
             lang_c::Tail {
                 stmts: vec![],
-                ret: lang_c::Expression::BinOp {
+                cont: lang_c::Expression::BinOp {
                     fst: lang_c::Atom::Integer(10),
                     op: BinaryOperation::Add,
                     snd: lang_c::Atom::Integer(32),
@@ -142,7 +142,7 @@ mod select_instructions_tests {
                         op: UnaryOperation::Neg,
                     },
                 }],
-                ret: lang_c::Expression::BinOp {
+                cont: lang_c::Expression::BinOp {
                     fst: lang_c::Atom::Integer(52),
                     op: BinaryOperation::Add,
                     snd: lang_c::Atom::Variable("x0".to_owned()),

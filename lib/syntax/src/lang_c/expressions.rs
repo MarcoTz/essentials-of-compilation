@@ -1,4 +1,4 @@
-use super::{Atom, Tail, TailEnd};
+use super::Atom;
 use crate::{BinaryOperation, Comparator, READ_INT_CALL, UnaryOperation};
 use std::fmt;
 
@@ -20,7 +20,6 @@ pub enum Expression {
         cmp: Comparator,
         right: Atom,
     },
-    Unit,
 }
 
 impl Expression {
@@ -44,20 +43,7 @@ impl fmt::Display for Expression {
             Expression::ReadInt => f.write_str(READ_INT_CALL),
             Expression::UnaryOp { arg, op } => write!(f, "{op}({arg})"),
             Expression::BinOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
-            Expression::Unit => f.write_str("()"),
             Expression::Cmp { left, cmp, right } => write!(f, "{left}{cmp}{right}"),
         }
-    }
-}
-
-impl From<Expression> for Tail {
-    fn from(exp: Expression) -> Tail {
-        Tail::ret(exp)
-    }
-}
-
-impl From<Expression> for TailEnd {
-    fn from(exp: Expression) -> TailEnd {
-        TailEnd::Return(exp)
     }
 }

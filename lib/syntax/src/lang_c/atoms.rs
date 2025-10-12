@@ -1,4 +1,4 @@
-use super::{Expression, Tail, TailEnd};
+use super::{Continuation, Expression, Tail};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -6,6 +6,7 @@ pub enum Atom {
     Integer(i64),
     Variable(String),
     Bool(bool),
+    Unit,
 }
 
 impl fmt::Display for Atom {
@@ -14,6 +15,7 @@ impl fmt::Display for Atom {
             Atom::Integer(i) => write!(f, "{i}"),
             Atom::Variable(v) => f.write_str(v),
             Atom::Bool(b) => write!(f, "{b}"),
+            Atom::Unit => f.write_str("()"),
         }
     }
 }
@@ -26,12 +28,15 @@ impl From<Atom> for Expression {
 
 impl From<Atom> for Tail {
     fn from(atm: Atom) -> Tail {
-        Tail::ret(atm.into())
+        Tail {
+            stmts: vec![],
+            cont: Continuation::Return(atm),
+        }
     }
 }
 
-impl From<Atom> for TailEnd {
-    fn from(atm: Atom) -> TailEnd {
-        TailEnd::Return(atm.into())
+impl From<Atom> for Continuation {
+    fn from(atm: Atom) -> Continuation {
+        Continuation::Return(atm.into())
     }
 }

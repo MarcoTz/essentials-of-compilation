@@ -42,9 +42,9 @@ impl SubstVar for Statement {
         match self {
             Statement::Return(exp) => Statement::Return(exp.subst_var(old, new)),
             Statement::Print(exp) => Statement::Print(exp.subst_var(old, new)),
-            Statement::LetBinding { var, bound } => {
+            Statement::Assignment { var, bound } => {
                 let bound_subst = bound.subst_var(old, new);
-                Statement::LetBinding {
+                Statement::Assignment {
                     var,
                     bound: bound_subst,
                 }

@@ -145,7 +145,7 @@ fn parse_let(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
     let var = var_pair.as_str().trim();
     let bound_pair = inner.remove(0);
     let bound_expr = parse_expression(bound_pair)?;
-    Ok(Statement::bind(var, bound_expr))
+    Ok(Statement::assign(var, bound_expr))
 }
 
 fn parse_if(pair: Pair<'_, Rule>) -> Result<Statement, Error> {

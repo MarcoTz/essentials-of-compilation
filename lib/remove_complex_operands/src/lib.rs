@@ -34,9 +34,9 @@ fn rco_stmt(stmt: lang::Statement, used_vars: &mut HashSet<String>) -> Vec<lang_
             stmts.push(lang_mon::Statement::Print(atm));
             stmts
         }
-        lang::Statement::LetBinding { var, bound } => {
+        lang::Statement::Assignment { var, bound } => {
             let (mut stmts, new_bind) = rco_expr(bound, used_vars);
-            stmts.push(lang_mon::Statement::bind(&var, new_bind));
+            stmts.push(lang_mon::Statement::assign(&var, new_bind));
             stmts
         }
         lang::Statement::If {
@@ -124,7 +124,7 @@ fn exp_to_atm(
     used_vars: &mut HashSet<String>,
 ) -> (lang_mon::Statement, lang_mon::Atom) {
     let new_var = fresh_var(&used_vars);
-    let let_exp = lang_mon::Statement::bind(&new_var, exp);
+    let let_exp = lang_mon::Statement::assign(&new_var, exp);
     used_vars.insert(new_var.clone());
     let atm = lang_mon::Atom::Variable(new_var);
     (let_exp, atm)
@@ -138,7 +138,7 @@ mod remove_complex_operands_tests {
     #[test]
     fn remove_sum() {
         let result = remove_complex_operands(lang::Program::new(vec![
-            lang::Statement::bind(
+            lang::Statement::assign(
                 "x",
                 lang::Expression::bin(
                     lang::Expression::lit(42),
@@ -153,11 +153,11 @@ mod remove_complex_operands_tests {
             )),
         ]));
         let expected = lang_mon::Program::new(vec![
-            lang_mon::Statement::bind(
+            lang_mon::Statement::assign(
                 "x0",
                 lang_mon::Expression::un(lang_mon::Atom::Integer(10), UnaryOperation::Neg),
             ),
-            lang_mon::Statement::bind(
+            lang_mon::Statement::assign(
                 "x",
                 lang_mon::Expression::bin(
                     lang_mon::Atom::Integer(42),
@@ -165,7 +165,7 @@ mod remove_complex_operands_tests {
                     lang_mon::Atom::Variable("x0".to_owned()),
                 ),
             ),
-            lang_mon::Statement::bind(
+            lang_mon::Statement::assign(
                 "x1",
                 lang_mon::Expression::bin(
                     lang_mon::Atom::Variable("x".to_owned()),

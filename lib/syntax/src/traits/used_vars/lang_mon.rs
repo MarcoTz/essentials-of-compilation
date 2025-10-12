@@ -23,7 +23,7 @@ impl UsedVars for Statement {
         match self {
             Statement::Return(atm) => atm.used_vars(),
             Statement::Print(atm) => atm.used_vars(),
-            Statement::LetBinding { var, bound } => {
+            Statement::Assign { var, bound } => {
                 let mut used = bound.used_vars();
                 used.insert(var.clone());
                 used

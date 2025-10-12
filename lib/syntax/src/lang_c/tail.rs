@@ -1,16 +1,16 @@
-use super::{Atom, Expression, Statement};
+use super::{Atom, Statement};
 use crate::Comparator;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Tail {
     pub stmts: Vec<Statement>,
-    pub ret: TailEnd,
+    pub cont: Continuation,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum TailEnd {
-    Return(Expression),
+pub enum Continuation {
+    Return(Atom),
     Goto(String),
     If {
         left: Atom,
@@ -21,30 +21,21 @@ pub enum TailEnd {
     },
 }
 
-impl Tail {
-    pub fn ret(exp: Expression) -> Tail {
-        Tail {
-            ret: exp.into(),
-            stmts: vec![],
-        }
-    }
-}
-
 impl fmt::Display for Tail {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for stmt in self.stmts.iter() {
             writeln!(f, "{stmt}")?;
         }
-        self.ret.fmt(f)
+        self.cont.fmt(f)
     }
 }
 
-impl fmt::Display for TailEnd {
+impl fmt::Display for Continuation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            TailEnd::Return(exp) => write!(f, "return {exp}"),
-            TailEnd::Goto(label) => write!(f, "goto {label}"),
-            TailEnd::If {
+            Continuation::Return(exp) => write!(f, "return {exp}"),
+            Continuation::Goto(label) => write!(f, "goto {label}"),
+            Continuation::If {
                 left,
                 cmp,
                 right,

@@ -1,14 +1,14 @@
 use std::fmt;
 
-mod atm;
-mod expr;
-mod stmt;
+mod atoms;
+mod expressions;
+mod statements;
 mod tail;
 
-pub use atm::Atom;
-pub use expr::Expression;
-pub use stmt::Statement;
-pub use tail::{Tail, TailEnd};
+pub use atoms::Atom;
+pub use expressions::Expression;
+pub use statements::Statement;
+pub use tail::{Continuation, Tail};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Block {

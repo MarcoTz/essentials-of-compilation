@@ -23,11 +23,11 @@ fn uniquify_stmt(stmt: Statement, substitutions: &mut HashMap<String, String>) -
     match stmt {
         Statement::Return(exp) => Statement::Return(uniquify_exp(exp, substitutions)),
         Statement::Print(exp) => Statement::Print(uniquify_exp(exp, substitutions)),
-        Statement::LetBinding { var, bound } => {
+        Statement::Assignment { var, bound } => {
             let bound_unique = uniquify_exp(bound, substitutions);
             let new_var = fresh_var(&substitutions.values().cloned().collect());
             let new_bound = bound_unique.subst_var(&var, &new_var);
-            Statement::bind(&new_var, new_bound)
+            Statement::assign(&new_var, new_bound)
         }
         Statement::If {
             cond_exp,
@@ -79,8 +79,8 @@ mod uniquify_tests {
     #[test]
     fn uniqufy_let_let() {
         let result = uniquify(Program::new(vec![
-            Statement::bind("x", Expression::lit(32)),
-            Statement::bind("x", Expression::lit(10)),
+            Statement::assign("x", Expression::lit(32)),
+            Statement::assign("x", Expression::lit(10)),
             Statement::Return(Expression::bin(
                 Expression::var("x"),
                 BinaryOperation::Add,
@@ -88,8 +88,8 @@ mod uniquify_tests {
             )),
         ]));
         let expected = Program::new(vec![
-            Statement::bind("x0", Expression::lit(32)),
-            Statement::bind("x1", Expression::lit(10)),
+            Statement::assign("x0", Expression::lit(32)),
+            Statement::assign("x1", Expression::lit(10)),
             Statement::Return(Expression::bin(
                 Expression::var("x1"),
                 BinaryOperation::Add,
@@ -102,8 +102,8 @@ mod uniquify_tests {
     #[test]
     fn uniquify_shadow() {
         let result = uniquify(Program::new(vec![
-            Statement::bind("x", Expression::lit(4)),
-            Statement::bind(
+            Statement::assign("x", Expression::lit(4)),
+            Statement::assign(
                 "x",
                 Expression::bin(
                     Expression::var("x"),
@@ -118,8 +118,8 @@ mod uniquify_tests {
             )),
         ]));
         let expected = Program::new(vec![
-            Statement::bind("x0", Expression::lit(4)),
-            Statement::bind(
+            Statement::assign("x0", Expression::lit(4)),
+            Statement::assign(
                 "x1",
                 Expression::bin(
                     Expression::var("x0"),

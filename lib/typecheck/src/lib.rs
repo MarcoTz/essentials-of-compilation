@@ -41,7 +41,7 @@ fn check_stmt(
                 Err(Error::mismatch(exp_ty, Type::Integer))
             }
         }
-        Statement::LetBinding { var, bound } => {
+        Statement::Assignment { var, bound } => {
             let bound_ty = check_exp(bound, var_types)?;
             var_types.insert(var.clone(), bound_ty);
             Ok(None)

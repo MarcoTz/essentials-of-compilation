@@ -6,7 +6,7 @@ use std::fmt;
 pub enum Statement {
     Return(Atom),
     Print(Atom),
-    LetBinding {
+    Assign {
         var: String,
         bound: Expression,
     },
@@ -18,8 +18,8 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn bind(var: &str, bound_exp: Expression) -> Statement {
-        Statement::LetBinding {
+    pub fn assign(var: &str, bound_exp: Expression) -> Statement {
+        Statement::Assign {
             var: var.to_owned(),
             bound: bound_exp,
         }
@@ -39,7 +39,7 @@ impl fmt::Display for Statement {
         match self {
             Statement::Return(atm) => write!(f, "{RETURN_CALL}({atm})"),
             Statement::Print(atm) => write!(f, "{PRINT_CALL}({atm})"),
-            Statement::LetBinding { var, bound } => write!(f, "let {var} = {bound}"),
+            Statement::Assign { var, bound } => write!(f, "let {var} = {bound}"),
             Statement::If {
                 cond_exp,
                 then_block,

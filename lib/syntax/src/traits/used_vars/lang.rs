@@ -23,7 +23,7 @@ impl UsedVars for Statement {
         match self {
             Statement::Return(exp) => exp.used_vars(),
             Statement::Print(exp) => exp.used_vars(),
-            Statement::LetBinding { var, bound } => {
+            Statement::Assignment { var, bound } => {
                 &HashSet::from([var.clone()]) | &bound.used_vars()
             }
             Statement::If {
