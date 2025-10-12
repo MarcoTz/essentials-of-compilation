@@ -1,36 +1,26 @@
-use super::{Instruction, VarArg};
-use std::{collections::HashMap, fmt};
+use super::{Block, Instruction, VarArg};
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VarProgram {
-    pub blocks: HashMap<String, Vec<Instruction<VarArg>>>,
+    pub blocks: Vec<Block<VarArg>>,
 }
 
 impl VarProgram {
     pub fn new() -> VarProgram {
-        VarProgram {
-            blocks: HashMap::new(),
-        }
+        VarProgram { blocks: vec![] }
     }
 
-    pub fn add_block(&mut self, lb: &str, block: Vec<Instruction<VarArg>>) {
-        self.blocks.insert(lb.to_owned(), block);
+    pub fn add_block(&mut self, lb: &str, instrs: Vec<Instruction<VarArg>>) {
+        self.blocks.push(Block::new(lb, instrs));
     }
 }
 
 impl fmt::Display for VarProgram {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, ".global main")?;
-        for (label, instrs) in self.blocks.iter() {
-            write!(
-                f,
-                "{label}:\n{}",
-                instrs
-                    .iter()
-                    .map(|instr| format!("\t{instr}",))
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            )?;
+        for block in self.blocks.iter() {
+            block.fmt(f)?;
         }
         Ok(())
     }

@@ -1,10 +1,11 @@
-use super::reg::Reg;
+use super::{ByteReg, Reg};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Arg {
     Immediate(i64),
     Register(Reg),
+    ByteReg(ByteReg),
     Deref(Reg, i64),
 }
 
@@ -19,6 +20,7 @@ impl fmt::Display for Arg {
         match self {
             Arg::Immediate(i) => write!(f, "${i}"),
             Arg::Register(reg) => write!(f, "%{reg}"),
+            Arg::ByteReg(reg) => write!(f, "%{reg}"),
             Arg::Deref(reg, offset) => write!(f, "{offset}(%{reg})"),
         }
     }

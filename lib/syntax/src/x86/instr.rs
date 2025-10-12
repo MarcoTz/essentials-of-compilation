@@ -12,6 +12,24 @@ pub enum Instruction<Arg> {
     CallQ { label: String },
     RetQ,
     Jump { label: String },
+    XorQ { src: Arg, dest: Arg },
+    CmpQ { left: Arg, right: Arg },
+    SetCC { cc: Cc, dest: Arg },
+    MovZBQ { src: Arg, dest: Arg },
+    JumpCC { cc: Cc, label: String },
+    NotQ { arg: Arg },
+    AndQ { src: Arg, dest: Arg },
+    OrQ { src: Arg, dest: Arg },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Cc {
+    E,
+    Ne,
+    L,
+    Le,
+    G,
+    Ge,
 }
 
 pub type VarInstr = Instruction<VarArg>;
@@ -100,6 +118,27 @@ where
             Instruction::CallQ { label } => write!(f, "callq {label}"),
             Instruction::RetQ => write!(f, "retq"),
             Instruction::Jump { label } => write!(f, "jmp {label}"),
+            Instruction::XorQ { src, dest } => write!(f, "xorq {src}, {dest}"),
+            Instruction::CmpQ { left, right } => write!(f, "cmpq {right}, {left}"),
+            Instruction::SetCC { cc, dest: arg } => write!(f, "set{cc} {arg}"),
+            Instruction::MovZBQ { src, dest } => write!(f, "movzbq {src}, {dest}"),
+            Instruction::JumpCC { cc, label } => write!(f, "j{cc} {label}"),
+            Instruction::NotQ { arg } => write!(f, "notq {arg}"),
+            Instruction::AndQ { src, dest } => write!(f, "andq {src}, {dest}"),
+            Instruction::OrQ { src, dest } => write!(f, "orq {src}, {dest}"),
+        }
+    }
+}
+
+impl fmt::Display for Cc {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Cc::E => f.write_str("e"),
+            Cc::Ne => f.write_str("ne"),
+            Cc::L => f.write_str("l"),
+            Cc::Le => f.write_str("le"),
+            Cc::G => f.write_str("g"),
+            Cc::Ge => f.write_str("ge"),
         }
     }
 }
