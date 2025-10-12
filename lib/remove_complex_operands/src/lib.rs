@@ -1,40 +1,68 @@
 use std::collections::HashSet;
-use syntax::{fresh_var, lang, lang_mon};
+use syntax::{
+    lang, lang_mon,
+    traits::{UsedVars, fresh_var},
+};
 
 pub fn remove_complex_operands(prog: lang::Program) -> lang_mon::Program {
     let mut used = prog.used_vars();
+    let new_main = rco_block(prog.main, &mut used);
+    new_main.into()
+}
+
+fn rco_block(block: lang::Block, used_vars: &mut HashSet<String>) -> lang_mon::Block {
     let mut removed = vec![];
-    for exp in prog.exps {
-        let (exps, last) = rco_expr(exp, &mut used);
-        removed.extend(exps);
-        removed.push(last);
+    for stmt in block.stmts {
+        removed.extend(rco_stmt(stmt, used_vars));
     }
-    lang_mon::Program::new(removed)
+    lang_mon::Block::new(removed)
+}
+
+fn rco_stmt(stmt: lang::Statement, used_vars: &mut HashSet<String>) -> Vec<lang_mon::Statement> {
+    match stmt {
+        lang::Statement::Return(exp) => {
+            let (mut stmts, exp) = rco_expr(exp, used_vars);
+            let (assign, atm) = exp_to_atm(exp, used_vars);
+            stmts.push(assign);
+            stmts.push(lang_mon::Statement::Return(atm));
+            stmts
+        }
+        lang::Statement::Print(exp) => {
+            let (mut stmts, exp) = rco_expr(exp, used_vars);
+            let (assign, atm) = exp_to_atm(exp, used_vars);
+            stmts.push(assign);
+            stmts.push(lang_mon::Statement::Print(atm));
+            stmts
+        }
+        lang::Statement::LetBinding { var, bound } => {
+            let (mut stmts, new_bind) = rco_expr(bound, used_vars);
+            stmts.push(lang_mon::Statement::bind(&var, new_bind));
+            stmts
+        }
+        lang::Statement::If {
+            cond_exp,
+            then_block,
+            else_block,
+        } => {
+            let (mut stmts, new_cond) = rco_expr(cond_exp, used_vars);
+            let new_then = rco_block(then_block, used_vars);
+            let new_else = rco_block(else_block, used_vars);
+            stmts.push(lang_mon::Statement::cond(new_cond, new_then, new_else));
+            stmts
+        }
+    }
 }
 
 fn rco_expr(
     exp: lang::Expression,
     used_vars: &mut HashSet<String>,
-) -> (Vec<lang_mon::Expression>, lang_mon::Expression) {
+) -> (Vec<lang_mon::Statement>, lang_mon::Expression) {
     match exp {
         lang::Expression::Literal(i) => (vec![], lang_mon::Atom::Integer(i).into()),
         lang::Expression::Bool(b) => (vec![], lang_mon::Atom::Bool(b).into()),
         lang::Expression::Variable(v) => (vec![], lang_mon::Atom::Variable(v).into()),
         lang::Expression::ReadInt => (vec![], lang_mon::Expression::ReadInt),
-        lang::Expression::Print(exp) => {
-            let (mut exps, last) = rco_expr(*exp, used_vars);
-            if let lang_mon::Expression::Atm(atm) = last {
-                (exps, lang_mon::Expression::Print(atm.clone()))
-            } else {
-                let (assignment, atm) = exp_to_atm(last, used_vars);
-                exps.push(assignment);
-                (exps, lang_mon::Expression::Print(atm))
-            }
-        }
-        lang::Expression::LetIn { var, bound } => {
-            let (exps, last) = rco_expr(*bound, used_vars);
-            (exps, lang_mon::Expression::let_in(&var, last))
-        }
+
         lang::Expression::BinOp { fst, op, snd } => {
             let (fst_exps, fst_last) = rco_expr(*fst, used_vars);
             let (snd_exps, snd_last) = rco_expr(*snd, used_vars);
@@ -88,39 +116,15 @@ fn rco_expr(
             };
             (exps, lang_mon::Expression::cmp(left_atm, cmp, right_atm))
         }
-        lang::Expression::If {
-            cond_exp,
-            then_block,
-            else_block,
-        } => {
-            let (cond_exps, cond_last) = rco_expr(*cond_exp, used_vars);
-            let mut then_exps = vec![];
-            for then_exp in then_block {
-                let (exps, last) = rco_expr(then_exp, used_vars);
-                then_exps.extend(exps);
-                then_exps.push(last);
-            }
-
-            let mut else_exps = vec![];
-            for else_exp in else_block {
-                let (exps, last) = rco_expr(else_exp, used_vars);
-                else_exps.extend(exps);
-                else_exps.push(last);
-            }
-            (
-                cond_exps,
-                lang_mon::Expression::if_exp(cond_last, then_exps, else_exps),
-            )
-        }
     }
 }
 
 fn exp_to_atm(
     exp: lang_mon::Expression,
     used_vars: &mut HashSet<String>,
-) -> (lang_mon::Expression, lang_mon::Atom) {
+) -> (lang_mon::Statement, lang_mon::Atom) {
     let new_var = fresh_var(&used_vars);
-    let let_exp = lang_mon::Expression::let_in(&new_var, exp);
+    let let_exp = lang_mon::Statement::bind(&new_var, exp);
     used_vars.insert(new_var.clone());
     let atm = lang_mon::Atom::Variable(new_var);
     (let_exp, atm)
@@ -134,7 +138,7 @@ mod remove_complex_operands_tests {
     #[test]
     fn remove_sum() {
         let result = remove_complex_operands(lang::Program::new(vec![
-            lang::Expression::let_in(
+            lang::Statement::bind(
                 "x",
                 lang::Expression::bin(
                     lang::Expression::lit(42),
@@ -142,18 +146,18 @@ mod remove_complex_operands_tests {
                     lang::Expression::un(lang::Expression::lit(10), UnaryOperation::Neg),
                 ),
             ),
-            lang::Expression::bin(
+            lang::Statement::Return(lang::Expression::bin(
                 lang::Expression::var("x"),
                 BinaryOperation::Add,
                 lang::Expression::lit(10),
-            ),
+            )),
         ]));
         let expected = lang_mon::Program::new(vec![
-            lang_mon::Expression::let_in(
+            lang_mon::Statement::bind(
                 "x0",
                 lang_mon::Expression::un(lang_mon::Atom::Integer(10), UnaryOperation::Neg),
             ),
-            lang_mon::Expression::let_in(
+            lang_mon::Statement::bind(
                 "x",
                 lang_mon::Expression::bin(
                     lang_mon::Atom::Integer(42),
@@ -161,11 +165,15 @@ mod remove_complex_operands_tests {
                     lang_mon::Atom::Variable("x0".to_owned()),
                 ),
             ),
-            lang_mon::Expression::bin(
-                lang_mon::Atom::Variable("x".to_owned()),
-                BinaryOperation::Add,
-                lang_mon::Atom::Integer(10),
+            lang_mon::Statement::bind(
+                "x1",
+                lang_mon::Expression::bin(
+                    lang_mon::Atom::Variable("x".to_owned()),
+                    BinaryOperation::Add,
+                    lang_mon::Atom::Integer(10),
+                ),
             ),
+            lang_mon::Statement::Return(lang_mon::Atom::Variable("x1".to_owned())),
         ]);
         assert_eq!(result, expected)
     }
