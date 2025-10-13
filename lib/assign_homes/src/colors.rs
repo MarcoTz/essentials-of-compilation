@@ -9,6 +9,12 @@ pub type Color = i64;
 #[derive(Debug, PartialEq)]
 pub struct Coloring(pub HashMap<Location, Color>);
 
+impl Coloring {
+    pub fn contains_loc(&self, loc: &Location) -> bool {
+        self.0.contains_key(loc)
+    }
+}
+
 pub fn color_to_arg(color: Color) -> Arg {
     match color {
         0 => Reg::Rcx.into(),

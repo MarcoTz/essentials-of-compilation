@@ -22,9 +22,13 @@ pub fn uncover_live(mut prog: VarProgram) -> Result<AnnotProg, Error> {
     let block_order = flow_graph.topo_sort()?;
 
     for block_label in block_order {
+        if block_label == "conclusion" || block_label == "main" {
+            continue;
+        }
         let block = prog
             .remove_block(&block_label)
-            .ok_or(Error::MissingBlock(block_label))?;
+            .ok_or(Error::MissingBlock(block_label.clone()))?;
+        println!("uncovering label {block_label}");
         let uncovered = uncover_block(block.instrs, &label2live)?;
         label2live.insert(block.label.clone(), (uncovered[0]).live_before.clone());
         annot.add_block(&block.label, uncovered);
