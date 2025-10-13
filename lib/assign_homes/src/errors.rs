@@ -5,6 +5,8 @@ pub enum Error {
     NoAssignment(String),
     MissingLiveBefore(String),
     NextVertex,
+    FlowCycle,
+    MissingBlock(String),
 }
 
 impl fmt::Display for Error {
@@ -15,6 +17,8 @@ impl fmt::Display for Error {
                 write!(f, "Could not find live before set for label {label}")
             }
             Error::NextVertex => write!(f, "Could not get next vertex to color"),
+            Error::FlowCycle => write!(f, "Flow Graph contains cycle"),
+            Error::MissingBlock(label) => write!(f, "Could not find block with label {label}"),
         }
     }
 }

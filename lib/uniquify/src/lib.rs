@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use syntax::{
     lang::{Block, Expression, Program, Statement},
-    traits::{SubstVar, fresh_var},
+    traits::fresh_var,
 };
 
 pub fn uniquify(prog: Program) -> Program {

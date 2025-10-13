@@ -2,6 +2,7 @@ mod assign;
 mod color_graph;
 mod colors;
 mod errors;
+mod flow_graph;
 mod graph;
 mod interference_graph;
 mod move_graph;

@@ -1,5 +1,6 @@
 use crate::{
     errors::Error,
+    flow_graph::FlowGraph,
     program::{AnnotProg, LiveInstruction, Location, location::arg_locations},
 };
 use std::collections::{HashMap, HashSet};
@@ -8,14 +9,22 @@ use syntax::{
     x86::{Instruction, Reg, VarArg, VarProgram},
 };
 
-pub fn uncover_live(prog: VarProgram) -> Result<AnnotProg, Error> {
+pub fn uncover_live(mut prog: VarProgram) -> Result<AnnotProg, Error> {
     let mut annot = AnnotProg::new();
     let mut label2live = HashMap::new();
     label2live.insert(
         "conclusion".to_owned(),
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
-    for block in prog.blocks {
+
+    let mut flow_graph = FlowGraph::new();
+    flow_graph.build(&prog);
+    let block_order = flow_graph.topo_sort()?;
+
+    for block_label in block_order {
+        let block = prog
+            .remove_block(&block_label)
+            .ok_or(Error::MissingBlock(block_label))?;
         let uncovered = uncover_block(block.instrs, &label2live)?;
         label2live.insert(block.label.clone(), (uncovered[0]).live_before.clone());
         annot.add_block(&block.label, uncovered);
