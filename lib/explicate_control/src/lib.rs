@@ -1,53 +1,9 @@
 use syntax::{Comparator, UnaryOperation, lang_c, lang_mon};
 
 mod errors;
+mod state;
 pub use errors::Error;
-
-pub struct ExplicateState {
-    blocks: Vec<lang_c::Block>,
-}
-
-impl ExplicateState {
-    pub fn new() -> ExplicateState {
-        ExplicateState { blocks: vec![] }
-    }
-
-    fn fresh_label(&self) -> String {
-        let prefix = "block_";
-        let mut num = 0;
-        let mut label = format!("{prefix}{num}");
-        while self
-            .blocks
-            .iter()
-            .map(|block| &block.label)
-            .collect::<Vec<_>>()
-            .contains(&&label)
-        {
-            num += 1;
-            label = format!("{prefix}{num}");
-        }
-        label
-    }
-
-    pub fn add_block(&mut self, tail: lang_c::Tail) -> String {
-        let label = self.fresh_label();
-        let block = lang_c::Block::new(&label, tail);
-        self.blocks.push(block);
-        label
-    }
-
-    fn move_blocks(self, prog: &mut lang_c::Program) {
-        for block in self.blocks {
-            prog.add_block(&block.label, block.tail);
-        }
-    }
-}
-
-impl Default for ExplicateState {
-    fn default() -> ExplicateState {
-        ExplicateState::new()
-    }
-}
+use state::ExplicateState;
 
 enum StmtOrCont {
     Stmt(lang_c::Statement),
@@ -204,5 +160,105 @@ fn explicate_cmp(
             op: UnaryOperation::Not,
         } => Ok((arg, Comparator::Eq, lang_c::Atom::Bool(false))),
         _ => Err(Error::BadCmp(exp)),
+    }
+}
+
+#[cfg(test)]
+mod explicate_tests {
+    use super::explicate_control;
+    use syntax::{BinaryOperation, Comparator, lang_c, lang_mon};
+
+    #[test]
+    fn explicate_if_nested() {
+        let prog = lang_mon::Program::new(vec![
+            lang_mon::Statement::assign("x", lang_mon::Expression::Atm(0.into())),
+            lang_mon::Statement::assign("y", lang_mon::Expression::Atm(5.into())),
+            lang_mon::Statement::cond(
+                lang_mon::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
+                lang_mon::Block::new(vec![lang_mon::Statement::cond(
+                    lang_mon::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
+                    lang_mon::Block::new(vec![
+                        lang_mon::Statement::assign(
+                            "z",
+                            lang_mon::Expression::bin("y".into(), BinaryOperation::Add, 2.into()),
+                        ),
+                        lang_mon::Statement::Print("z".into()),
+                    ]),
+                    lang_mon::Block::new(vec![lang_mon::Statement::Print("y".into())]),
+                )]),
+                lang_mon::Block::new(vec![
+                    lang_mon::Statement::assign(
+                        "z",
+                        lang_mon::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
+                    ),
+                    lang_mon::Statement::Print("z".into()),
+                ]),
+            ),
+        ]);
+        let result = explicate_control(prog).unwrap();
+        let mut expected = lang_c::Program::new();
+        expected.add_block(
+            "start",
+            lang_c::Tail {
+                stmts: vec![
+                    lang_c::Statement::assign("x", lang_c::Expression::Atm(0.into())),
+                    lang_c::Statement::assign("y", lang_c::Expression::Atm(5.into())),
+                ],
+                cont: lang_c::Continuation::If {
+                    left: "x".into(),
+                    cmp: Comparator::Lt,
+                    right: 1.into(),
+                    then_label: "block_2".to_owned(),
+                    else_label: "block_3".to_owned(),
+                },
+            },
+        );
+        expected.add_block(
+            "block_2",
+            lang_c::Tail {
+                stmts: vec![],
+                cont: lang_c::Continuation::If {
+                    left: "x".into(),
+                    cmp: Comparator::Eq,
+                    right: 0.into(),
+                    then_label: "block_0".to_owned(),
+                    else_label: "block_1".to_owned(),
+                },
+            },
+        );
+        expected.add_block(
+            "block_1",
+            lang_c::Tail {
+                stmts: vec![lang_c::Statement::Print("y".into())],
+                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+            },
+        );
+        expected.add_block(
+            "block_0",
+            lang_c::Tail {
+                stmts: vec![
+                    lang_c::Statement::assign(
+                        "z",
+                        lang_c::Expression::bin("y".into(), BinaryOperation::Add, 2.into()),
+                    ),
+                    lang_c::Statement::Print("z".into()),
+                ],
+                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+            },
+        );
+        expected.add_block(
+            "block_3",
+            lang_c::Tail {
+                stmts: vec![
+                    lang_c::Statement::assign(
+                        "z",
+                        lang_c::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
+                    ),
+                    lang_c::Statement::Print("z".into()),
+                ],
+                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+            },
+        );
+        assert_eq!(result, expected)
     }
 }

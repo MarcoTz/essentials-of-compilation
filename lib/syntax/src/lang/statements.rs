@@ -46,7 +46,7 @@ impl fmt::Display for Statement {
                 else_block,
             } => write!(
                 f,
-                "if {cond_exp} {{ {} }} else {{ {} }}",
+                "if {cond_exp} {{ {} }} else {{ {} }};",
                 then_block, else_block
             ),
         }

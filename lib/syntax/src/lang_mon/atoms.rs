@@ -23,3 +23,21 @@ impl From<Atom> for Expression {
         Expression::Atm(atm)
     }
 }
+
+impl From<i64> for Atom {
+    fn from(i: i64) -> Atom {
+        Atom::Integer(i)
+    }
+}
+
+impl From<bool> for Atom {
+    fn from(b: bool) -> Atom {
+        Atom::Bool(b)
+    }
+}
+
+impl From<&str> for Atom {
+    fn from(v: &str) -> Atom {
+        Atom::Variable(v.to_owned())
+    }
+}

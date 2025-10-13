@@ -168,7 +168,12 @@ fn parse_if(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
             current_then = false;
             continue;
         }
-        let stmt = parse_statement(next)?;
+        let mut next_inner = next.into_inner();
+        let stmt_rule = next_inner.next().ok_or(Error::missing(Rule::statement))?;
+        if let Some(n) = next_inner.next() {
+            return Err(Error::remaining(n.as_rule()));
+        }
+        let stmt = parse_statement(stmt_rule)?;
         if current_then {
             then_stmts.push(stmt);
         } else {
@@ -202,7 +207,7 @@ fn parse_binary_expr(pair: Pair<'_, Rule>, fst: Expression) -> Result<Expression
 }
 
 fn parse_cmp_expr(pair: Pair<'_, Rule>, left: Expression) -> Result<Expression, Error> {
-    let mut inner = pair_to_n_inner(pair, &[Rule::cmp_op, Rule::expression])?;
+    let mut inner = pair_to_n_inner(pair, &[Rule::cmp, Rule::expression])?;
     let cmp_pair = inner.remove(0);
     let cmp = parse_cmp(cmp_pair)?;
     let right_pair = inner.remove(0);
@@ -213,6 +218,7 @@ fn parse_cmp_expr(pair: Pair<'_, Rule>, left: Expression) -> Result<Expression, 
 fn parse_un_op(pair: Pair<'_, Rule>) -> Result<UnaryOperation, Error> {
     match pair.as_str().trim() {
         "-" => Ok(UnaryOperation::Neg),
+        "!" => Ok(UnaryOperation::Not),
         s => Err(Error::unknown(s)),
     }
 }

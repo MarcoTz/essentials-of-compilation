@@ -1,6 +1,6 @@
 WHITESPACE = _{ " " | "\n" | "\t" }
 program = { SOI ~ block ~ EOI }
-block = _{ (statement ~ ";")* }
+block = _{ (statement ~ ";")+ }
 
 variable = @{ !(keyword ~ WHITESPACE) ~  (ASCII_ALPHA | "_") ~ (ASCII_ALPHA|ASCII_DIGIT|"_")* }
 literal = { ASCII_DIGIT+ }

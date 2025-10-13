@@ -25,7 +25,7 @@ impl Block {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Program {
     pub blocks: Vec<Block>,
 }
@@ -47,6 +47,24 @@ impl Program {
         self.blocks.iter().map(|block| &block.label).collect()
     }
 }
+
+impl PartialEq for Program {
+    fn eq(&self, other: &Program) -> bool {
+        for block in self.blocks.iter() {
+            match other.blocks.iter().find(|bl| bl.label == block.label) {
+                None => return false,
+                Some(bl) => {
+                    if block != bl {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+}
+
+impl Eq for Program {}
 
 impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

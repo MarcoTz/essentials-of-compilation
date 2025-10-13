@@ -191,7 +191,7 @@ fn select_cmp(cmp: Comparator) -> x86::Cc {
 #[cfg(test)]
 mod select_instructions_tests {
     use super::select_instructions;
-    use syntax::{BinaryOperation, UnaryOperation, lang_c, x86};
+    use syntax::{BinaryOperation, Comparator, UnaryOperation, lang_c, x86};
 
     #[test]
     fn select_sum() {
@@ -277,6 +277,88 @@ mod select_instructions_tests {
                 },
                 x86::Instruction::MovQ {
                     src: "x1".into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+                x86::Instruction::Jump {
+                    label: "conclusion".to_owned(),
+                },
+            ],
+        );
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn select_if() {
+        let mut prog = lang_c::Program::new();
+        prog.add_block(
+            "start",
+            lang_c::Tail {
+                stmts: vec![lang_c::Statement::assign("x0", lang_c::Expression::ReadInt)],
+                cont: lang_c::Continuation::If {
+                    left: "x0".into(),
+                    cmp: Comparator::Eq,
+                    right: 1.into(),
+                    then_label: "block_0".to_owned(),
+                    else_label: "block_1".to_owned(),
+                },
+            },
+        );
+        prog.add_block(
+            "block_0",
+            lang_c::Tail {
+                stmts: vec![],
+                cont: lang_c::Continuation::Return(42.into()),
+            },
+        );
+        prog.add_block(
+            "block_1",
+            lang_c::Tail {
+                stmts: vec![],
+                cont: lang_c::Continuation::Return(0.into()),
+            },
+        );
+        let result = select_instructions(prog);
+        let mut expected = x86::VarProgram::new();
+        expected.add_block(
+            "start",
+            vec![
+                x86::Instruction::CallQ {
+                    label: "read_int".to_owned(),
+                },
+                x86::Instruction::MovQ {
+                    src: x86::Reg::Rax.into(),
+                    dest: "x0".into(),
+                },
+                x86::Instruction::CmpQ {
+                    left: "x0".into(),
+                    right: 1.into(),
+                },
+                x86::Instruction::JumpCC {
+                    cc: x86::Cc::E,
+                    label: "block_0".to_owned(),
+                },
+                x86::Instruction::Jump {
+                    label: "block_1".to_owned(),
+                },
+            ],
+        );
+        expected.add_block(
+            "block_0",
+            vec![
+                x86::Instruction::MovQ {
+                    src: 42.into(),
+                    dest: x86::Reg::Rax.into(),
+                },
+                x86::Instruction::Jump {
+                    label: "conclusion".to_owned(),
+                },
+            ],
+        );
+        expected.add_block(
+            "block_1",
+            vec![
+                x86::Instruction::MovQ {
+                    src: 0.into(),
                     dest: x86::Reg::Rax.into(),
                 },
                 x86::Instruction::Jump {

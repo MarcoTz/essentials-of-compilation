@@ -1,0 +1,3 @@
+let y = 10;
+let x = if y == 0 { 40 } else { 777 };;
+print_int(x + 2);
