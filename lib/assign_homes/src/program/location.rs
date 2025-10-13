@@ -1,7 +1,7 @@
 use std::{collections::HashSet, fmt};
 use syntax::x86::{Arg, Reg, VarArg};
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum Location {
     Variable(String),
     Register(Reg),
