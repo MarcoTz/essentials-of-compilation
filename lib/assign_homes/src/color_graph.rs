@@ -14,8 +14,9 @@ pub fn color_graph(
     let mut coloring = empty_coloring();
     vert_set = vert_set
         .into_iter()
-        .filter(|vert| !coloring.contains_loc(&vert))
+        .filter(|vert| matches!(vert, Location::Variable(_)))
         .collect();
+    println!("vertices to color: {vert_set:?}");
     'outer: while !vert_set.is_empty() {
         let next_candidates = get_next_candidates(&vert_set, &interference_graph, &coloring)?;
         for candidate in next_candidates.iter() {
@@ -40,6 +41,7 @@ pub fn color_graph(
         vert_set.remove(next_candidate);
         coloring.0.insert(next_candidate.clone(), next_color);
     }
+    println!("generated coloring: {coloring:?}");
     Ok(coloring)
 }
 
@@ -104,7 +106,7 @@ fn get_move_related(
 }
 
 /*
- will only work once coloring is deterministic
+ * will only work once coloring is deterministic
 
 #[cfg(test)]
 mod color_graph_tests {

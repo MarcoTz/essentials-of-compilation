@@ -43,7 +43,9 @@ fn select_return(cont: lang_c::Continuation) -> Vec<x86::Instruction<x86::VarArg
                     src: arg_dest,
                     dest: x86::Reg::Rax.into(),
                 },
-                x86::Instruction::RetQ,
+                x86::Instruction::Jump {
+                    label: "conclusion".to_owned(),
+                },
             ]
         }
         lang_c::Continuation::Goto(label) => vec![x86::Instruction::Jump { label }],
@@ -221,7 +223,9 @@ mod select_instructions_tests {
                     src: "x0".into(),
                     dest: x86::Reg::Rax.into(),
                 },
-                x86::Instruction::RetQ,
+                x86::Instruction::Jump {
+                    label: "conclusion".to_owned(),
+                },
             ],
         );
         assert_eq!(result, expected)
@@ -275,7 +279,9 @@ mod select_instructions_tests {
                     src: "x1".into(),
                     dest: x86::Reg::Rax.into(),
                 },
-                x86::Instruction::RetQ,
+                x86::Instruction::Jump {
+                    label: "conclusion".to_owned(),
+                },
             ],
         );
         assert_eq!(result, expected)
