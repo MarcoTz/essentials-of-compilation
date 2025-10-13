@@ -26,7 +26,12 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
         if pair.as_rule() == Rule::EOI {
             break;
         }
-        let stmt = parse_statement(pair)?;
+        let mut stmt_inner = pair.into_inner();
+        let stmt_pair = stmt_inner.next().ok_or(Error::missing(Rule::statement))?;
+        if let Some(n) = stmt_inner.next() {
+            return Err(Error::remaining(n.as_rule()));
+        }
+        let stmt = parse_statement(stmt_pair)?;
         stmts.push(stmt);
     }
     if let Some(p) = prog_inner.next() {
@@ -37,7 +42,10 @@ pub fn parse_program(input: &str) -> Result<Program, Error> {
 
 fn parse_statement(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
     match pair.as_rule() {
-        Rule::paren_statement => todo!(),
+        Rule::paren_statement => {
+            let stmt_pair = pair_to_n_inner(pair, &[Rule::statement])?.remove(0);
+            parse_statement(stmt_pair)
+        }
         Rule::if_statement => parse_if(pair),
         Rule::print_statement => parse_print(pair),
         Rule::let_statement => parse_let(pair),
@@ -160,11 +168,11 @@ fn parse_if(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
             current_then = false;
             continue;
         }
-        let exp = parse_statement(next)?;
+        let stmt = parse_statement(next)?;
         if current_then {
-            then_stmts.push(exp);
+            then_stmts.push(stmt);
         } else {
-            else_stmts.push(exp);
+            else_stmts.push(stmt);
         }
     }
 
