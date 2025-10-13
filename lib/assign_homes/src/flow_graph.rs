@@ -64,7 +64,8 @@ impl FlowGraph {
 
     fn build_instr(&mut self, instr: &Instruction<VarArg>, current_label: &str) {
         match instr {
-            Instruction::CallQ { label } => self.add_edge(current_label, label),
+            //Only relevant once top-level functions are available
+            //Instruction::CallQ { label } => self.add_edge(current_label, label),
             Instruction::Jump { label } => self.add_edge(current_label, label),
             Instruction::JumpCC { label, .. } => self.add_edge(current_label, label),
             _ => (),

@@ -137,7 +137,7 @@ mod uncover_live_tests {
     fn uncover_example() {
         let mut example = VarProgram::new();
         example.add_block(
-            "main",
+            "start",
             vec![
                 Instruction::mov(5, "a"),
                 Instruction::mov(30, "b"),
@@ -149,7 +149,7 @@ mod uncover_live_tests {
         let result = uncover_live(example).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
-            "main",
+            "start",
             vec![
                 LiveInstruction::new(
                     Instruction::mov(5, "a"),
@@ -185,7 +185,7 @@ mod uncover_live_tests {
     fn uncover_registers() {
         let mut example = VarProgram::new();
         example.add_block(
-            "main",
+            "start",
             vec![
                 Instruction::mov(1, "v"),
                 Instruction::mov(42, "w"),
@@ -204,7 +204,7 @@ mod uncover_live_tests {
         let result = uncover_live(example).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
-            "main",
+            "start",
             vec![
                 LiveInstruction::new(
                     Instruction::mov(1, "v"),
