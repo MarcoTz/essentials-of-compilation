@@ -5,13 +5,13 @@ fn main() -> Result<(), Error> {
     set_working_dir()?;
     let examples = load_examples()?;
     for example in examples {
-        print!("Parsing {}", example.name);
+        println!("Parsing {}", example.name);
         let parsed = parse_program(&example.source)?;
-        println!(".... Ok");
-        print!("Reparsing {}", example.name);
+        println!("\t...Ok");
+        println!("Reparsing {}", example.name);
         let parsed_str = parsed.to_string();
-        let _ = parse_program(&parsed_str)?;
-        println!(".... Ok");
+        parse_program(&parsed_str)?;
+        println!("\t...Ok");
     }
     Ok(())
 }

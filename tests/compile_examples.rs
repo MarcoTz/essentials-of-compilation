@@ -8,10 +8,10 @@ fn main() -> Result<(), Error> {
     for example in examples {
         let compiler = Compiler::new(false, example.path, None, None, None)?;
         let exe_path = compiler.paths.exe_out.clone();
-        print!("Compiling {}", example.name);
+        println!("Compiling {}", example.name);
         compiler.run()?;
-        println!("... Ok");
-        print!("Checking output of {}", example.name);
+        println!("\n...Ok");
+        println!("Checking output of {}", example.name);
         let mut check_cmd = Command::new(&exe_path);
         let output = check_cmd
             .output()
@@ -28,7 +28,7 @@ fn main() -> Result<(), Error> {
                 &example.expected,
             ));
         }
-        println!("... Ok");
+        println!("\t...Ok");
     }
     Ok(())
 }
