@@ -84,13 +84,13 @@ impl FlowGraph {
         while !start.is_empty() {
             let next = start.remove(0);
             let outgoing = self.outgoing(&next);
+            sorted.push(next);
             for edge in outgoing {
                 self.edges.remove(&edge);
                 if self.incoming(&edge.1).len() == 0 {
-                    sorted.push(edge.1);
+                    start.push(edge.1);
                 }
             }
-            sorted.push(next);
         }
 
         if !self.edges.is_empty() {
@@ -118,5 +118,25 @@ impl fmt::Display for FlowGraph {
             writeln!(f, "\t{from} --> {to}")?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod flow_graph_tests {
+    use super::FlowGraph;
+
+    #[test]
+    fn sort_example() {
+        let mut graph = FlowGraph::new();
+        graph.add_edge("5", "11");
+        graph.add_edge("7", "11");
+        graph.add_edge("7", "8");
+        graph.add_edge("3", "8");
+        graph.add_edge("3", "10");
+        graph.add_edge("11", "2");
+        graph.add_edge("11", "9");
+        graph.add_edge("11", "10");
+        graph.add_edge("8", "9");
+        graph.topo_sort().unwrap();
     }
 }
