@@ -104,14 +104,11 @@ fn explicate_statement(
             then_block,
             else_block,
         } => {
-            let cond_exp = explicate_exp(cond_exp);
-            let (left, cmp, right) = explicate_cmp(cond_exp)?;
+            let cond = explicate_atm(cond_exp);
             let then_label = explicate_tail(then_block, state, false)?;
             let else_label = explicate_tail(else_block, state, false)?;
             Ok(lang_c::Continuation::If {
-                left,
-                cmp,
-                right,
+                cond,
                 then_label,
                 else_label,
             }
@@ -149,20 +146,6 @@ fn explicate_atm(atm: lang_mon::Atom) -> lang_c::Atom {
     }
 }
 
-fn explicate_cmp(
-    exp: lang_c::Expression,
-) -> Result<(lang_c::Atom, Comparator, lang_c::Atom), Error> {
-    match exp {
-        lang_c::Expression::Atm(atm) => Ok((atm, Comparator::Eq, lang_c::Atom::Bool(true))),
-        lang_c::Expression::Cmp { left, cmp, right } => Ok((left, cmp, right)),
-        lang_c::Expression::UnaryOp {
-            arg,
-            op: UnaryOperation::Not,
-        } => Ok((arg, Comparator::Eq, lang_c::Atom::Bool(false))),
-        _ => Err(Error::BadCmp(exp)),
-    }
-}
-
 #[cfg(test)]
 mod explicate_tests {
     use super::explicate_control;
@@ -173,19 +156,33 @@ mod explicate_tests {
         let prog = lang_mon::Program::new(vec![
             lang_mon::Statement::assign("x", lang_mon::Expression::Atm(0.into())),
             lang_mon::Statement::assign("y", lang_mon::Expression::Atm(5.into())),
-            lang_mon::Statement::cond(
+            lang_mon::Statement::assign(
+                "z",
                 lang_mon::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
-                lang_mon::Block::new(vec![lang_mon::Statement::cond(
-                    lang_mon::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
-                    lang_mon::Block::new(vec![
-                        lang_mon::Statement::assign(
-                            "z",
-                            lang_mon::Expression::bin("y".into(), BinaryOperation::Add, 2.into()),
-                        ),
-                        lang_mon::Statement::Print("z".into()),
-                    ]),
-                    lang_mon::Block::new(vec![lang_mon::Statement::Print("y".into())]),
-                )]),
+            ),
+            lang_mon::Statement::cond(
+                "z".into(),
+                lang_mon::Block::new(vec![
+                    lang_mon::Statement::assign(
+                        "w",
+                        lang_mon::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
+                    ),
+                    lang_mon::Statement::cond(
+                        "w".into(),
+                        lang_mon::Block::new(vec![
+                            lang_mon::Statement::assign(
+                                "z",
+                                lang_mon::Expression::bin(
+                                    "y".into(),
+                                    BinaryOperation::Add,
+                                    2.into(),
+                                ),
+                            ),
+                            lang_mon::Statement::Print("z".into()),
+                        ]),
+                        lang_mon::Block::new(vec![lang_mon::Statement::Print("y".into())]),
+                    ),
+                ]),
                 lang_mon::Block::new(vec![
                     lang_mon::Statement::assign(
                         "z",
@@ -203,11 +200,13 @@ mod explicate_tests {
                 stmts: vec![
                     lang_c::Statement::assign("x", lang_c::Expression::Atm(0.into())),
                     lang_c::Statement::assign("y", lang_c::Expression::Atm(5.into())),
+                    lang_c::Statement::assign(
+                        "z",
+                        lang_c::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
+                    ),
                 ],
                 cont: lang_c::Continuation::If {
-                    left: "x".into(),
-                    cmp: Comparator::Lt,
-                    right: 1.into(),
+                    cond: "z".into(),
                     then_label: "block_2".to_owned(),
                     else_label: "block_3".to_owned(),
                 },
@@ -216,11 +215,12 @@ mod explicate_tests {
         expected.add_block(
             "block_2",
             lang_c::Tail {
-                stmts: vec![],
+                stmts: vec![lang_c::Statement::assign(
+                    "w".into(),
+                    lang_c::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
+                )],
                 cont: lang_c::Continuation::If {
-                    left: "x".into(),
-                    cmp: Comparator::Eq,
-                    right: 0.into(),
+                    cond: "w".into(),
                     then_label: "block_0".to_owned(),
                     else_label: "block_1".to_owned(),
                 },

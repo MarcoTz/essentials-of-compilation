@@ -11,7 +11,7 @@ pub enum Statement {
         bound: Expression,
     },
     If {
-        cond_exp: Expression,
+        cond_exp: Atom,
         then_block: Block,
         else_block: Block,
     },
@@ -25,7 +25,7 @@ impl Statement {
         }
     }
 
-    pub fn cond(cond_exp: Expression, then_block: Block, else_block: Block) -> Statement {
+    pub fn cond(cond_exp: Atom, then_block: Block, else_block: Block) -> Statement {
         Statement::If {
             cond_exp,
             then_block,

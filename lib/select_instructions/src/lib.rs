@@ -50,25 +50,21 @@ fn select_return(cont: lang_c::Continuation) -> Vec<x86::Instruction<x86::VarArg
         }
         lang_c::Continuation::Goto(label) => vec![x86::Instruction::Jump { label }],
         lang_c::Continuation::If {
-            left,
-            cmp,
-            right,
+            cond,
             then_label,
             else_label,
         } => {
-            let left_dest = select_atm(left);
-            let right_dest = select_atm(right);
-            let cmp_instr = x86::Instruction::CmpQ {
-                left: left_dest,
-                right: right_dest,
+            let cond_dest = select_atm(cond);
+            let cmp = x86::Instruction::CmpQ {
+                left: cond_dest,
+                right: 1.into(),
             };
-            let cmp = select_cmp(cmp);
             let jump_true = x86::Instruction::JumpCC {
-                cc: cmp,
+                cc: x86::Cc::E,
                 label: then_label,
             };
             let jump_false = x86::Instruction::Jump { label: else_label };
-            vec![cmp_instr, jump_true, jump_false]
+            vec![cmp, jump_true, jump_false]
         }
     }
 }
@@ -155,10 +151,10 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
                 },
                 x86::Instruction::SetCC {
                     cc,
-                    dest: x86::ByteReg::Ah.into(),
+                    dest: x86::ByteReg::Al.into(),
                 },
                 x86::Instruction::MovZBQ {
-                    src: x86::ByteReg::Ah.into(),
+                    src: x86::ByteReg::Al.into(),
                     dest,
                 },
             ]
@@ -296,11 +292,15 @@ mod select_instructions_tests {
         prog.add_block(
             "start",
             lang_c::Tail {
-                stmts: vec![lang_c::Statement::assign("x0", lang_c::Expression::ReadInt)],
+                stmts: vec![
+                    lang_c::Statement::assign("x0", lang_c::Expression::ReadInt),
+                    lang_c::Statement::assign(
+                        "x1",
+                        lang_c::Expression::cmp("x0".into(), Comparator::Eq, 1.into()),
+                    ),
+                ],
                 cont: lang_c::Continuation::If {
-                    left: "x0".into(),
-                    cmp: Comparator::Eq,
-                    right: 1.into(),
+                    cond: "x1".into(),
                     then_label: "block_0".to_owned(),
                     else_label: "block_1".to_owned(),
                 },
@@ -334,6 +334,18 @@ mod select_instructions_tests {
                 },
                 x86::Instruction::CmpQ {
                     left: "x0".into(),
+                    right: 1.into(),
+                },
+                x86::Instruction::SetCC {
+                    cc: x86::Cc::E,
+                    dest: x86::Arg::ByteReg(x86::ByteReg::Al).into(),
+                },
+                x86::Instruction::MovZBQ {
+                    src: x86::Arg::ByteReg(x86::ByteReg::Al).into(),
+                    dest: "x1".into(),
+                },
+                x86::Instruction::CmpQ {
+                    left: "x1".into(),
                     right: 1.into(),
                 },
                 x86::Instruction::JumpCC {

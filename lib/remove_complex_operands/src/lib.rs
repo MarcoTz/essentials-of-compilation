@@ -45,9 +45,11 @@ fn rco_stmt(stmt: lang::Statement, used_vars: &mut HashSet<String>) -> Vec<lang_
             else_block,
         } => {
             let (mut stmts, new_cond) = rco_expr(cond_exp, used_vars);
+            let (assign, cond_atm) = exp_to_atm(new_cond, used_vars);
+            stmts.push(assign);
             let new_then = rco_block(then_block, used_vars);
             let new_else = rco_block(else_block, used_vars);
-            stmts.push(lang_mon::Statement::cond(new_cond, new_then, new_else));
+            stmts.push(lang_mon::Statement::cond(cond_atm, new_then, new_else));
             stmts
         }
     }
