@@ -27,7 +27,8 @@ pub trait Pass {
 
 mod assemble;
 mod assign_homes;
-mod build_graph;
+mod build_flow_graph;
+mod build_interference_graph;
 mod color_graph;
 mod explicate_control;
 mod generate_prelude_conclusion;
@@ -42,7 +43,8 @@ mod uniquify;
 
 pub use assemble::Assemble;
 pub use assign_homes::AssignHomes;
-pub use build_graph::BuildGraph;
+pub use build_flow_graph::BuildFlowGraph;
+pub use build_interference_graph::BuildInterferenceGraph;
 pub use color_graph::ColorGraph;
 pub use explicate_control::ExplicateControl;
 pub use generate_prelude_conclusion::GeneratePreludeConclusion;

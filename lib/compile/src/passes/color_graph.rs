@@ -1,4 +1,4 @@
-use super::{Pass, build_graph::Built};
+use super::{Pass, build_interference_graph::Built};
 use crate::CompilerPaths;
 use assign_homes::{AnnotProg, Coloring, color_graph};
 use std::fmt;

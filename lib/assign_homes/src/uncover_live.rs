@@ -9,7 +9,7 @@ use syntax::{
     x86::{Instruction, Reg, VarArg, VarProgram},
 };
 
-pub fn uncover_live(mut prog: VarProgram) -> Result<AnnotProg, Error> {
+pub fn uncover_live(mut prog: VarProgram, flow_graph: FlowGraph) -> Result<AnnotProg, Error> {
     let mut annot = AnnotProg::new();
     let mut label2live = HashMap::new();
     label2live.insert(
@@ -17,10 +17,7 @@ pub fn uncover_live(mut prog: VarProgram) -> Result<AnnotProg, Error> {
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
 
-    let mut flow_graph = FlowGraph::new();
-    flow_graph.build(&prog);
     let block_order = flow_graph.topo_sort()?;
-
     for block_label in block_order {
         if block_label == "conclusion" || block_label == "main" {
             continue;

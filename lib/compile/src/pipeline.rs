@@ -1,9 +1,9 @@
 use crate::{
     CompilerPaths, Error,
     passes::{
-        Assemble, AssignHomes, BuildGraph, ColorGraph, ExplicateControl, GeneratePreludeConclusion,
-        Link, Parse, Pass, PatchInstructions, RemoveComplexOperands, SelectInstructions, Typecheck,
-        UncoverLive, Uniquify,
+        Assemble, AssignHomes, BuildFlowGraph, BuildInterferenceGraph, ColorGraph,
+        ExplicateControl, GeneratePreludeConclusion, Link, Parse, Pass, PatchInstructions,
+        RemoveComplexOperands, SelectInstructions, Typecheck, UncoverLive, Uniquify,
     },
 };
 
@@ -15,8 +15,9 @@ pub enum Pipeline {
     RemoveComplexOperands(<RemoveComplexOperands as Pass>::Input),
     ExplicateControl(<ExplicateControl as Pass>::Input),
     SelectInstructions(<SelectInstructions as Pass>::Input),
+    BuildFlowGraph(<BuildFlowGraph as Pass>::Input),
     UncoverLive(<UncoverLive as Pass>::Input),
-    BuildGraph(<BuildGraph as Pass>::Input),
+    BuildGraph(<BuildInterferenceGraph as Pass>::Input),
     ColorGraph(<ColorGraph as Pass>::Input),
     AssignHomes(<AssignHomes as Pass>::Input),
     PatchInstructions(<PatchInstructions as Pass>::Input),
@@ -38,22 +39,22 @@ impl Pipeline {
             }
             Pipeline::Uniquify(input) => {
                 let output = <Uniquify as Pass>::run_debug(input, comp, debug)?;
-
                 Ok(Some(Pipeline::RemoveComplexOperands(output)))
             }
             Pipeline::RemoveComplexOperands(input) => {
                 let output = <RemoveComplexOperands as Pass>::run_debug(input, comp, debug)?;
-
                 Ok(Some(Pipeline::ExplicateControl(output)))
             }
             Pipeline::ExplicateControl(input) => {
                 let output = <ExplicateControl as Pass>::run_debug(input, comp, debug)?;
-
                 Ok(Some(Pipeline::SelectInstructions(output)))
             }
             Pipeline::SelectInstructions(input) => {
                 let output = <SelectInstructions as Pass>::run_debug(input, comp, debug)?;
-
+                Ok(Some(Pipeline::BuildFlowGraph(output)))
+            }
+            Pipeline::BuildFlowGraph(input) => {
+                let output = <BuildFlowGraph as Pass>::run_debug(input, comp, debug)?;
                 Ok(Some(Pipeline::UncoverLive(output)))
             }
             Pipeline::UncoverLive(input) => {
@@ -62,7 +63,7 @@ impl Pipeline {
                 Ok(Some(Pipeline::BuildGraph(output)))
             }
             Pipeline::BuildGraph(input) => {
-                let output = <BuildGraph as Pass>::run_debug(input, comp, debug)?;
+                let output = <BuildInterferenceGraph as Pass>::run_debug(input, comp, debug)?;
 
                 Ok(Some(Pipeline::ColorGraph(output)))
             }

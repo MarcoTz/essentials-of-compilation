@@ -70,6 +70,7 @@ impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for block in self.blocks.iter() {
             block.fmt(f)?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -77,7 +78,8 @@ impl fmt::Display for Program {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:\n{}", self.label, self.tail)
+        let tail_str = self.tail.to_string().replace("\n", "\n\t");
+        write!(f, "{}:\n\t{}", self.label, tail_str)
     }
 }
 

@@ -35,6 +35,7 @@ impl fmt::Display for VarProgram {
         writeln!(f, ".global main")?;
         for block in self.blocks.iter() {
             block.fmt(f)?;
+            writeln!(f)?;
         }
         Ok(())
     }

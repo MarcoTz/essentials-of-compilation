@@ -1,7 +1,8 @@
 use crate::errors::Error;
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt};
 use syntax::x86::{Block, Instruction, VarArg, VarProgram};
 
+#[derive(Debug)]
 pub struct FlowGraph {
     verts: HashSet<String>,
     edges: HashSet<(String, String)>,
@@ -102,5 +103,20 @@ impl FlowGraph {
 impl Default for FlowGraph {
     fn default() -> FlowGraph {
         FlowGraph::new()
+    }
+}
+
+impl fmt::Display for FlowGraph {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Labels:")?;
+        for vert in self.verts.iter() {
+            writeln!(f, "\t{vert}")?;
+        }
+        writeln!(f)?;
+        writeln!(f, "Flow Edges")?;
+        for (from, to) in self.edges.iter() {
+            writeln!(f, "\t{from} --> {to}")?;
+        }
+        Ok(())
     }
 }

@@ -3,7 +3,7 @@ use crate::CompilerPaths;
 use assign_homes::{AnnotProg, LocationGraph, build_interference_graph, build_move_graph};
 use std::{convert::Infallible, fmt};
 
-pub struct BuildGraph;
+pub struct BuildInterferenceGraph;
 
 #[derive(Debug)]
 pub struct Built {
@@ -12,7 +12,7 @@ pub struct Built {
     pub move_graph: LocationGraph,
 }
 
-impl Pass for BuildGraph {
+impl Pass for BuildInterferenceGraph {
     type Input = AnnotProg;
     type Output = Built;
     type Error = Infallible;

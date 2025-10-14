@@ -1,12 +1,11 @@
-use super::Pass;
+use super::{Pass, build_flow_graph::FlowProgram};
 use crate::CompilerPaths;
 use assign_homes::{AnnotProg, uncover_live};
-use syntax::x86::VarProgram;
 
 pub struct UncoverLive;
 
 impl Pass for UncoverLive {
-    type Input = VarProgram;
+    type Input = FlowProgram;
     type Output = AnnotProg;
     type Error = assign_homes::Error;
 
@@ -15,6 +14,6 @@ impl Pass for UncoverLive {
     }
 
     fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        uncover_live(input)
+        uncover_live(input.prog, input.graph)
     }
 }

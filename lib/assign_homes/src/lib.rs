@@ -13,6 +13,7 @@ pub use assign::assign_homes;
 pub use color_graph::color_graph;
 pub use colors::Coloring;
 pub use errors::Error;
+pub use flow_graph::FlowGraph;
 pub use graph::LocationGraph;
 pub use interference_graph::build_interference_graph;
 pub use move_graph::build_move_graph;
