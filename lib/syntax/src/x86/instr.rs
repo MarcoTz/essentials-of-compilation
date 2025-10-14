@@ -17,7 +17,6 @@ pub enum Instruction<Arg> {
     SetCC { cc: Cc, dest: Arg },
     MovZBQ { src: Arg, dest: Arg },
     JumpCC { cc: Cc, label: String },
-    NotQ { arg: Arg },
     AndQ { src: Arg, dest: Arg },
     OrQ { src: Arg, dest: Arg },
 }
@@ -123,7 +122,6 @@ where
             Instruction::SetCC { cc, dest: arg } => write!(f, "set{cc} {arg}"),
             Instruction::MovZBQ { src, dest } => write!(f, "movzbq {src}, {dest}"),
             Instruction::JumpCC { cc, label } => write!(f, "j{cc} {label}"),
-            Instruction::NotQ { arg } => write!(f, "notq {arg}"),
             Instruction::AndQ { src, dest } => write!(f, "andq {src}, {dest}"),
             Instruction::OrQ { src, dest } => write!(f, "orq {src}, {dest}"),
         }

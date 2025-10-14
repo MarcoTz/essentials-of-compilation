@@ -28,7 +28,6 @@ fn collect_instr(instr: &Instruction<VarArg>) -> HashSet<Reg> {
         Instruction::SetCC { dest, .. } => collect_arg(dest),
         Instruction::MovZBQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
         Instruction::JumpCC { .. } => HashSet::new(),
-        Instruction::NotQ { arg } => collect_arg(arg),
         Instruction::AndQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
         Instruction::OrQ { src, dest } => &collect_arg(src) | &collect_arg(dest),
     }

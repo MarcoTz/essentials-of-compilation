@@ -46,8 +46,9 @@ impl fmt::Display for Statement {
                 else_block,
             } => write!(
                 f,
-                "if {cond_exp} {{ {} }} else {{ {} }};",
-                then_block, else_block
+                "if {cond_exp} {{\n\t{}\n}} else {{\n\t{}\n}};",
+                then_block.to_string().replace("\n", "\n\t"),
+                else_block.to_string().replace("\n", "\n\t"),
             ),
         }
     }

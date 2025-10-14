@@ -17,7 +17,8 @@ pub fn uncover_live(mut prog: VarProgram, flow_graph: FlowGraph) -> Result<Annot
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
 
-    let block_order = flow_graph.topo_sort()?;
+    let mut block_order = flow_graph.topo_sort()?;
+    block_order.reverse();
     for block_label in block_order {
         if block_label == "conclusion" || block_label == "main" {
             continue;
@@ -89,7 +90,6 @@ pub fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
         Instruction::SetCC { dest, .. } => arg_locations(dest),
         Instruction::MovZBQ { dest, .. } => arg_locations(dest),
         Instruction::JumpCC { .. } => HashSet::new(),
-        Instruction::NotQ { arg } => arg_locations(arg),
         Instruction::AndQ { dest, .. } => arg_locations(dest),
         Instruction::OrQ { dest, .. } => arg_locations(dest),
     }
@@ -117,7 +117,6 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
         Instruction::SetCC { .. } => HashSet::new(),
         Instruction::MovZBQ { src, .. } => arg_locations(src),
         Instruction::JumpCC { .. } => HashSet::new(),
-        Instruction::NotQ { arg } => arg_locations(arg),
         Instruction::AndQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
         Instruction::OrQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
     }

@@ -73,10 +73,7 @@ fn assign_instr(
             dest: assign_arg(dest, assignments)?,
         }),
         Instruction::JumpCC { cc, label } => Ok(Instruction::JumpCC { cc, label }),
-        Instruction::NotQ { arg } => Ok(Instruction::NotQ {
-            arg: assign_arg(arg, assignments)?,
-        }),
-        Instruction::AndQ { src, dest } => Ok(Instruction::AddQ {
+        Instruction::AndQ { src, dest } => Ok(Instruction::AndQ {
             src: assign_arg(src, assignments)?,
             dest: assign_arg(dest, assignments)?,
         }),

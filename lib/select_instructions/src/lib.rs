@@ -103,7 +103,10 @@ fn select_exp(exp: lang_c::Expression, dest: x86::VarArg) -> Vec<x86::Instructio
                         src: arg_loc,
                         dest: dest.clone(),
                     },
-                    x86::Instruction::NotQ { arg: dest },
+                    x86::Instruction::XorQ {
+                        src: 1.into(),
+                        dest,
+                    },
                 ],
             }
         }

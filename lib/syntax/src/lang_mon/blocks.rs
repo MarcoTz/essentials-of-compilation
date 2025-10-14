@@ -20,10 +20,14 @@ impl From<Block> for Program {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for stmt in self.stmts.iter() {
-            stmt.fmt(f)?;
-            writeln!(f)?;
-        }
-        Ok(())
+        write!(
+            f,
+            "{}",
+            self.stmts
+                .iter()
+                .map(|stmt| stmt.to_string())
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
     }
 }

@@ -10,7 +10,7 @@ fn main() -> Result<(), Error> {
         let exe_path = compiler.paths.exe_out.clone();
         println!("Compiling {}", example.name);
         compiler.run()?;
-        println!("\n...Ok");
+        println!("\t...Ok");
         println!("Checking output of {}", example.name);
         let mut check_cmd = Command::new(&exe_path);
         let output = check_cmd

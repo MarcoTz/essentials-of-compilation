@@ -25,7 +25,6 @@ fn patch_instr(instr: Instruction<Arg>) -> Vec<Instruction<Arg>> {
         Instruction::RetQ => vec![Instruction::RetQ],
         Instruction::Jump { label } => vec![Instruction::Jump { label }],
         Instruction::JumpCC { cc, label } => vec![Instruction::JumpCC { cc, label }],
-        Instruction::NotQ { arg } => vec![Instruction::NotQ { arg }],
         Instruction::SetCC { cc, dest } => vec![Instruction::SetCC { cc, dest }],
 
         Instruction::CmpQ {
@@ -68,7 +67,7 @@ fn patch_instr(instr: Instruction<Arg>) -> Vec<Instruction<Arg>> {
             remove_double_deref(src, dest, |src, dest| Instruction::MovZBQ { src, dest })
         }
         Instruction::AndQ { src, dest } => {
-            remove_double_deref(src, dest, |src, dest| Instruction::AddQ { src, dest })
+            remove_double_deref(src, dest, |src, dest| Instruction::AndQ { src, dest })
         }
         Instruction::OrQ { src, dest } => {
             remove_double_deref(src, dest, |src, dest| Instruction::OrQ { src, dest })
