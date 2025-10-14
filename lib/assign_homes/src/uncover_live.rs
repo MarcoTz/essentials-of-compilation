@@ -125,7 +125,7 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
 
 #[cfg(test)]
 mod uncover_live_tests {
-    use super::{AnnotProg, LiveInstruction, uncover_live};
+    use super::{AnnotProg, FlowGraph, LiveInstruction, uncover_live};
     use std::collections::HashSet;
     use syntax::x86::{Instruction, Reg, VarProgram};
 
@@ -142,7 +142,9 @@ mod uncover_live_tests {
                 Instruction::add("b", "c"),
             ],
         );
-        let result = uncover_live(example).unwrap();
+        let mut example_flow = FlowGraph::new();
+        example_flow.build(&example);
+        let result = uncover_live(example, example_flow).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
             "start",
@@ -197,7 +199,9 @@ mod uncover_live_tests {
                 Instruction::jmp("conclusion"),
             ],
         );
-        let result = uncover_live(example).unwrap();
+        let mut example_flow = FlowGraph::new();
+        example_flow.build(&example);
+        let result = uncover_live(example, example_flow).unwrap();
         let mut expected = AnnotProg::new();
         expected.add_block(
             "start",
