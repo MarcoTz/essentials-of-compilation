@@ -2,17 +2,17 @@
 members = [
   "apps/cli",
   "lib/test_utils",
-  "lib/syntax",
-  "lib/compile",
+  "lib/definitions",
+  "lib/lang",
+  "lib/lang_mon",
+  "lib/lang_c",
+  "lib/lang_x86",
   "lib/parser",
-  "lib/typecheck",
-  "lib/uniquify",
-  "lib/remove_complex_operands",
-  "lib/explicate_control",
-  "lib/select_instructions",
-  "lib/assign_homes",
-  "lib/patch_instructions",
-  "lib/generate_prelude_conclusion",
+  "lib/lang2lang_mon",
+  "lib/lang_mon2lang_c",
+  "lib/lang_c2lang_x86var",
+  "lib/register_allocation",
+  "lib/driver",
   "tests"
 ]
 

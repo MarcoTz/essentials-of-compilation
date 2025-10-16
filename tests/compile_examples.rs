@@ -1,4 +1,4 @@
-use compile::Compiler;
+use driver::Compiler;
 use std::process::Command;
 use test_utils::{Error, load_examples, set_working_dir};
 

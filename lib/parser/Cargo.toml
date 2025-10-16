@@ -4,7 +4,8 @@ version="0.0.1"
 edition="2024"
 
 [dependencies]
-syntax = { path = "../syntax" }
+lang = { path = "../lang" }
+definitions = { path = "../definitions" }
 
 pest={version="2.8.1"}
 pest_derive={version="2.8.1"}

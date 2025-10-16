@@ -15,5 +15,5 @@ harness=false
 
 [dependencies]
 parser = { path = "../lib/parser" }
-compile = { path = "../lib/compile" }
+driver = { path = "../lib/driver" }
 test_utils = { path = "../lib/test_utils" }

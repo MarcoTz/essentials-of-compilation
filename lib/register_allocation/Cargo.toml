@@ -1,0 +1,8 @@
+[package]
+name="register_allocation"
+version="0.0.1"
+edition="2024"
+
+[dependencies]
+definitions={ path="../definitions" }
+lang_x86 = {path="../lang_x86" }

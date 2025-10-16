@@ -1,0 +1,69 @@
+use super::{RemoveComplexOperands, exp_to_atm};
+use std::collections::HashSet;
+
+impl RemoveComplexOperands for lang::Expression {
+    type Target = (Vec<lang_mon::Statement>, lang_mon::Expression);
+
+    fn remove_complex_operands(self, used_vars: &mut HashSet<String>) -> Self::Target {
+        match self {
+            lang::Expression::Literal(i) => (vec![], lang_mon::Atom::Integer(i).into()),
+            lang::Expression::Bool(b) => (vec![], lang_mon::Atom::Bool(b).into()),
+            lang::Expression::Variable(v) => (vec![], lang_mon::Atom::Variable(v).into()),
+            lang::Expression::ReadInt => (vec![], lang_mon::Expression::ReadInt),
+
+            lang::Expression::BinOp { fst, op, snd } => {
+                let (fst_exps, fst_last) = fst.remove_complex_operands(used_vars);
+                let (snd_exps, snd_last) = snd.remove_complex_operands(used_vars);
+                let mut exps = vec![];
+                exps.extend(fst_exps);
+                let fst_atm = if let lang_mon::Expression::Atm(atm) = fst_last {
+                    atm
+                } else {
+                    let (assignment, atm) = exp_to_atm(fst_last, used_vars);
+                    exps.push(assignment);
+                    atm
+                };
+                exps.extend(snd_exps);
+                let snd_atm = if let lang_mon::Expression::Atm(atm) = snd_last {
+                    atm
+                } else {
+                    let (assignment, atm) = exp_to_atm(snd_last, used_vars);
+                    exps.push(assignment);
+                    atm
+                };
+                (exps, lang_mon::Expression::bin(fst_atm, op, snd_atm))
+            }
+            lang::Expression::UnOp { arg, op } => {
+                let (mut exps, last) = arg.remove_complex_operands(used_vars);
+                if let lang_mon::Expression::Atm(atm) = last {
+                    (exps, lang_mon::Expression::un(atm, op))
+                } else {
+                    let (assignment, atm) = exp_to_atm(last, used_vars);
+                    exps.push(assignment);
+                    (exps, lang_mon::Expression::un(atm, op))
+                }
+            }
+            lang::Expression::Cmp { left, cmp, right } => {
+                let (left_exps, left_last) = left.remove_complex_operands(used_vars);
+                let (right_exps, right_last) = right.remove_complex_operands(used_vars);
+                let mut exps = left_exps;
+                let left_atm = if let lang_mon::Expression::Atm(atm) = left_last {
+                    atm
+                } else {
+                    let (assignment, atm) = exp_to_atm(left_last, used_vars);
+                    exps.push(assignment);
+                    atm
+                };
+                exps.extend(right_exps);
+                let right_atm = if let lang_mon::Expression::Atm(atm) = right_last {
+                    atm
+                } else {
+                    let (assignment, atm) = exp_to_atm(right_last, used_vars);
+                    exps.push(assignment);
+                    atm
+                };
+                (exps, lang_mon::Expression::cmp(left_atm, cmp, right_atm))
+            }
+        }
+    }
+}

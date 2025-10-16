@@ -3,7 +3,7 @@ use std::{fmt, path::PathBuf};
 #[derive(Debug)]
 pub enum Error {
     Parse(parser::Error),
-    Compiler(compile::Error),
+    Compiler(driver::Error),
     ReadDir(String),
     FileAccess(PathBuf),
     GetFileName(PathBuf),
@@ -58,8 +58,8 @@ impl From<parser::Error> for Error {
     }
 }
 
-impl From<compile::Error> for Error {
-    fn from(err: compile::Error) -> Error {
+impl From<driver::Error> for Error {
+    fn from(err: driver::Error) -> Error {
         Error::Compiler(err)
     }
 }

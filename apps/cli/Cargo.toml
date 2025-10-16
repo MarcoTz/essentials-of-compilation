@@ -8,6 +8,6 @@ name="compile_cli"
 path="src/main.rs"
 
 [dependencies]
-compile = { path="../../lib/compile" } 
+driver = { path="../../lib/driver" } 
 
 clap = { version = "4.5.45", features = ["derive"] }

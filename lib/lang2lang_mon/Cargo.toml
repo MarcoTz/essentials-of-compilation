@@ -1,0 +1,9 @@
+[package]
+name="lang2lang_mon"
+version="0.0.1"
+edition="2024"
+
+[dependencies]
+definitions={ path="../definitions" }
+lang={ path="../lang" }
+lang_mon={ path="../lang_mon" }

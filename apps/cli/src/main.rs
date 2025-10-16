@@ -1,5 +1,5 @@
 use clap::Parser;
-use compile::Compiler;
+use driver::Compiler;
 use std::path::PathBuf;
 
 #[derive(Parser)]
