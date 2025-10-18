@@ -49,7 +49,7 @@ impl BlockAccum {
         next
     }
 
-    pub fn to_prog(self) -> core::Program {
+    pub fn build_prog(self) -> core::Program {
         let mut prog = core::Program::new();
         for block in self.blocks {
             prog.add_block(&block.label, block.tail);

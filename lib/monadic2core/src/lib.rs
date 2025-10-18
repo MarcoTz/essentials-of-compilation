@@ -10,7 +10,7 @@ pub use errors::Error;
 pub fn explicate_control(prog: monadic::Program) -> Result<core::Program, Error> {
     let mut accum = BlockAccum::new();
     prog.main.explicate_control(&mut accum)?;
-    Ok(accum.to_prog())
+    Ok(accum.build_prog())
 }
 
 pub trait ExplicateControl {

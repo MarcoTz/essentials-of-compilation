@@ -12,10 +12,7 @@ pub fn color_graph(
 ) -> Result<Coloring, Error> {
     let mut vert_set = interference_graph.verts.clone();
     let mut coloring = empty_coloring();
-    vert_set = vert_set
-        .into_iter()
-        .filter(|vert| matches!(vert, Location::Variable(_)))
-        .collect();
+    vert_set.retain(|vert| matches!(vert, Location::Variable(_)));
     'outer: while !vert_set.is_empty() {
         let mut next_candidates = get_next_candidates(&vert_set, &interference_graph, &coloring)?;
         next_candidates.sort();

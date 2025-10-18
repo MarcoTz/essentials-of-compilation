@@ -52,7 +52,7 @@ impl FlowGraph {
 
     pub fn build(&mut self, prog: &VarProgram) {
         for block in prog.blocks.iter() {
-            self.build_block(&block);
+            self.build_block(block);
         }
     }
 
@@ -78,7 +78,7 @@ impl FlowGraph {
         let mut start = self
             .verts
             .iter()
-            .filter(|vert| self.incoming(vert).len() == 0)
+            .filter(|vert| self.incoming(vert).is_empty())
             .cloned()
             .collect::<Vec<_>>();
         while !start.is_empty() {
@@ -87,7 +87,7 @@ impl FlowGraph {
             sorted.push(next);
             for edge in outgoing {
                 self.edges.remove(&edge);
-                if self.incoming(&edge.1).len() == 0 {
+                if self.incoming(&edge.1).is_empty() {
                     start.push(edge.1);
                 }
             }
