@@ -5,11 +5,11 @@ edition="2024"
 
 [dependencies]
 definitions={ path="../definitions" }
-lang = { path="../lang" }
+surface = { path="../surface" }
 lang_mon = { path="../lang_mon" }
 lang_c = { path="../lang_c" }
 lang_x86 = { path="../lang_x86" }
-lang2lang_mon = { path="../lang2lang_mon" }
+surface2lang_mon = { path="../surface2lang_mon" }
 lang_mon2lang_c = { path="../lang_mon2lang_c" }
 lang_c2lang_x86var = { path="../lang_c2lang_x86var" }
 parser = { path="../parser" }

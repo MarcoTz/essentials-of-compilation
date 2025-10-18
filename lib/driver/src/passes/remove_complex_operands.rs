@@ -1,12 +1,12 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang2lang_mon::RemoveComplexOperands;
 use std::convert::Infallible;
+use surface2lang_mon::RemoveComplexOperands;
 
 pub struct Rco;
 
 impl Pass for Rco {
-    type Input = lang::Program;
+    type Input = surface::Program;
     type Output = lang_mon::Program;
     type Error = Infallible;
 

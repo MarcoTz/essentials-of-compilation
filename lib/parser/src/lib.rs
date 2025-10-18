@@ -1,6 +1,6 @@
-use lang::Program;
 use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
+use surface::Program;
 
 mod errors;
 mod expressions;

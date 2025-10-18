@@ -1,7 +1,7 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang::{Program, Uniquify};
 use std::convert::Infallible;
+use surface::{Program, Uniquify};
 
 pub struct UniquifyVariables;
 

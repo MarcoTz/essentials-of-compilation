@@ -2,8 +2,8 @@ use crate::{
     Error, Rule, pair_to_n_inner,
     symbols::{parse_bin_op, parse_cmp, parse_un_op},
 };
-use lang::Expression;
 use pest::iterators::Pair;
+use surface::Expression;
 
 pub fn parse_expression(pair: Pair<'_, Rule>) -> Result<Expression, Error> {
     let mut inner = pair.into_inner();

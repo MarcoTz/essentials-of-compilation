@@ -1,13 +1,13 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang::{Program, Typecheck};
+use surface::{Program, Typecheck};
 
 pub struct CheckTypes;
 
 impl Pass for CheckTypes {
     type Input = Program;
     type Output = Program;
-    type Error = lang::typecheck::Error;
+    type Error = surface::typecheck::Error;
 
     fn description() -> &'static str {
         "Typecheck"

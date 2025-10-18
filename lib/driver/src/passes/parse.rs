@@ -1,7 +1,7 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang::Program;
 use parser::parse_program;
+use surface::Program;
 
 pub struct Parse;
 

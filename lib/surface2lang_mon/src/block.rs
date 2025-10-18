@@ -1,7 +1,7 @@
 use super::RemoveComplexOperands;
 use std::collections::HashSet;
 
-impl RemoveComplexOperands for lang::Block {
+impl RemoveComplexOperands for surface::Block {
     type Target = lang_mon::Block;
     fn remove_complex_operands(self, used_vars: &mut HashSet<String>) -> Self::Target {
         let mut removed = vec![];

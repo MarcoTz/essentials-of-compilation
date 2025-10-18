@@ -1,17 +1,17 @@
 use super::{RemoveComplexOperands, exp_to_atm};
 use std::collections::HashSet;
 
-impl RemoveComplexOperands for lang::Expression {
+impl RemoveComplexOperands for surface::Expression {
     type Target = (Vec<lang_mon::Statement>, lang_mon::Expression);
 
     fn remove_complex_operands(self, used_vars: &mut HashSet<String>) -> Self::Target {
         match self {
-            lang::Expression::Literal(i) => (vec![], lang_mon::Atom::Integer(i).into()),
-            lang::Expression::Bool(b) => (vec![], lang_mon::Atom::Bool(b).into()),
-            lang::Expression::Variable(v) => (vec![], lang_mon::Atom::Variable(v).into()),
-            lang::Expression::ReadInt => (vec![], lang_mon::Expression::ReadInt),
+            surface::Expression::Literal(i) => (vec![], lang_mon::Atom::Integer(i).into()),
+            surface::Expression::Bool(b) => (vec![], lang_mon::Atom::Bool(b).into()),
+            surface::Expression::Variable(v) => (vec![], lang_mon::Atom::Variable(v).into()),
+            surface::Expression::ReadInt => (vec![], lang_mon::Expression::ReadInt),
 
-            lang::Expression::BinOp { fst, op, snd } => {
+            surface::Expression::BinOp { fst, op, snd } => {
                 let (fst_exps, fst_last) = fst.remove_complex_operands(used_vars);
                 let (snd_exps, snd_last) = snd.remove_complex_operands(used_vars);
                 let mut exps = vec![];
@@ -33,7 +33,7 @@ impl RemoveComplexOperands for lang::Expression {
                 };
                 (exps, lang_mon::Expression::bin(fst_atm, op, snd_atm))
             }
-            lang::Expression::UnOp { arg, op } => {
+            surface::Expression::UnOp { arg, op } => {
                 let (mut exps, last) = arg.remove_complex_operands(used_vars);
                 if let lang_mon::Expression::Atm(atm) = last {
                     (exps, lang_mon::Expression::un(atm, op))
@@ -43,7 +43,7 @@ impl RemoveComplexOperands for lang::Expression {
                     (exps, lang_mon::Expression::un(atm, op))
                 }
             }
-            lang::Expression::Cmp { left, cmp, right } => {
+            surface::Expression::Cmp { left, cmp, right } => {
                 let (left_exps, left_last) = left.remove_complex_operands(used_vars);
                 let (right_exps, right_last) = right.remove_complex_operands(used_vars);
                 let mut exps = left_exps;

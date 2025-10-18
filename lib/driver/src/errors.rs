@@ -5,7 +5,7 @@ pub enum Error {
     Infallible,
     Parse(parser::Error),
     AssignHomes(register_allocation::Error),
-    Typecheck(lang::typecheck::Error),
+    Typecheck(surface::typecheck::Error),
     ExplicateControl(lang_mon2lang_c::Error),
     ReadFile(PathBuf),
     ParentNotFound(PathBuf),
@@ -57,8 +57,8 @@ impl From<register_allocation::Error> for Error {
     }
 }
 
-impl From<lang::typecheck::Error> for Error {
-    fn from(err: lang::typecheck::Error) -> Error {
+impl From<surface::typecheck::Error> for Error {
+    fn from(err: surface::typecheck::Error) -> Error {
         Error::Typecheck(err)
     }
 }

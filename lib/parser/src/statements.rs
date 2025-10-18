@@ -1,6 +1,6 @@
 use crate::{Error, Rule, pair_to_n_inner, parse_expression};
-use lang::{Block, Statement};
 use pest::iterators::Pair;
+use surface::{Block, Statement};
 
 pub fn parse_statement(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
     match pair.as_rule() {
