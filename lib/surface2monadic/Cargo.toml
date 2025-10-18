@@ -1,7 +1,9 @@
 [package]
-name="lang_mon"
+name="surface2monadic"
 version="0.0.1"
 edition="2024"
 
 [dependencies]
 definitions={ path="../definitions" }
+surface={ path="../surface" }
+monadic={ path="../monadic" }

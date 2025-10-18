@@ -6,7 +6,7 @@ pub enum Error {
     Parse(parser::Error),
     AssignHomes(register_allocation::Error),
     Typecheck(surface::typecheck::Error),
-    ExplicateControl(lang_mon2lang_c::Error),
+    ExplicateControl(monadic2lang_c::Error),
     ReadFile(PathBuf),
     ParentNotFound(PathBuf),
     CreateDir(PathBuf),
@@ -63,8 +63,8 @@ impl From<surface::typecheck::Error> for Error {
     }
 }
 
-impl From<lang_mon2lang_c::Error> for Error {
-    fn from(err: lang_mon2lang_c::Error) -> Error {
+impl From<monadic2lang_c::Error> for Error {
+    fn from(err: monadic2lang_c::Error) -> Error {
         Error::ExplicateControl(err)
     }
 }

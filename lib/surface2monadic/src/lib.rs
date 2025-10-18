@@ -1,5 +1,4 @@
 use definitions::traits::fresh_var;
-use lang_mon;
 use std::collections::HashSet;
 
 mod block;
@@ -13,13 +12,13 @@ pub trait RemoveComplexOperands {
 }
 
 fn exp_to_atm(
-    exp: lang_mon::Expression,
+    exp: monadic::Expression,
     used_vars: &mut HashSet<String>,
-) -> (lang_mon::Statement, lang_mon::Atom) {
+) -> (monadic::Statement, monadic::Atom) {
     let new_var = fresh_var(used_vars);
-    let let_exp = lang_mon::Statement::assign(&new_var, exp);
+    let let_exp = monadic::Statement::assign(&new_var, exp);
     used_vars.insert(new_var.clone());
-    let atm = lang_mon::Atom::Variable(new_var);
+    let atm = monadic::Atom::Variable(new_var);
     (let_exp, atm)
 }
 
@@ -28,7 +27,7 @@ mod remove_complex_operands_tests {
     use super::RemoveComplexOperands;
     use definitions::{BinaryOperation, UnaryOperation};
     use lang;
-    use lang_mon;
+    use monadic;
 
     #[test]
     fn remove_sum() {
@@ -48,28 +47,28 @@ mod remove_complex_operands_tests {
             )),
         ])
         .remove_complex_operands(&mut Default::default());
-        let expected = lang_mon::Program::new(vec![
-            lang_mon::Statement::assign(
+        let expected = monadic::Program::new(vec![
+            monadic::Statement::assign(
                 "x0",
-                lang_mon::Expression::un(lang_mon::Atom::Integer(10), UnaryOperation::Neg),
+                monadic::Expression::un(monadic::Atom::Integer(10), UnaryOperation::Neg),
             ),
-            lang_mon::Statement::assign(
+            monadic::Statement::assign(
                 "x",
-                lang_mon::Expression::bin(
-                    lang_mon::Atom::Integer(42),
+                monadic::Expression::bin(
+                    monadic::Atom::Integer(42),
                     BinaryOperation::Add,
-                    lang_mon::Atom::Variable("x0".to_owned()),
+                    monadic::Atom::Variable("x0".to_owned()),
                 ),
             ),
-            lang_mon::Statement::assign(
+            monadic::Statement::assign(
                 "x1",
-                lang_mon::Expression::bin(
-                    lang_mon::Atom::Variable("x".to_owned()),
+                monadic::Expression::bin(
+                    monadic::Atom::Variable("x".to_owned()),
                     BinaryOperation::Add,
-                    lang_mon::Atom::Integer(10),
+                    monadic::Atom::Integer(10),
                 ),
             ),
-            lang_mon::Statement::Return(lang_mon::Atom::Variable("x1".to_owned())),
+            monadic::Statement::Return(monadic::Atom::Variable("x1".to_owned())),
         ]);
         assert_eq!(result, expected)
     }

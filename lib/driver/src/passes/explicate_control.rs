@@ -1,11 +1,11 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang_mon2lang_c::{Error, ExplicateControl};
+use monadic2lang_c::{Error, ExplicateControl};
 
 pub struct Explicate;
 
 impl Pass for Explicate {
-    type Input = lang_mon::Program;
+    type Input = monadic::Program;
     type Output = lang_c::Program;
     type Error = Error;
 

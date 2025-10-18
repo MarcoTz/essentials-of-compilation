@@ -1,13 +1,13 @@
 use super::Pass;
 use crate::CompilerPaths;
 use std::convert::Infallible;
-use surface2lang_mon::RemoveComplexOperands;
+use surface2monadic::RemoveComplexOperands;
 
 pub struct Rco;
 
 impl Pass for Rco {
     type Input = surface::Program;
-    type Output = lang_mon::Program;
+    type Output = monadic::Program;
     type Error = Infallible;
 
     fn description() -> &'static str {

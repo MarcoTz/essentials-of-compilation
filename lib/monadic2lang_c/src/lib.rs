@@ -25,7 +25,7 @@ impl From<lang_c::Continuation> for StmtOrCont {
     }
 }
 
-impl ExplicateControl for lang_mon::Program {
+impl ExplicateControl for monadic::Program {
     type Target = lang_c::Program;
     fn explicate_control(self, state: &mut ExplicateState) -> Result<Self::Target, Error> {
         let mut new_prog = lang_c::Program::new();
@@ -36,7 +36,7 @@ impl ExplicateControl for lang_mon::Program {
 }
 
 fn explicate_tail(
-    block: lang_mon::Block,
+    block: monadic::Block,
     state: &mut ExplicateState,
     mut is_start: bool,
 ) -> Result<String, Error> {
@@ -86,19 +86,19 @@ fn create_block(tail: lang_c::Tail, label: Option<&str>, state: &mut ExplicateSt
 }
 
 fn explicate_statement(
-    stmt: lang_mon::Statement,
+    stmt: monadic::Statement,
     state: &mut ExplicateState,
 ) -> Result<StmtOrCont, Error> {
     match stmt {
-        lang_mon::Statement::Return(atm) => {
+        monadic::Statement::Return(atm) => {
             Ok(lang_c::Continuation::Return(explicate_atm(atm)).into())
         }
-        lang_mon::Statement::Print(atm) => Ok(lang_c::Statement::Print(explicate_atm(atm)).into()),
-        lang_mon::Statement::Assign { var, bound } => {
+        monadic::Statement::Print(atm) => Ok(lang_c::Statement::Print(explicate_atm(atm)).into()),
+        monadic::Statement::Assign { var, bound } => {
             let bound_exp = explicate_exp(bound);
             Ok(lang_c::Statement::assign(&var, bound_exp).into())
         }
-        lang_mon::Statement::If {
+        monadic::Statement::If {
             cond_exp,
             then_block,
             else_block,
@@ -116,20 +116,20 @@ fn explicate_statement(
     }
 }
 
-fn explicate_exp(exp: lang_mon::Expression) -> lang_c::Expression {
+fn explicate_exp(exp: monadic::Expression) -> lang_c::Expression {
     match exp {
-        lang_mon::Expression::Atm(atm) => lang_c::Expression::Atm(explicate_atm(atm)),
-        lang_mon::Expression::ReadInt => lang_c::Expression::ReadInt,
-        lang_mon::Expression::UnaryOp { arg, op } => {
+        monadic::Expression::Atm(atm) => lang_c::Expression::Atm(explicate_atm(atm)),
+        monadic::Expression::ReadInt => lang_c::Expression::ReadInt,
+        monadic::Expression::UnaryOp { arg, op } => {
             let arg_exp = explicate_atm(arg);
             lang_c::Expression::un(arg_exp, op)
         }
-        lang_mon::Expression::BinaryOp { fst, op, snd } => {
+        monadic::Expression::BinaryOp { fst, op, snd } => {
             let fst_exp = explicate_atm(fst);
             let snd_exp = explicate_atm(snd);
             lang_c::Expression::bin(fst_exp, op, snd_exp)
         }
-        lang_mon::Expression::Cmp { left, cmp, right } => {
+        monadic::Expression::Cmp { left, cmp, right } => {
             let left_exp = explicate_atm(left);
             let right_exp = explicate_atm(right);
             lang_c::Expression::cmp(left_exp, cmp, right_exp)
@@ -137,11 +137,11 @@ fn explicate_exp(exp: lang_mon::Expression) -> lang_c::Expression {
     }
 }
 
-fn explicate_atm(atm: lang_mon::Atom) -> lang_c::Atom {
+fn explicate_atm(atm: monadic::Atom) -> lang_c::Atom {
     match atm {
-        lang_mon::Atom::Integer(i) => lang_c::Atom::Integer(i),
-        lang_mon::Atom::Bool(b) => lang_c::Atom::Bool(b),
-        lang_mon::Atom::Variable(v) => lang_c::Atom::Variable(v),
+        monadic::Atom::Integer(i) => lang_c::Atom::Integer(i),
+        monadic::Atom::Bool(b) => lang_c::Atom::Bool(b),
+        monadic::Atom::Variable(v) => lang_c::Atom::Variable(v),
     }
 }
 
@@ -152,42 +152,42 @@ mod explicate_tests {
 
     #[test]
     fn explicate_if_nested() {
-        let prog = lang_mon::Program::new(vec![
-            lang_mon::Statement::assign("x", lang_mon::Expression::Atm(0.into())),
-            lang_mon::Statement::assign("y", lang_mon::Expression::Atm(5.into())),
-            lang_mon::Statement::assign(
+        let prog = monadic::Program::new(vec![
+            monadic::Statement::assign("x", monadic::Expression::Atm(0.into())),
+            monadic::Statement::assign("y", monadic::Expression::Atm(5.into())),
+            monadic::Statement::assign(
                 "z",
-                lang_mon::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
+                monadic::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
             ),
-            lang_mon::Statement::cond(
+            monadic::Statement::cond(
                 "z".into(),
-                lang_mon::Block::new(vec![
-                    lang_mon::Statement::assign(
+                monadic::Block::new(vec![
+                    monadic::Statement::assign(
                         "w",
-                        lang_mon::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
+                        monadic::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
                     ),
-                    lang_mon::Statement::cond(
+                    monadic::Statement::cond(
                         "w".into(),
-                        lang_mon::Block::new(vec![
-                            lang_mon::Statement::assign(
+                        monadic::Block::new(vec![
+                            monadic::Statement::assign(
                                 "z",
-                                lang_mon::Expression::bin(
+                                monadic::Expression::bin(
                                     "y".into(),
                                     BinaryOperation::Add,
                                     2.into(),
                                 ),
                             ),
-                            lang_mon::Statement::Print("z".into()),
+                            monadic::Statement::Print("z".into()),
                         ]),
-                        lang_mon::Block::new(vec![lang_mon::Statement::Print("y".into())]),
+                        monadic::Block::new(vec![monadic::Statement::Print("y".into())]),
                     ),
                 ]),
-                lang_mon::Block::new(vec![
-                    lang_mon::Statement::assign(
+                monadic::Block::new(vec![
+                    monadic::Statement::assign(
                         "z",
-                        lang_mon::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
+                        monadic::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
                     ),
-                    lang_mon::Statement::Print("z".into()),
+                    monadic::Statement::Print("z".into()),
                 ]),
             ),
         ]);
