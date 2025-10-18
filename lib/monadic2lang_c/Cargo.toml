@@ -6,4 +6,4 @@ edition="2024"
 [dependencies]
 definitions={ path="../definitions" }
 monadic={ path="../monadic" }
-lang_c={ path="../lang_c" }
+core={ path="../core" }

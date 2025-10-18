@@ -9,26 +9,26 @@ pub trait ExplicateControl {
 }
 
 enum StmtOrCont {
-    Stmt(lang_c::Statement),
-    Cont(lang_c::Continuation),
+    Stmt(core::Statement),
+    Cont(core::Continuation),
 }
 
-impl From<lang_c::Statement> for StmtOrCont {
-    fn from(stmt: lang_c::Statement) -> StmtOrCont {
+impl From<core::Statement> for StmtOrCont {
+    fn from(stmt: core::Statement) -> StmtOrCont {
         StmtOrCont::Stmt(stmt)
     }
 }
 
-impl From<lang_c::Continuation> for StmtOrCont {
-    fn from(cont: lang_c::Continuation) -> StmtOrCont {
+impl From<core::Continuation> for StmtOrCont {
+    fn from(cont: core::Continuation) -> StmtOrCont {
         StmtOrCont::Cont(cont)
     }
 }
 
 impl ExplicateControl for monadic::Program {
-    type Target = lang_c::Program;
+    type Target = core::Program;
     fn explicate_control(self, state: &mut ExplicateState) -> Result<Self::Target, Error> {
-        let mut new_prog = lang_c::Program::new();
+        let mut new_prog = core::Program::new();
         explicate_tail(self.main, state, true)?;
         state.move_blocks(&mut new_prog);
         Ok(new_prog)
@@ -45,7 +45,7 @@ fn explicate_tail(
     for stmt in block.stmts {
         match explicate_statement(stmt, state)? {
             StmtOrCont::Cont(c) => {
-                let tail = lang_c::Tail {
+                let tail = core::Tail {
                     stmts: block_stmts,
                     cont: c,
                 };
@@ -63,9 +63,9 @@ fn explicate_tail(
     if !block_stmts.is_empty() {
         let label = if is_start { Some("start") } else { None };
         let next_label = create_block(
-            lang_c::Tail {
+            core::Tail {
                 stmts: block_stmts,
-                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+                cont: core::Continuation::Return(core::Atom::Unit),
             },
             label,
             state,
@@ -81,7 +81,7 @@ fn explicate_tail(
     }
 }
 
-fn create_block(tail: lang_c::Tail, label: Option<&str>, state: &mut ExplicateState) -> String {
+fn create_block(tail: core::Tail, label: Option<&str>, state: &mut ExplicateState) -> String {
     state.add_block(tail, label)
 }
 
@@ -91,12 +91,12 @@ fn explicate_statement(
 ) -> Result<StmtOrCont, Error> {
     match stmt {
         monadic::Statement::Return(atm) => {
-            Ok(lang_c::Continuation::Return(explicate_atm(atm)).into())
+            Ok(core::Continuation::Return(explicate_atm(atm)).into())
         }
-        monadic::Statement::Print(atm) => Ok(lang_c::Statement::Print(explicate_atm(atm)).into()),
+        monadic::Statement::Print(atm) => Ok(core::Statement::Print(explicate_atm(atm)).into()),
         monadic::Statement::Assign { var, bound } => {
             let bound_exp = explicate_exp(bound);
-            Ok(lang_c::Statement::assign(&var, bound_exp).into())
+            Ok(core::Statement::assign(&var, bound_exp).into())
         }
         monadic::Statement::If {
             cond_exp,
@@ -106,7 +106,7 @@ fn explicate_statement(
             let cond = explicate_atm(cond_exp);
             let then_label = explicate_tail(then_block, state, false)?;
             let else_label = explicate_tail(else_block, state, false)?;
-            Ok(lang_c::Continuation::If {
+            Ok(core::Continuation::If {
                 cond,
                 then_label,
                 else_label,
@@ -116,32 +116,32 @@ fn explicate_statement(
     }
 }
 
-fn explicate_exp(exp: monadic::Expression) -> lang_c::Expression {
+fn explicate_exp(exp: monadic::Expression) -> core::Expression {
     match exp {
-        monadic::Expression::Atm(atm) => lang_c::Expression::Atm(explicate_atm(atm)),
-        monadic::Expression::ReadInt => lang_c::Expression::ReadInt,
+        monadic::Expression::Atm(atm) => core::Expression::Atm(explicate_atm(atm)),
+        monadic::Expression::ReadInt => core::Expression::ReadInt,
         monadic::Expression::UnaryOp { arg, op } => {
             let arg_exp = explicate_atm(arg);
-            lang_c::Expression::un(arg_exp, op)
+            core::Expression::un(arg_exp, op)
         }
         monadic::Expression::BinaryOp { fst, op, snd } => {
             let fst_exp = explicate_atm(fst);
             let snd_exp = explicate_atm(snd);
-            lang_c::Expression::bin(fst_exp, op, snd_exp)
+            core::Expression::bin(fst_exp, op, snd_exp)
         }
         monadic::Expression::Cmp { left, cmp, right } => {
             let left_exp = explicate_atm(left);
             let right_exp = explicate_atm(right);
-            lang_c::Expression::cmp(left_exp, cmp, right_exp)
+            core::Expression::cmp(left_exp, cmp, right_exp)
         }
     }
 }
 
-fn explicate_atm(atm: monadic::Atom) -> lang_c::Atom {
+fn explicate_atm(atm: monadic::Atom) -> core::Atom {
     match atm {
-        monadic::Atom::Integer(i) => lang_c::Atom::Integer(i),
-        monadic::Atom::Bool(b) => lang_c::Atom::Bool(b),
-        monadic::Atom::Variable(v) => lang_c::Atom::Variable(v),
+        monadic::Atom::Integer(i) => core::Atom::Integer(i),
+        monadic::Atom::Bool(b) => core::Atom::Bool(b),
+        monadic::Atom::Variable(v) => core::Atom::Variable(v),
     }
 }
 
@@ -192,19 +192,19 @@ mod explicate_tests {
             ),
         ]);
         let result = prog.explicate_control(&mut Default::default()).unwrap();
-        let mut expected = lang_c::Program::new();
+        let mut expected = core::Program::new();
         expected.add_block(
             "start",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![
-                    lang_c::Statement::assign("x", lang_c::Expression::Atm(0.into())),
-                    lang_c::Statement::assign("y", lang_c::Expression::Atm(5.into())),
-                    lang_c::Statement::assign(
+                    core::Statement::assign("x", core::Expression::Atm(0.into())),
+                    core::Statement::assign("y", core::Expression::Atm(5.into())),
+                    core::Statement::assign(
                         "z",
-                        lang_c::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
+                        core::Expression::cmp("x".into(), Comparator::Lt, 1.into()),
                     ),
                 ],
-                cont: lang_c::Continuation::If {
+                cont: core::Continuation::If {
                     cond: "z".into(),
                     then_label: "block_2".to_owned(),
                     else_label: "block_3".to_owned(),
@@ -213,12 +213,12 @@ mod explicate_tests {
         );
         expected.add_block(
             "block_2",
-            lang_c::Tail {
-                stmts: vec![lang_c::Statement::assign(
+            core::Tail {
+                stmts: vec![core::Statement::assign(
                     "w".into(),
-                    lang_c::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
+                    core::Expression::cmp("x".into(), Comparator::Eq, 0.into()),
                 )],
-                cont: lang_c::Continuation::If {
+                cont: core::Continuation::If {
                     cond: "w".into(),
                     then_label: "block_0".to_owned(),
                     else_label: "block_1".to_owned(),
@@ -227,35 +227,35 @@ mod explicate_tests {
         );
         expected.add_block(
             "block_1",
-            lang_c::Tail {
-                stmts: vec![lang_c::Statement::Print("y".into())],
-                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+            core::Tail {
+                stmts: vec![core::Statement::Print("y".into())],
+                cont: core::Continuation::Return(core::Atom::Unit),
             },
         );
         expected.add_block(
             "block_0",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![
-                    lang_c::Statement::assign(
+                    core::Statement::assign(
                         "z",
-                        lang_c::Expression::bin("y".into(), BinaryOperation::Add, 2.into()),
+                        core::Expression::bin("y".into(), BinaryOperation::Add, 2.into()),
                     ),
-                    lang_c::Statement::Print("z".into()),
+                    core::Statement::Print("z".into()),
                 ],
-                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+                cont: core::Continuation::Return(core::Atom::Unit),
             },
         );
         expected.add_block(
             "block_3",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![
-                    lang_c::Statement::assign(
+                    core::Statement::assign(
                         "z",
-                        lang_c::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
+                        core::Expression::bin("y".into(), BinaryOperation::Add, 10.into()),
                     ),
-                    lang_c::Statement::Print("z".into()),
+                    core::Statement::Print("z".into()),
                 ],
-                cont: lang_c::Continuation::Return(lang_c::Atom::Unit),
+                cont: core::Continuation::Return(core::Atom::Unit),
             },
         );
         assert_eq!(result, expected)

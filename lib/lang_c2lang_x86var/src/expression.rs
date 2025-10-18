@@ -1,16 +1,16 @@
 use super::SelectInstructions;
 use definitions::{BinaryOperation, READ_INT_CALL, UnaryOperation};
 
-impl SelectInstructions for lang_c::Expression {
+impl SelectInstructions for core::Expression {
     type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
     type Arg = lang_x86::VarArg;
     fn select_instructions(self, dest: lang_x86::VarArg) -> Self::Target {
         match self {
-            lang_c::Expression::Atm(atm) => vec![lang_x86::Instruction::MovQ {
+            core::Expression::Atm(atm) => vec![lang_x86::Instruction::MovQ {
                 src: atm.select_instructions(()),
                 dest,
             }],
-            lang_c::Expression::ReadInt => vec![
+            core::Expression::ReadInt => vec![
                 lang_x86::Instruction::CallQ {
                     label: READ_INT_CALL.to_owned(),
                 },
@@ -19,7 +19,7 @@ impl SelectInstructions for lang_c::Expression {
                     dest,
                 },
             ],
-            lang_c::Expression::UnaryOp { arg, op } => {
+            core::Expression::UnaryOp { arg, op } => {
                 let arg_loc = arg.select_instructions(());
                 match op {
                     UnaryOperation::Neg => vec![
@@ -41,7 +41,7 @@ impl SelectInstructions for lang_c::Expression {
                     ],
                 }
             }
-            lang_c::Expression::BinOp { fst, op, snd } => {
+            core::Expression::BinOp { fst, op, snd } => {
                 let fst_loc = fst.select_instructions(());
                 let snd_loc = snd.select_instructions(());
                 match op {
@@ -75,7 +75,7 @@ impl SelectInstructions for lang_c::Expression {
                     ],
                 }
             }
-            lang_c::Expression::Cmp { left, cmp, right } => {
+            core::Expression::Cmp { left, cmp, right } => {
                 let left_dest = left.select_instructions(());
                 let right_dest = right.select_instructions(());
                 let cc = cmp.select_instructions(());

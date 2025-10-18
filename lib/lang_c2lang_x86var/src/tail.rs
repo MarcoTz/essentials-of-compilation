@@ -1,6 +1,6 @@
 use super::SelectInstructions;
 
-impl SelectInstructions for lang_c::Tail {
+impl SelectInstructions for core::Tail {
     type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
     type Arg = ();
 

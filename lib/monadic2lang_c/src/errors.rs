@@ -1,4 +1,4 @@
-use lang_c::Expression;
+use core::Expression;
 use std::fmt;
 
 #[derive(Debug)]

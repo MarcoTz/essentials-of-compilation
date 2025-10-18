@@ -1,6 +1,6 @@
 use super::SelectInstructions;
 
-impl SelectInstructions for lang_c::Program {
+impl SelectInstructions for core::Program {
     type Target = lang_x86::VarProgram;
     type Arg = ();
     fn select_instructions(self, _: Self::Arg) -> Self::Target {

@@ -6,7 +6,7 @@ use std::convert::Infallible;
 pub struct SelectInstrs;
 
 impl Pass for SelectInstrs {
-    type Input = lang_c::Program;
+    type Input = core::Program;
     type Output = lang_x86::VarProgram;
     type Error = Infallible;
 

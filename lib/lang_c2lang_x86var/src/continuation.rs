@@ -1,12 +1,12 @@
 use super::SelectInstructions;
 
-impl SelectInstructions for lang_c::Continuation {
+impl SelectInstructions for core::Continuation {
     type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
     type Arg = ();
 
     fn select_instructions(self, _: Self::Arg) -> Self::Target {
         match self {
-            lang_c::Continuation::Return(atm) => {
+            core::Continuation::Return(atm) => {
                 let arg_dest = atm.select_instructions(());
                 vec![
                     lang_x86::Instruction::MovQ {
@@ -18,8 +18,8 @@ impl SelectInstructions for lang_c::Continuation {
                     },
                 ]
             }
-            lang_c::Continuation::Goto(label) => vec![lang_x86::Instruction::Jump { label }],
-            lang_c::Continuation::If {
+            core::Continuation::Goto(label) => vec![lang_x86::Instruction::Jump { label }],
+            core::Continuation::If {
                 cond,
                 then_label,
                 else_label,

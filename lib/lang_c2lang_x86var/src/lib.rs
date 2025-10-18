@@ -35,15 +35,15 @@ mod select_instructions_tests {
 
     #[test]
     fn select_sum() {
-        let mut prog = lang_c::Program::new();
+        let mut prog = core::Program::new();
         prog.add_block(
             "start",
-            lang_c::Tail {
-                stmts: vec![lang_c::Statement::assign(
+            core::Tail {
+                stmts: vec![core::Statement::assign(
                     "x0",
-                    lang_c::Expression::bin(10.into(), BinaryOperation::Add, 32.into()),
+                    core::Expression::bin(10.into(), BinaryOperation::Add, 32.into()),
                 )],
-                cont: lang_c::Continuation::Return(lang_c::Atom::Variable("x0".to_owned())),
+                cont: core::Continuation::Return(core::Atom::Variable("x0".to_owned())),
             },
         );
         let result = prog.select_instructions(());
@@ -73,28 +73,28 @@ mod select_instructions_tests {
 
     #[test]
     fn select_neg_sum() {
-        let mut prog = lang_c::Program::new();
+        let mut prog = core::Program::new();
         prog.add_block(
             "start",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![
-                    lang_c::Statement::assign(
+                    core::Statement::assign(
                         "x0",
-                        lang_c::Expression::UnaryOp {
-                            arg: lang_c::Atom::Integer(10),
+                        core::Expression::UnaryOp {
+                            arg: core::Atom::Integer(10),
                             op: UnaryOperation::Neg,
                         },
                     ),
-                    lang_c::Statement::assign(
+                    core::Statement::assign(
                         "x1",
-                        lang_c::Expression::BinOp {
+                        core::Expression::BinOp {
                             fst: 52.into(),
                             op: BinaryOperation::Add,
                             snd: "x0".into(),
                         },
                     ),
                 ],
-                cont: lang_c::Continuation::Return(lang_c::Atom::Variable("x1".to_owned())),
+                cont: core::Continuation::Return(core::Atom::Variable("x1".to_owned())),
             },
         );
         let result = prog.select_instructions(());
@@ -129,18 +129,18 @@ mod select_instructions_tests {
 
     #[test]
     fn select_if() {
-        let mut prog = lang_c::Program::new();
+        let mut prog = core::Program::new();
         prog.add_block(
             "start",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![
-                    lang_c::Statement::assign("x0", lang_c::Expression::ReadInt),
-                    lang_c::Statement::assign(
+                    core::Statement::assign("x0", core::Expression::ReadInt),
+                    core::Statement::assign(
                         "x1",
-                        lang_c::Expression::cmp("x0".into(), Comparator::Eq, 1.into()),
+                        core::Expression::cmp("x0".into(), Comparator::Eq, 1.into()),
                     ),
                 ],
-                cont: lang_c::Continuation::If {
+                cont: core::Continuation::If {
                     cond: "x1".into(),
                     then_label: "block_0".to_owned(),
                     else_label: "block_1".to_owned(),
@@ -149,16 +149,16 @@ mod select_instructions_tests {
         );
         prog.add_block(
             "block_0",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![],
-                cont: lang_c::Continuation::Return(42.into()),
+                cont: core::Continuation::Return(42.into()),
             },
         );
         prog.add_block(
             "block_1",
-            lang_c::Tail {
+            core::Tail {
                 stmts: vec![],
-                cont: lang_c::Continuation::Return(0.into()),
+                cont: core::Continuation::Return(0.into()),
             },
         );
         let result = prog.select_instructions(());

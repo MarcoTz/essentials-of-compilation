@@ -1,5 +1,5 @@
 pub struct ExplicateState {
-    pub blocks: Vec<lang_c::Block>,
+    pub blocks: Vec<core::Block>,
 }
 
 impl ExplicateState {
@@ -24,17 +24,17 @@ impl ExplicateState {
         label
     }
 
-    pub fn add_block(&mut self, tail: lang_c::Tail, label: Option<&str>) -> String {
+    pub fn add_block(&mut self, tail: core::Tail, label: Option<&str>) -> String {
         let label = match label {
             None => self.fresh_label(),
             Some(lb) => lb.to_owned(),
         };
-        let block = lang_c::Block::new(&label, tail);
+        let block = core::Block::new(&label, tail);
         self.blocks.push(block);
         label
     }
 
-    pub fn move_blocks(&mut self, prog: &mut lang_c::Program) {
+    pub fn move_blocks(&mut self, prog: &mut core::Program) {
         while !self.blocks.is_empty() {
             let next = self.blocks.remove(0);
             prog.add_block(&next.label, next.tail);

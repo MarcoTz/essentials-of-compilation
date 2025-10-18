@@ -7,7 +7,7 @@ edition="2024"
 definitions={ path="../definitions" }
 surface = { path="../surface" }
 monadic = { path="../monadic" }
-lang_c = { path="../lang_c" }
+core = { path="../core" }
 lang_x86 = { path="../lang_x86" }
 surface2monadic = { path="../surface2monadic" }
 monadic2lang_c = { path="../monadic2lang_c" }

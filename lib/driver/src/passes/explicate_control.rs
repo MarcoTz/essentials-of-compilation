@@ -6,7 +6,7 @@ pub struct Explicate;
 
 impl Pass for Explicate {
     type Input = monadic::Program;
-    type Output = lang_c::Program;
+    type Output = core::Program;
     type Error = Error;
 
     fn description() -> &'static str {
