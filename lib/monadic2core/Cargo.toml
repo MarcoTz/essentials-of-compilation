@@ -1,5 +1,5 @@
 [package]
-name="monadic2lang_c"
+name="monadic2core"
 version="0.0.1"
 edition="2024"
 

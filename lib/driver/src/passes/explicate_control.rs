@@ -1,6 +1,6 @@
 use super::Pass;
 use crate::CompilerPaths;
-use monadic2lang_c::{Error, ExplicateControl};
+use monadic2core::{Error, ExplicateControl};
 
 pub struct Explicate;
 

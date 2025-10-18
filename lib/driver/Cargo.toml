@@ -10,7 +10,7 @@ monadic = { path="../monadic" }
 core = { path="../core" }
 lang_x86 = { path="../lang_x86" }
 surface2monadic = { path="../surface2monadic" }
-monadic2lang_c = { path="../monadic2lang_c" }
+monadic2core= { path="../monadic2core" }
 lang_c2lang_x86var = { path="../lang_c2lang_x86var" }
 parser = { path="../parser" }
 register_allocation = { path="../register_allocation" }
