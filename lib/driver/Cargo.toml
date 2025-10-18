@@ -11,6 +11,6 @@ core = { path="../core" }
 asm = { path="../asm" }
 surface2monadic = { path="../surface2monadic" }
 monadic2core= { path="../monadic2core" }
-core2lang_x86var = { path="../core2lang_x86var" }
+core2asm = { path="../core2asm" }
 parser = { path="../parser" }
 register_allocation = { path="../register_allocation" }

@@ -1,6 +1,6 @@
 use super::Pass;
 use crate::CompilerPaths;
-use core2lang_x86var::SelectInstructions;
+use core2asm::SelectInstructions;
 use std::convert::Infallible;
 
 pub struct SelectInstrs;
