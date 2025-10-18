@@ -2,20 +2,20 @@ use super::SelectInstructions;
 use definitions::{BinaryOperation, READ_INT_CALL, UnaryOperation};
 
 impl SelectInstructions for core::Expression {
-    type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
-    type Arg = lang_x86::VarArg;
-    fn select_instructions(self, dest: lang_x86::VarArg) -> Self::Target {
+    type Target = Vec<asm::Instruction<asm::VarArg>>;
+    type Arg = asm::VarArg;
+    fn select_instructions(self, dest: asm::VarArg) -> Self::Target {
         match self {
-            core::Expression::Atm(atm) => vec![lang_x86::Instruction::MovQ {
+            core::Expression::Atm(atm) => vec![asm::Instruction::MovQ {
                 src: atm.select_instructions(()),
                 dest,
             }],
             core::Expression::ReadInt => vec![
-                lang_x86::Instruction::CallQ {
+                asm::Instruction::CallQ {
                     label: READ_INT_CALL.to_owned(),
                 },
-                lang_x86::Instruction::MovQ {
-                    src: lang_x86::Reg::Rax.into(),
+                asm::Instruction::MovQ {
+                    src: asm::Reg::Rax.into(),
                     dest,
                 },
             ],
@@ -23,18 +23,18 @@ impl SelectInstructions for core::Expression {
                 let arg_loc = arg.select_instructions(());
                 match op {
                     UnaryOperation::Neg => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: arg_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::NegQ { arg: dest },
+                        asm::Instruction::NegQ { arg: dest },
                     ],
                     UnaryOperation::Not => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: arg_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::XorQ {
+                        asm::Instruction::XorQ {
                             src: 1.into(),
                             dest,
                         },
@@ -46,32 +46,32 @@ impl SelectInstructions for core::Expression {
                 let snd_loc = snd.select_instructions(());
                 match op {
                     BinaryOperation::Add => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: fst_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::AddQ { src: snd_loc, dest },
+                        asm::Instruction::AddQ { src: snd_loc, dest },
                     ],
                     BinaryOperation::Sub => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: fst_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::SubQ { src: snd_loc, dest },
+                        asm::Instruction::SubQ { src: snd_loc, dest },
                     ],
                     BinaryOperation::And => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: fst_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::AndQ { src: snd_loc, dest },
+                        asm::Instruction::AndQ { src: snd_loc, dest },
                     ],
                     BinaryOperation::Or => vec![
-                        lang_x86::Instruction::MovQ {
+                        asm::Instruction::MovQ {
                             src: fst_loc,
                             dest: dest.clone(),
                         },
-                        lang_x86::Instruction::OrQ { src: snd_loc, dest },
+                        asm::Instruction::OrQ { src: snd_loc, dest },
                     ],
                 }
             }
@@ -80,16 +80,16 @@ impl SelectInstructions for core::Expression {
                 let right_dest = right.select_instructions(());
                 let cc = cmp.select_instructions(());
                 vec![
-                    lang_x86::Instruction::CmpQ {
+                    asm::Instruction::CmpQ {
                         left: left_dest,
                         right: right_dest,
                     },
-                    lang_x86::Instruction::SetCC {
+                    asm::Instruction::SetCC {
                         cc,
-                        dest: lang_x86::ByteReg::Al.into(),
+                        dest: asm::ByteReg::Al.into(),
                     },
-                    lang_x86::Instruction::MovZBQ {
-                        src: lang_x86::ByteReg::Al.into(),
+                    asm::Instruction::MovZBQ {
+                        src: asm::ByteReg::Al.into(),
                         dest,
                     },
                 ]

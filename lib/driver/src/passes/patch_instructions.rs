@@ -1,13 +1,13 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang_x86::PatchInstructions;
+use asm::PatchInstructions;
 use std::convert::Infallible;
 
 pub struct PatchInstrs;
 
 impl Pass for PatchInstrs {
-    type Input = lang_x86::Program;
-    type Output = lang_x86::Program;
+    type Input = asm::Program;
+    type Output = asm::Program;
     type Error = Infallible;
 
     fn description() -> &'static str {

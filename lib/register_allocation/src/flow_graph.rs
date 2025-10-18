@@ -1,5 +1,5 @@
 use crate::errors::Error;
-use lang_x86::{Block, Instruction, VarArg, VarProgram};
+use asm::{Block, Instruction, VarArg, VarProgram};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug)]

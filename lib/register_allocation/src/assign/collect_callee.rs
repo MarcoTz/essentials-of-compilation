@@ -1,5 +1,5 @@
 use crate::program::AnnotProg;
-use lang_x86::{Arg, Instruction, Reg, VarArg};
+use asm::{Arg, Instruction, Reg, VarArg};
 use std::collections::HashSet;
 
 pub fn collect_callee(prog: &AnnotProg) -> HashSet<Reg> {

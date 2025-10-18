@@ -3,7 +3,7 @@ use crate::{
     errors::Error,
     program::AnnotProg,
 };
-use lang_x86::{Arg, Block, Instruction, Program, VarArg};
+use asm::{Arg, Block, Instruction, Program, VarArg};
 use std::collections::HashMap;
 
 mod collect_callee;
@@ -94,7 +94,7 @@ fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Result<Arg, Er
 mod assign_homes_tests {
     use super::{Coloring, assign_homes};
     use crate::program::{AnnotProg, LiveInstruction};
-    use lang_x86::{Arg, Block, Instruction, Program, Reg, VarArg};
+    use asm::{Arg, Block, Instruction, Program, Reg, VarArg};
     use std::collections::{HashMap, HashSet};
 
     #[test]

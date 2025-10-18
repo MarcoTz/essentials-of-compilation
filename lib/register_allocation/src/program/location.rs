@@ -1,4 +1,4 @@
-use lang_x86::{Arg, Reg, VarArg};
+use asm::{Arg, Reg, VarArg};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]

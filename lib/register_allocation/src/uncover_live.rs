@@ -3,8 +3,8 @@ use crate::{
     flow_graph::FlowGraph,
     program::{AnnotProg, LiveInstruction, Location, location::arg_locations},
 };
+use asm::{Instruction, Reg, VarArg, VarProgram};
 use definitions::PRINT_CALL;
-use lang_x86::{Instruction, Reg, VarArg, VarProgram};
 use std::collections::{HashMap, HashSet};
 
 pub fn uncover_live(mut prog: VarProgram, flow_graph: FlowGraph) -> Result<AnnotProg, Error> {
@@ -123,7 +123,7 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
 #[cfg(test)]
 mod uncover_live_tests {
     use super::{AnnotProg, FlowGraph, LiveInstruction, uncover_live};
-    use lang_x86::{Instruction, Reg, VarProgram};
+    use asm::{Instruction, Reg, VarProgram};
     use std::collections::HashSet;
 
     #[test]

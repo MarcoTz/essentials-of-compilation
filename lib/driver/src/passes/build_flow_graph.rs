@@ -1,6 +1,6 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang_x86::VarProgram;
+use asm::VarProgram;
 use register_allocation::FlowGraph;
 use std::{convert::Infallible, fmt};
 

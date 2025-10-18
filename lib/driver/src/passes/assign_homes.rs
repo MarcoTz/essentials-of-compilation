@@ -1,6 +1,6 @@
 use super::{Pass, color_graph::Colored};
 use crate::CompilerPaths;
-use lang_x86::Program;
+use asm::Program;
 use register_allocation::assign_homes;
 
 pub struct AssignHomes;

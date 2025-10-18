@@ -1,7 +1,6 @@
 use super::Pass;
 use crate::CompilerPaths;
-use lang_x86::Program;
-use lang_x86::generate_prelude_conclusion;
+use asm::{Program, generate_prelude_conclusion};
 use std::convert::Infallible;
 
 pub struct GeneratePreludeConclusion;

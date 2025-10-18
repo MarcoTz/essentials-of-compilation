@@ -7,7 +7,7 @@ pub struct SelectInstrs;
 
 impl Pass for SelectInstrs {
     type Input = core::Program;
-    type Output = lang_x86::VarProgram;
+    type Output = asm::VarProgram;
     type Error = Infallible;
 
     fn description() -> &'static str {

@@ -3,7 +3,7 @@ use crate::{
     program::{AnnotProg, LiveInstruction, Location},
     uncover_live::written_locations,
 };
-use lang_x86::Instruction;
+use asm::Instruction;
 use std::collections::HashSet;
 
 pub fn build_interference_graph(prog: &AnnotProg) -> LocationGraph {
@@ -77,7 +77,7 @@ fn mov_edges(
 mod interference_graph_tests {
     use super::{LocationGraph, build_interference_graph};
     use crate::program::{AnnotProg, LiveInstruction};
-    use lang_x86::{Instruction, Reg};
+    use asm::{Instruction, Reg};
     use std::collections::HashSet;
 
     #[test]

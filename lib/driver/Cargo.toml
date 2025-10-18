@@ -8,7 +8,7 @@ definitions={ path="../definitions" }
 surface = { path="../surface" }
 monadic = { path="../monadic" }
 core = { path="../core" }
-lang_x86 = { path="../lang_x86" }
+asm = { path="../asm" }
 surface2monadic = { path="../surface2monadic" }
 monadic2core= { path="../monadic2core" }
 core2lang_x86var = { path="../core2lang_x86var" }

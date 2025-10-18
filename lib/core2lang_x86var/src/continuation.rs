@@ -1,7 +1,7 @@
 use super::SelectInstructions;
 
 impl SelectInstructions for core::Continuation {
-    type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
+    type Target = Vec<asm::Instruction<asm::VarArg>>;
     type Arg = ();
 
     fn select_instructions(self, _: Self::Arg) -> Self::Target {
@@ -9,31 +9,31 @@ impl SelectInstructions for core::Continuation {
             core::Continuation::Return(atm) => {
                 let arg_dest = atm.select_instructions(());
                 vec![
-                    lang_x86::Instruction::MovQ {
+                    asm::Instruction::MovQ {
                         src: arg_dest,
-                        dest: lang_x86::Reg::Rax.into(),
+                        dest: asm::Reg::Rax.into(),
                     },
-                    lang_x86::Instruction::Jump {
+                    asm::Instruction::Jump {
                         label: "conclusion".to_owned(),
                     },
                 ]
             }
-            core::Continuation::Goto(label) => vec![lang_x86::Instruction::Jump { label }],
+            core::Continuation::Goto(label) => vec![asm::Instruction::Jump { label }],
             core::Continuation::If {
                 cond,
                 then_label,
                 else_label,
             } => {
                 let cond_dest = cond.select_instructions(());
-                let cmp = lang_x86::Instruction::CmpQ {
+                let cmp = asm::Instruction::CmpQ {
                     left: cond_dest,
                     right: 1.into(),
                 };
-                let jump_true = lang_x86::Instruction::JumpCC {
-                    cc: lang_x86::Cc::E,
+                let jump_true = asm::Instruction::JumpCC {
+                    cc: asm::Cc::E,
                     label: then_label,
                 };
-                let jump_false = lang_x86::Instruction::Jump { label: else_label };
+                let jump_false = asm::Instruction::Jump { label: else_label };
                 vec![cmp, jump_true, jump_false]
             }
         }

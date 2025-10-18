@@ -1,7 +1,7 @@
 use super::SelectInstructions;
 
 impl SelectInstructions for core::Tail {
-    type Target = Vec<lang_x86::Instruction<lang_x86::VarArg>>;
+    type Target = Vec<asm::Instruction<asm::VarArg>>;
     type Arg = ();
 
     fn select_instructions(self, _: Self::Arg) -> Self::Target {

@@ -14,16 +14,16 @@ pub trait SelectInstructions {
 }
 
 impl SelectInstructions for Comparator {
-    type Target = lang_x86::Cc;
+    type Target = asm::Cc;
     type Arg = ();
 
-    fn select_instructions(self, _: Self::Arg) -> lang_x86::Cc {
+    fn select_instructions(self, _: Self::Arg) -> asm::Cc {
         match self {
-            Comparator::Eq => lang_x86::Cc::E,
-            Comparator::Lt => lang_x86::Cc::L,
-            Comparator::Leq => lang_x86::Cc::Le,
-            Comparator::Gt => lang_x86::Cc::G,
-            Comparator::Geq => lang_x86::Cc::Ge,
+            Comparator::Eq => asm::Cc::E,
+            Comparator::Lt => asm::Cc::L,
+            Comparator::Leq => asm::Cc::Le,
+            Comparator::Gt => asm::Cc::G,
+            Comparator::Geq => asm::Cc::Ge,
         }
     }
 }
@@ -47,23 +47,23 @@ mod select_instructions_tests {
             },
         );
         let result = prog.select_instructions(());
-        let mut expected = lang_x86::VarProgram::new();
+        let mut expected = asm::VarProgram::new();
         expected.add_block(
             "start",
             vec![
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: 10.into(),
                     dest: "x0".into(),
                 },
-                lang_x86::Instruction::AddQ {
+                asm::Instruction::AddQ {
                     src: 32.into(),
                     dest: "x0".into(),
                 },
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: "x0".into(),
-                    dest: lang_x86::Reg::Rax.into(),
+                    dest: asm::Reg::Rax.into(),
                 },
-                lang_x86::Instruction::Jump {
+                asm::Instruction::Jump {
                     label: "conclusion".to_owned(),
                 },
             ],
@@ -98,28 +98,28 @@ mod select_instructions_tests {
             },
         );
         let result = prog.select_instructions(());
-        let mut expected = lang_x86::VarProgram::new();
+        let mut expected = asm::VarProgram::new();
         expected.add_block(
             "start",
             vec![
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: 10.into(),
                     dest: "x0".into(),
                 },
-                lang_x86::Instruction::NegQ { arg: "x0".into() },
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::NegQ { arg: "x0".into() },
+                asm::Instruction::MovQ {
                     src: 52.into(),
                     dest: "x1".into(),
                 },
-                lang_x86::Instruction::AddQ {
+                asm::Instruction::AddQ {
                     src: "x0".into(),
                     dest: "x1".into(),
                 },
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: "x1".into(),
-                    dest: lang_x86::Reg::Rax.into(),
+                    dest: asm::Reg::Rax.into(),
                 },
-                lang_x86::Instruction::Jump {
+                asm::Instruction::Jump {
                     label: "conclusion".to_owned(),
                 },
             ],
@@ -162,38 +162,38 @@ mod select_instructions_tests {
             },
         );
         let result = prog.select_instructions(());
-        let mut expected = lang_x86::VarProgram::new();
+        let mut expected = asm::VarProgram::new();
         expected.add_block(
             "start",
             vec![
-                lang_x86::Instruction::CallQ {
+                asm::Instruction::CallQ {
                     label: "read_int".to_owned(),
                 },
-                lang_x86::Instruction::MovQ {
-                    src: lang_x86::Reg::Rax.into(),
+                asm::Instruction::MovQ {
+                    src: asm::Reg::Rax.into(),
                     dest: "x0".into(),
                 },
-                lang_x86::Instruction::CmpQ {
+                asm::Instruction::CmpQ {
                     left: "x0".into(),
                     right: 1.into(),
                 },
-                lang_x86::Instruction::SetCC {
-                    cc: lang_x86::Cc::E,
-                    dest: lang_x86::Arg::ByteReg(lang_x86::ByteReg::Al).into(),
+                asm::Instruction::SetCC {
+                    cc: asm::Cc::E,
+                    dest: asm::Arg::ByteReg(asm::ByteReg::Al).into(),
                 },
-                lang_x86::Instruction::MovZBQ {
-                    src: lang_x86::Arg::ByteReg(lang_x86::ByteReg::Al).into(),
+                asm::Instruction::MovZBQ {
+                    src: asm::Arg::ByteReg(asm::ByteReg::Al).into(),
                     dest: "x1".into(),
                 },
-                lang_x86::Instruction::CmpQ {
+                asm::Instruction::CmpQ {
                     left: "x1".into(),
                     right: 1.into(),
                 },
-                lang_x86::Instruction::JumpCC {
-                    cc: lang_x86::Cc::E,
+                asm::Instruction::JumpCC {
+                    cc: asm::Cc::E,
                     label: "block_0".to_owned(),
                 },
-                lang_x86::Instruction::Jump {
+                asm::Instruction::Jump {
                     label: "block_1".to_owned(),
                 },
             ],
@@ -201,11 +201,11 @@ mod select_instructions_tests {
         expected.add_block(
             "block_0",
             vec![
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: 42.into(),
-                    dest: lang_x86::Reg::Rax.into(),
+                    dest: asm::Reg::Rax.into(),
                 },
-                lang_x86::Instruction::Jump {
+                asm::Instruction::Jump {
                     label: "conclusion".to_owned(),
                 },
             ],
@@ -213,11 +213,11 @@ mod select_instructions_tests {
         expected.add_block(
             "block_1",
             vec![
-                lang_x86::Instruction::MovQ {
+                asm::Instruction::MovQ {
                     src: 0.into(),
-                    dest: lang_x86::Reg::Rax.into(),
+                    dest: asm::Reg::Rax.into(),
                 },
-                lang_x86::Instruction::Jump {
+                asm::Instruction::Jump {
                     label: "conclusion".to_owned(),
                 },
             ],

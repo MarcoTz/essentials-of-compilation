@@ -6,7 +6,7 @@ members = [
   "lib/surface",
   "lib/monadic",
   "lib/core",
-  "lib/lang_x86",
+  "lib/asm",
   "lib/parser",
   "lib/surface2monadic",
   "lib/monadic2core",

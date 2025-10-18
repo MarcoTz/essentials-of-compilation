@@ -1,6 +1,6 @@
 use super::Pass;
 use crate::{CompilerPaths, Error};
-use lang_x86::Program;
+use asm::Program;
 use std::{
     fmt,
     fs::{File, create_dir_all},

@@ -2,7 +2,7 @@ use crate::{
     graph::LocationGraph,
     program::{AnnotProg, LiveInstruction, Location},
 };
-use lang_x86::{Instruction, VarArg};
+use asm::{Instruction, VarArg};
 
 pub fn build_move_graph(prog: &AnnotProg) -> LocationGraph {
     let mut graph = LocationGraph::new();
@@ -34,7 +34,7 @@ fn build_instr(instr: &LiveInstruction, graph: &mut LocationGraph) {
 #[cfg(test)]
 mod move_graph_tests {
     use super::{AnnotProg, LiveInstruction, LocationGraph, build_move_graph};
-    use lang_x86::{Instruction, Reg};
+    use asm::{Instruction, Reg};
     use std::collections::HashSet;
 
     #[test]

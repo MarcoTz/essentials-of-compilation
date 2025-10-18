@@ -6,4 +6,4 @@ edition="2024"
 [dependencies]
 definitions={ path="../definitions" }
 core={path="../core"}
-lang_x86={path="../lang_x86"}
+asm={path="../asm"}

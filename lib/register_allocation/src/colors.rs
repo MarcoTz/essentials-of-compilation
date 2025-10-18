@@ -1,5 +1,5 @@
 use crate::{graph::LocationGraph, program::Location};
-use lang_x86::{Arg, Reg};
+use asm::{Arg, Reg};
 use std::{
     collections::{HashMap, HashSet},
     fmt,

@@ -1,5 +1,5 @@
 use super::Location;
-use lang_x86::{Instruction, VarArg};
+use asm::{Instruction, VarArg};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
