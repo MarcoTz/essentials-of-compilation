@@ -1,44 +1,30 @@
 pub struct ExplicateState {
-    pub blocks: Vec<core::Block>,
+    pub current_label: String,
+    used_labels: Vec<String>,
 }
 
 impl ExplicateState {
     pub fn new() -> ExplicateState {
-        ExplicateState { blocks: vec![] }
+        ExplicateState {
+            current_label: "start".to_owned(),
+            used_labels: vec!["start".to_owned()],
+        }
     }
 
-    pub fn fresh_label(&self) -> String {
+    pub fn fresh_label(&mut self) {
+        self.used_labels.push(self.current_label.clone());
         let prefix = "block_";
         let mut num = 0;
         let mut label = format!("{prefix}{num}");
-        while self
-            .blocks
-            .iter()
-            .map(|block| &block.label)
-            .collect::<Vec<_>>()
-            .contains(&&label)
-        {
+        while self.used_labels.contains(&&label) {
             num += 1;
             label = format!("{prefix}{num}");
         }
-        label
+        self.current_label = label
     }
 
-    pub fn add_block(&mut self, tail: core::Tail, label: Option<&str>) -> String {
-        let label = match label {
-            None => self.fresh_label(),
-            Some(lb) => lb.to_owned(),
-        };
-        let block = core::Block::new(&label, tail);
-        self.blocks.push(block);
-        label
-    }
-
-    pub fn move_blocks(&mut self, prog: &mut core::Program) {
-        while !self.blocks.is_empty() {
-            let next = self.blocks.remove(0);
-            prog.add_block(&next.label, next.tail);
-        }
+    pub fn last_label(&self) -> String {
+        self.used_labels.last().unwrap().clone()
     }
 }
 

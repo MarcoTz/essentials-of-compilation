@@ -26,24 +26,22 @@ fn exp_to_atm(
 mod remove_complex_operands_tests {
     use super::RemoveComplexOperands;
     use definitions::{BinaryOperation, UnaryOperation};
-    use lang;
-    use monadic;
 
     #[test]
     fn remove_sum() {
-        let result = lang::Program::new(vec![
-            lang::Statement::assign(
+        let result = surface::Program::new(vec![
+            surface::Statement::assign(
                 "x",
-                lang::Expression::bin(
-                    lang::Expression::lit(42),
+                surface::Expression::bin(
+                    surface::Expression::lit(42),
                     BinaryOperation::Add,
-                    lang::Expression::un(lang::Expression::lit(10), UnaryOperation::Neg),
+                    surface::Expression::un(surface::Expression::lit(10), UnaryOperation::Neg),
                 ),
             ),
-            lang::Statement::Return(lang::Expression::bin(
-                lang::Expression::var("x"),
+            surface::Statement::Return(surface::Expression::bin(
+                surface::Expression::var("x"),
                 BinaryOperation::Add,
-                lang::Expression::lit(10),
+                surface::Expression::lit(10),
             )),
         ])
         .remove_complex_operands(&mut Default::default());

@@ -1,153 +1,203 @@
+use std::{collections::HashSet, mem::swap};
 mod errors;
 mod state;
 pub use errors::Error;
 use state::ExplicateState;
 
+pub struct BlockBuilder {
+    stmts: Vec<core::Statement>,
+}
+
+impl BlockBuilder {
+    pub fn new() -> BlockBuilder {
+        BlockBuilder { stmts: vec![] }
+    }
+
+    pub fn to_block(self, lb: &str, cont: core::Continuation) -> core::Block {
+        core::Block {
+            label: lb.to_owned(),
+            tail: core::Tail {
+                stmts: self.stmts,
+                cont,
+            },
+        }
+    }
+}
+
+pub struct BlockAccum {
+    blocks: Vec<core::Block>,
+    current: BlockBuilder,
+    current_label: String,
+    used_labels: HashSet<String>,
+}
+
+impl BlockAccum {
+    pub fn new() -> BlockAccum {
+        BlockAccum {
+            blocks: vec![],
+            current: BlockBuilder::new(),
+            current_label: "start".to_owned(),
+            used_labels: HashSet::from(["start".to_owned()]),
+        }
+    }
+
+    pub fn push_block(&mut self, block: core::Block) {
+        self.used_labels.insert(block.label.clone());
+        self.blocks.push(block)
+    }
+
+    pub fn push_stmt(&mut self, stmt: core::Statement) {
+        self.current.stmts.push(stmt)
+    }
+
+    pub fn next_block(&mut self, cont: core::Continuation) {
+        let mut old = BlockBuilder::new();
+        swap(&mut self.current, &mut old);
+        println!("adding block with label {}", self.current_label);
+        let block = old.to_block(&self.current_label, cont);
+        self.used_labels.insert(self.current_label.to_owned());
+        self.blocks.push(block);
+    }
+
+    pub fn fresh_label(&mut self) -> String {
+        let mut num = 0;
+        let mut next = format!("block_{}", num);
+        while self.used_labels.contains(&next) {
+            num += 1;
+            next = format!("block_{}", num);
+        }
+        self.used_labels.insert(next.clone());
+        next
+    }
+
+    pub fn to_prog(self) -> core::Program {
+        let mut prog = core::Program::new();
+        for block in self.blocks {
+            prog.add_block(&block.label, block.tail);
+        }
+        prog
+    }
+}
+
+impl Default for BlockAccum {
+    fn default() -> BlockAccum {
+        BlockAccum::new()
+    }
+}
+
+pub fn explicate_control(prog: monadic::Program) -> Result<core::Program, Error> {
+    let mut accum = BlockAccum::new();
+    prog.main.explicate_control(&mut accum)?;
+    Ok(accum.to_prog())
+}
+
 pub trait ExplicateControl {
     type Target;
-    fn explicate_control(self, state: &mut ExplicateState) -> Result<Self::Target, Error>;
+    fn explicate_control(self, accum: &mut BlockAccum) -> Result<Self::Target, Error>;
 }
 
-enum StmtOrCont {
-    Stmt(core::Statement),
-    Cont(core::Continuation),
-}
-
-impl From<core::Statement> for StmtOrCont {
-    fn from(stmt: core::Statement) -> StmtOrCont {
-        StmtOrCont::Stmt(stmt)
+impl ExplicateControl for monadic::Block {
+    type Target = ();
+    fn explicate_control(self, accum: &mut BlockAccum) -> Result<Self::Target, Error> {
+        for stmt in self.stmts {
+            stmt.explicate_control(accum)?;
+        }
+        if !accum.current.stmts.is_empty() {
+            println!("finishing block from explicate block");
+            accum.next_block(core::Continuation::Return(core::Atom::Unit));
+        }
+        Ok(())
     }
 }
 
-impl From<core::Continuation> for StmtOrCont {
-    fn from(cont: core::Continuation) -> StmtOrCont {
-        StmtOrCont::Cont(cont)
-    }
-}
-
-impl ExplicateControl for monadic::Program {
-    type Target = core::Program;
-    fn explicate_control(self, state: &mut ExplicateState) -> Result<Self::Target, Error> {
-        let mut new_prog = core::Program::new();
-        explicate_tail(self.main, state, true)?;
-        state.move_blocks(&mut new_prog);
-        Ok(new_prog)
-    }
-}
-
-fn explicate_tail(
-    block: monadic::Block,
-    state: &mut ExplicateState,
-    mut is_start: bool,
-) -> Result<String, Error> {
-    let mut block_stmts = vec![];
-    let mut first_label = None;
-    for stmt in block.stmts {
-        match explicate_statement(stmt, state)? {
-            StmtOrCont::Cont(c) => {
-                let tail = core::Tail {
-                    stmts: block_stmts,
-                    cont: c,
+impl ExplicateControl for monadic::Statement {
+    type Target = ();
+    fn explicate_control(self, state: &mut BlockAccum) -> Result<(), Error> {
+        match self {
+            monadic::Statement::Return(atm) => {
+                let cont = core::Continuation::Return(atm.explicate_control(state)?);
+                println!("finishing block from return statement");
+                state.next_block(cont);
+                Ok(())
+            }
+            monadic::Statement::Print(atm) => {
+                let stmt = core::Statement::Print(atm.explicate_control(state)?);
+                state.push_stmt(stmt);
+                Ok(())
+            }
+            monadic::Statement::Assign { var, bound } => {
+                let bound_exp = bound.explicate_control(state)?;
+                state.push_stmt(core::Statement::assign(&var, bound_exp));
+                Ok(())
+            }
+            monadic::Statement::If {
+                cond_exp,
+                then_block,
+                else_block,
+            } => {
+                let cond = cond_exp.explicate_control(state)?;
+                let then_label = state.fresh_label();
+                let else_label = state.fresh_label();
+                let cont = core::Continuation::If {
+                    cond,
+                    then_label: then_label.clone(),
+                    else_label: else_label.clone(),
                 };
-                let label = if is_start { Some("start") } else { None };
-                let new_label = create_block(tail, label, state);
-                if first_label.is_none() {
-                    first_label = Some(new_label);
-                }
-                is_start = false;
-                block_stmts = vec![];
+                println!("finishing block from if statement");
+                state.next_block(cont);
+                println!("explicating then block with label {then_label}");
+                state.current_label = then_label;
+                then_block.explicate_control(state)?;
+                println!("explicating else block with label {else_label}");
+                state.current_label = else_label;
+                else_block.explicate_control(state)?;
+                Ok(())
             }
-            StmtOrCont::Stmt(stmt) => block_stmts.push(stmt),
         }
-    }
-    if !block_stmts.is_empty() {
-        let label = if is_start { Some("start") } else { None };
-        let next_label = create_block(
-            core::Tail {
-                stmts: block_stmts,
-                cont: core::Continuation::Return(core::Atom::Unit),
-            },
-            label,
-            state,
-        );
-        if first_label.is_none() {
-            first_label = Some(next_label)
-        }
-    }
-
-    match first_label {
-        None => Ok(state.fresh_label()),
-        Some(lb) => Ok(lb),
     }
 }
 
-fn create_block(tail: core::Tail, label: Option<&str>, state: &mut ExplicateState) -> String {
-    state.add_block(tail, label)
-}
-
-fn explicate_statement(
-    stmt: monadic::Statement,
-    state: &mut ExplicateState,
-) -> Result<StmtOrCont, Error> {
-    match stmt {
-        monadic::Statement::Return(atm) => {
-            Ok(core::Continuation::Return(explicate_atm(atm)).into())
-        }
-        monadic::Statement::Print(atm) => Ok(core::Statement::Print(explicate_atm(atm)).into()),
-        monadic::Statement::Assign { var, bound } => {
-            let bound_exp = explicate_exp(bound);
-            Ok(core::Statement::assign(&var, bound_exp).into())
-        }
-        monadic::Statement::If {
-            cond_exp,
-            then_block,
-            else_block,
-        } => {
-            let cond = explicate_atm(cond_exp);
-            let then_label = explicate_tail(then_block, state, false)?;
-            let else_label = explicate_tail(else_block, state, false)?;
-            Ok(core::Continuation::If {
-                cond,
-                then_label,
-                else_label,
+impl ExplicateControl for monadic::Expression {
+    type Target = core::Expression;
+    fn explicate_control(self, accum: &mut BlockAccum) -> Result<Self::Target, Error> {
+        match self {
+            monadic::Expression::Atm(atm) => {
+                Ok(core::Expression::Atm(atm.explicate_control(accum)?))
             }
-            .into())
+            monadic::Expression::ReadInt => Ok(core::Expression::ReadInt),
+            monadic::Expression::UnaryOp { arg, op } => {
+                let arg_exp = arg.explicate_control(accum)?;
+                Ok(core::Expression::un(arg_exp, op))
+            }
+            monadic::Expression::BinaryOp { fst, op, snd } => {
+                let fst_exp = fst.explicate_control(accum)?;
+                let snd_exp = snd.explicate_control(accum)?;
+                Ok(core::Expression::bin(fst_exp, op, snd_exp))
+            }
+            monadic::Expression::Cmp { left, cmp, right } => {
+                let left_exp = left.explicate_control(accum)?;
+                let right_exp = right.explicate_control(accum)?;
+                Ok(core::Expression::cmp(left_exp, cmp, right_exp))
+            }
         }
     }
 }
 
-fn explicate_exp(exp: monadic::Expression) -> core::Expression {
-    match exp {
-        monadic::Expression::Atm(atm) => core::Expression::Atm(explicate_atm(atm)),
-        monadic::Expression::ReadInt => core::Expression::ReadInt,
-        monadic::Expression::UnaryOp { arg, op } => {
-            let arg_exp = explicate_atm(arg);
-            core::Expression::un(arg_exp, op)
-        }
-        monadic::Expression::BinaryOp { fst, op, snd } => {
-            let fst_exp = explicate_atm(fst);
-            let snd_exp = explicate_atm(snd);
-            core::Expression::bin(fst_exp, op, snd_exp)
-        }
-        monadic::Expression::Cmp { left, cmp, right } => {
-            let left_exp = explicate_atm(left);
-            let right_exp = explicate_atm(right);
-            core::Expression::cmp(left_exp, cmp, right_exp)
-        }
-    }
-}
+impl ExplicateControl for monadic::Atom {
+    type Target = core::Atom;
 
-fn explicate_atm(atm: monadic::Atom) -> core::Atom {
-    match atm {
-        monadic::Atom::Integer(i) => core::Atom::Integer(i),
-        monadic::Atom::Bool(b) => core::Atom::Bool(b),
-        monadic::Atom::Variable(v) => core::Atom::Variable(v),
+    fn explicate_control(self, _: &mut BlockAccum) -> Result<Self::Target, Error> {
+        match self {
+            monadic::Atom::Integer(i) => Ok(core::Atom::Integer(i)),
+            monadic::Atom::Bool(b) => Ok(core::Atom::Bool(b)),
+            monadic::Atom::Variable(v) => Ok(core::Atom::Variable(v)),
+        }
     }
 }
 
 #[cfg(test)]
 mod explicate_tests {
-    use super::ExplicateControl;
+    use super::{ExplicateControl, explicate_control};
     use definitions::{BinaryOperation, Comparator};
 
     #[test]
@@ -191,7 +241,7 @@ mod explicate_tests {
                 ]),
             ),
         ]);
-        let result = prog.explicate_control(&mut Default::default()).unwrap();
+        let result = explicate_control(prog).unwrap();
         let mut expected = core::Program::new();
         expected.add_block(
             "start",
@@ -206,13 +256,13 @@ mod explicate_tests {
                 ],
                 cont: core::Continuation::If {
                     cond: "z".into(),
-                    then_label: "block_2".to_owned(),
-                    else_label: "block_3".to_owned(),
+                    then_label: "block_0".to_owned(),
+                    else_label: "block_1".to_owned(),
                 },
             },
         );
         expected.add_block(
-            "block_2",
+            "block_0",
             core::Tail {
                 stmts: vec![core::Statement::assign(
                     "w".into(),
@@ -220,20 +270,20 @@ mod explicate_tests {
                 )],
                 cont: core::Continuation::If {
                     cond: "w".into(),
-                    then_label: "block_0".to_owned(),
-                    else_label: "block_1".to_owned(),
+                    then_label: "block_2".to_owned(),
+                    else_label: "block_3".to_owned(),
                 },
             },
         );
         expected.add_block(
-            "block_1",
+            "block_3",
             core::Tail {
                 stmts: vec![core::Statement::Print("y".into())],
                 cont: core::Continuation::Return(core::Atom::Unit),
             },
         );
         expected.add_block(
-            "block_0",
+            "block_2",
             core::Tail {
                 stmts: vec![
                     core::Statement::assign(
@@ -246,7 +296,7 @@ mod explicate_tests {
             },
         );
         expected.add_block(
-            "block_3",
+            "block_1",
             core::Tail {
                 stmts: vec![
                     core::Statement::assign(

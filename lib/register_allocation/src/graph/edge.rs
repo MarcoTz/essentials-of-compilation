@@ -48,7 +48,7 @@ impl fmt::Display for Edge {
 #[cfg(test)]
 mod edge_tests {
     use super::Edge;
-    use lang_x86::Reg;
+    use asm::Reg;
     use std::collections::HashSet;
 
     #[test]

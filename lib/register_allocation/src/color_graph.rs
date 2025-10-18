@@ -108,7 +108,7 @@ fn get_move_related(
 mod color_graph_tests {
     use super::{Coloring, color_graph};
     use crate::graph::LocationGraph;
-    use lang_x86::Reg;
+    use asm::Reg;
     use std::collections::HashMap;
 
     #[test]
