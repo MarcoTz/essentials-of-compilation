@@ -1,20 +1,27 @@
-use super::Pass;
+use super::{CheckTypes, Pass, Rco};
 use crate::CompilerPaths;
 use std::convert::Infallible;
 use surface::{Program, Uniquify};
 
-pub struct UniquifyVariables;
+pub struct UniquifyVariables {
+    pub prog: Program,
+}
 
 impl Pass for UniquifyVariables {
-    type Input = Program;
-    type Output = Program;
+    type Next = Rco;
+    type Prev = CheckTypes;
     type Error = Infallible;
 
     fn description() -> &'static str {
         "Uniquify"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        Ok(input.uniquify(&mut Default::default()))
+    fn show_input(&self) -> String {
+        self.prog.to_string()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let prog = self.prog.uniquify(&mut Default::default());
+        Ok(Rco { prog })
     }
 }

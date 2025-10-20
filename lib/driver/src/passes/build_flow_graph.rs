@@ -1,35 +1,32 @@
-use super::Pass;
+use super::{Pass, SelectInstrs, UncoverLive};
 use crate::CompilerPaths;
 use asm::VarProgram;
 use register_allocation::FlowGraph;
-use std::{convert::Infallible, fmt};
+use std::convert::Infallible;
 
-pub struct BuildFlowGraph;
-
-#[derive(Debug)]
-pub struct FlowProgram {
+pub struct BuildFlowGraph {
     pub prog: VarProgram,
-    pub graph: FlowGraph,
 }
 
 impl Pass for BuildFlowGraph {
-    type Input = VarProgram;
-    type Output = FlowProgram;
+    type Next = UncoverLive;
+    type Prev = SelectInstrs;
     type Error = Infallible;
 
     fn description() -> &'static str {
         "Build Flow Graph"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        let mut graph = FlowGraph::new();
-        graph.build(&input);
-        Ok(FlowProgram { prog: input, graph })
+    fn show_input(&self) -> String {
+        self.prog.to_string()
     }
-}
 
-impl fmt::Display for FlowProgram {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.graph.fmt(f)
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let mut graph = FlowGraph::new();
+        graph.build(&self.prog);
+        Ok(UncoverLive {
+            prog: self.prog,
+            flow_graph: graph,
+        })
     }
 }

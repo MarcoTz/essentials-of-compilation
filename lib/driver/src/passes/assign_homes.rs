@@ -1,20 +1,27 @@
-use super::{Pass, color_graph::Colored};
+use super::{ColorGraph, Pass, PatchInstrs};
 use crate::CompilerPaths;
-use asm::Program;
-use register_allocation::assign_homes;
+use register_allocation::{AnnotProg, Coloring, assign_homes};
 
-pub struct AssignHomes;
+pub struct AssignHomes {
+    pub prog: AnnotProg,
+    pub coloring: Coloring,
+}
 
 impl Pass for AssignHomes {
-    type Input = Colored;
-    type Output = Program;
+    type Next = PatchInstrs;
+    type Prev = ColorGraph;
     type Error = register_allocation::Error;
 
     fn description() -> &'static str {
         "Assign Homes"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        assign_homes(input.prog, input.color)
+    fn show_input(&self) -> String {
+        self.coloring.to_string()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let out = assign_homes(self.prog, self.coloring)?;
+        Ok(PatchInstrs { prog: out })
     }
 }

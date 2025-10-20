@@ -1,20 +1,27 @@
-use super::Pass;
+use super::{AssignHomes, GeneratePreludeConclusion, Pass};
 use crate::CompilerPaths;
-use asm::PatchInstructions;
+use asm::{PatchInstructions, Program};
 use std::convert::Infallible;
 
-pub struct PatchInstrs;
+pub struct PatchInstrs {
+    pub prog: Program,
+}
 
 impl Pass for PatchInstrs {
-    type Input = asm::Program;
-    type Output = asm::Program;
+    type Next = GeneratePreludeConclusion;
+    type Prev = AssignHomes;
     type Error = Infallible;
 
     fn description() -> &'static str {
         "Patch Instructions"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        Ok(input.patch_instructions())
+    fn show_input(&self) -> String {
+        self.prog.to_string()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let prog = self.prog.patch_instructions();
+        Ok(GeneratePreludeConclusion { prog })
     }
 }

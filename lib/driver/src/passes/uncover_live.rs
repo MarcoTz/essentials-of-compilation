@@ -1,19 +1,28 @@
-use super::{Pass, build_flow_graph::FlowProgram};
+use super::{BuildFlowGraph, BuildInterferenceGraph, Pass};
 use crate::CompilerPaths;
-use register_allocation::{AnnotProg, uncover_live};
+use asm::VarProgram;
+use register_allocation::{FlowGraph, uncover_live};
 
-pub struct UncoverLive;
+pub struct UncoverLive {
+    pub prog: VarProgram,
+    pub flow_graph: FlowGraph,
+}
 
 impl Pass for UncoverLive {
-    type Input = FlowProgram;
-    type Output = AnnotProg;
+    type Next = BuildInterferenceGraph;
+    type Prev = BuildFlowGraph;
     type Error = register_allocation::Error;
 
     fn description() -> &'static str {
         "Uncover Live"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        uncover_live(input.prog, input.graph)
+    fn show_input(&self) -> String {
+        self.flow_graph.to_string()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let prog = uncover_live(self.prog, self.flow_graph)?;
+        Ok(BuildInterferenceGraph { prog })
     }
 }

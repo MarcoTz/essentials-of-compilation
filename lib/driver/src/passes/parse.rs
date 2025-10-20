@@ -1,20 +1,26 @@
-use super::Pass;
+use super::{CheckTypes, Done, Pass};
 use crate::CompilerPaths;
 use parser::parse_program;
-use surface::Program;
 
-pub struct Parse;
+pub struct Parse {
+    pub source: String,
+}
 
 impl Pass for Parse {
-    type Input = String;
-    type Output = Program;
+    type Next = CheckTypes;
+    type Prev = Done;
     type Error = parser::Error;
 
     fn description() -> &'static str {
         "Parse"
     }
 
-    fn run(source: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        parse_program(&source)
+    fn show_input(&self) -> String {
+        self.source.clone()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let prog = parse_program(&self.source)?;
+        Ok(CheckTypes { prog })
     }
 }

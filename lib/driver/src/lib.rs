@@ -3,8 +3,7 @@ use std::{fs::read_to_string, path::PathBuf, process::Command};
 mod errors;
 mod passes;
 mod paths;
-mod pipeline;
-use pipeline::Pipeline;
+use passes::{Parse, Pass};
 
 pub use errors::Error;
 use paths::{C_RUNTIME, get_asm_out, get_exe_out, get_object_out, get_runtime_object_out};
@@ -15,20 +14,20 @@ pub struct CompilerPaths {
     pub exe_out: PathBuf,
 }
 
-pub struct Compiler {
+pub struct Driver {
     debug: bool,
     pub paths: CompilerPaths,
-    current_step: Option<Pipeline>,
+    source: String,
 }
 
-impl Compiler {
+impl Driver {
     pub fn new(
         debug: bool,
         source: PathBuf,
         asm_out: Option<PathBuf>,
         object_out: Option<PathBuf>,
         exe_out: Option<PathBuf>,
-    ) -> Result<Compiler, Error> {
+    ) -> Result<Driver, Error> {
         let prog_name = source
             .file_stem()
             .ok_or(Error::GetFileName(source.clone()))?;
@@ -37,21 +36,36 @@ impl Compiler {
         let exe_out = get_exe_out(exe_out, prog_name)?;
         let source_contents = read_to_string(&source).map_err(|_| Error::ReadFile(source))?;
 
-        Ok(Compiler {
+        Ok(Driver {
             debug,
             paths: CompilerPaths {
                 asm_out,
                 object_out,
                 exe_out,
             },
-            current_step: Some(Pipeline::Parse(source_contents)),
+            source: source_contents,
         })
     }
 
-    pub fn run(mut self) -> Result<(), Error> {
-        while let Some(step) = self.current_step {
-            self.current_step = step.step(&self.paths, self.debug)?;
+    pub fn run(self) -> Result<(), Error> {
+        let parsed = Parse {
+            source: self.source.clone(),
         }
+        .run_debug(&self.paths, self.debug)?;
+        let checked = parsed.run_debug(&self.paths, self.debug)?;
+        let uniquified = checked.run_debug(&self.paths, self.debug)?;
+        let removed = uniquified.run_debug(&self.paths, self.debug)?;
+        let explicated = removed.run_debug(&self.paths, self.debug)?;
+        let selected = explicated.run_debug(&self.paths, self.debug)?;
+        let flow_built = selected.run_debug(&self.paths, self.debug)?;
+        let uncovered = flow_built.run_debug(&self.paths, self.debug)?;
+        let interference_built = uncovered.run_debug(&self.paths, self.debug)?;
+        let colored = interference_built.run_debug(&self.paths, self.debug)?;
+        let assigned = colored.run_debug(&self.paths, self.debug)?;
+        let patched = assigned.run_debug(&self.paths, self.debug)?;
+        let finalized = patched.run_debug(&self.paths, self.debug)?;
+        let assembled = finalized.run_debug(&self.paths, self.debug)?;
+        assembled.run_debug(&self.paths, self.debug)?;
         Ok(())
     }
 }

@@ -1,27 +1,44 @@
 use crate::CompilerPaths;
-use std::fmt;
-pub trait Pass {
-    type Input;
-    type Output;
-    type Error: Into<crate::Error>;
-    fn description() -> &'static str;
-    fn run(input: Self::Input, paths: &CompilerPaths) -> Result<Self::Output, Self::Error>;
+use std::convert::Infallible;
 
-    fn run_debug(
-        input: Self::Input,
-        paths: &CompilerPaths,
-        debug: bool,
-    ) -> Result<Self::Output, Self::Error>
-    where
-        Self::Output: fmt::Display,
-    {
-        let output = Self::run(input, paths)?;
+pub trait Pass: Sized {
+    type Next: Pass;
+    type Prev: Pass;
+    type Error: Into<crate::Error>;
+
+    fn description() -> &'static str;
+    fn show_input(&self) -> String;
+
+    fn run(self, paths: &CompilerPaths) -> Result<Self::Next, Self::Error>;
+
+    fn run_debug(self, paths: &CompilerPaths, debug: bool) -> Result<Self::Next, Self::Error> {
+        let next = self.run(paths)?;
         if debug {
             println!("=== {} ===", Self::description());
-            println!("{output}");
+            println!("{}", next.show_input());
             println!();
         }
-        Ok(output)
+        Ok(next)
+    }
+}
+
+pub struct Done;
+
+impl Pass for Done {
+    type Next = Self;
+    type Prev = Link;
+    type Error = Infallible;
+
+    fn description() -> &'static str {
+        "Successfully compiled Program"
+    }
+
+    fn show_input(&self) -> String {
+        "".to_owned()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        Ok(Done)
     }
 }
 

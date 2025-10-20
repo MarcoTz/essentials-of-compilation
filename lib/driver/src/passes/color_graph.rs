@@ -1,36 +1,34 @@
-use super::{Pass, build_interference_graph::Built};
+use super::{AssignHomes, BuildInterferenceGraph, Pass};
 use crate::CompilerPaths;
-use register_allocation::{AnnotProg, Coloring, color_graph};
-use std::fmt;
+use register_allocation::{AnnotProg, LocationGraph, color_graph};
 
-pub struct ColorGraph;
-
-#[derive(Debug)]
-pub struct Colored {
+pub struct ColorGraph {
     pub prog: AnnotProg,
-    pub color: Coloring,
+    pub interference_graph: LocationGraph,
+    pub move_graph: LocationGraph,
 }
 
 impl Pass for ColorGraph {
-    type Input = Built;
-    type Output = Colored;
+    type Next = AssignHomes;
+    type Prev = BuildInterferenceGraph;
     type Error = register_allocation::Error;
 
     fn description() -> &'static str {
         "Colored Graph"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        let coloring = color_graph(input.interference_graph, input.move_graph)?;
-        Ok(Colored {
-            prog: input.prog,
-            color: coloring,
-        })
+    fn show_input(&self) -> String {
+        format!(
+            "Interfecence Graph:\n{}\n\nMove GFraph:\n{}",
+            self.interference_graph, self.move_graph
+        )
     }
-}
 
-impl fmt::Display for Colored {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.color.fmt(f)
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let coloring = color_graph(self.interference_graph, self.move_graph)?;
+        Ok(AssignHomes {
+            prog: self.prog,
+            coloring,
+        })
     }
 }

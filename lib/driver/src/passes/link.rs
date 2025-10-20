@@ -1,19 +1,23 @@
-use super::{Pass, assemble::WrappedPath};
+use super::{Assemble, Done, Pass};
 use crate::{CompilerPaths, Error, assemble_runtime, paths::get_runtime_object_out};
 use std::process::Command;
 
 pub struct Link;
 
 impl Pass for Link {
-    type Input = ();
-    type Output = WrappedPath;
+    type Next = Done;
+    type Prev = Assemble;
     type Error = Error;
 
     fn description() -> &'static str {
         "Link"
     }
 
-    fn run(_: Self::Input, compiler: &CompilerPaths) -> Result<Self::Output, Self::Error> {
+    fn show_input(&self) -> String {
+        "".to_owned()
+    }
+
+    fn run(self, compiler: &CompilerPaths) -> Result<Self::Next, Self::Error> {
         if !compiler.object_out.exists() {
             return Err(Error::ReadFile(compiler.object_out.clone()));
         }
@@ -34,6 +38,6 @@ impl Pass for Link {
         if !res.success() {
             return Err(Error::RunCommand("gcc".to_owned()));
         }
-        Ok(WrappedPath(compiler.exe_out.clone()))
+        Ok(Done)
     }
 }

@@ -1,5 +1,5 @@
 use clap::Parser;
-use driver::Compiler;
+use driver::Driver;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -17,7 +17,7 @@ struct Args {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let compiler = Compiler::new(
+    let compiler = Driver::new(
         args.verbose,
         args.in_file,
         args.asm_out,

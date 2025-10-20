@@ -1,19 +1,27 @@
-use super::Pass;
+use super::{Pass, Rco, SelectInstrs};
 use crate::CompilerPaths;
+use monadic::Program;
 use monadic2core::{Error, explicate_control};
 
-pub struct Explicate;
+pub struct Explicate {
+    pub prog: Program,
+}
 
 impl Pass for Explicate {
-    type Input = monadic::Program;
-    type Output = core::Program;
+    type Next = SelectInstrs;
+    type Prev = Rco;
     type Error = Error;
 
     fn description() -> &'static str {
         "Explicate Control"
     }
 
-    fn run(input: Self::Input, _: &CompilerPaths) -> Result<Self::Output, Self::Error> {
-        explicate_control(input)
+    fn show_input(&self) -> String {
+        self.prog.to_string()
+    }
+
+    fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
+        let prog = explicate_control(self.prog)?;
+        Ok(SelectInstrs { prog })
     }
 }

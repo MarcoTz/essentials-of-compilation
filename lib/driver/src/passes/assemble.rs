@@ -1,28 +1,30 @@
-use super::Pass;
+use super::{GeneratePreludeConclusion, Link, Pass};
 use crate::{CompilerPaths, Error};
 use asm::Program;
 use std::{
-    fmt,
     fs::{File, create_dir_all},
     io::Write,
-    path::PathBuf,
     process::Command,
 };
 
-pub struct Assemble;
-
-pub struct WrappedPath(pub PathBuf);
+pub struct Assemble {
+    pub prog: Program,
+}
 
 impl Pass for Assemble {
-    type Input = Program;
-    type Output = WrappedPath;
+    type Next = Link;
+    type Prev = GeneratePreludeConclusion;
     type Error = Error;
 
     fn description() -> &'static str {
         "Assembled"
     }
 
-    fn run(input: Self::Input, compiler: &CompilerPaths) -> Result<Self::Output, Self::Error> {
+    fn show_input(&self) -> String {
+        self.prog.to_string()
+    }
+
+    fn run(self, compiler: &CompilerPaths) -> Result<Self::Next, Self::Error> {
         let asm_dir = compiler
             .asm_out
             .parent()
@@ -31,7 +33,7 @@ impl Pass for Assemble {
         let mut asm_file = File::create(&compiler.asm_out)
             .map_err(|_| Error::CreateFile(compiler.asm_out.clone()))?;
         asm_file
-            .write_all(input.to_string().as_bytes())
+            .write_all(self.prog.to_string().as_bytes())
             .map_err(|_| Error::WriteFile(compiler.asm_out.clone()))?;
 
         let object_dir = compiler
@@ -54,12 +56,6 @@ impl Pass for Assemble {
         if !res.success() {
             return Err(Error::RunCommand("gcc -c".to_owned()));
         }
-        Ok(WrappedPath(compiler.asm_out.clone()))
-    }
-}
-
-impl fmt::Display for WrappedPath {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0.display())
+        Ok(Link)
     }
 }

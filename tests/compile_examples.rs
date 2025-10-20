@@ -1,4 +1,4 @@
-use driver::Compiler;
+use driver::Driver;
 use std::process::Command;
 use test_utils::{Error, load_examples, set_working_dir};
 
@@ -6,7 +6,7 @@ fn main() -> Result<(), Error> {
     set_working_dir()?;
     let examples = load_examples()?;
     for example in examples {
-        let compiler = Compiler::new(false, example.path, None, None, None)?;
+        let compiler = Driver::new(false, example.path, None, None, None)?;
         let exe_path = compiler.paths.exe_out.clone();
         println!("Compiling {}", example.name);
         compiler.run()?;
