@@ -12,6 +12,7 @@ pub fn parse_statement(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
         Rule::while_statement => parse_while(pair),
         Rule::print_statement => parse_print(pair),
         Rule::let_statement => parse_let(pair),
+        Rule::set_statement => parse_set(pair),
         r => Err(Error::unexpected(r, "Statement")),
     }
 }
@@ -81,4 +82,13 @@ fn parse_let(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
     let bound_pair = inner.remove(0);
     let bound_expr = parse_expression(bound_pair)?;
     Ok(Statement::assign(var, bound_expr))
+}
+
+fn parse_set(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
+    let mut inner = pair_to_n_inner(pair, &[Rule::variable, Rule::expression])?;
+    let var_pair = inner.remove(0);
+    let var = var_pair.as_str().trim();
+    let bound_pair = inner.remove(0);
+    let bound_expr = parse_expression(bound_pair)?;
+    Ok(Statement::set(var, bound_expr))
 }

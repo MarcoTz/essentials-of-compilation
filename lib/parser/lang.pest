@@ -14,6 +14,7 @@ kw_false = _{ "false" }
 kw_if = _{ "if" }
 kw_else = _{ "else"}
 kw_while = _{"while"}
+kw_set = _{"set"}
 
 keyword = _{
   kw_read_int
@@ -25,6 +26,7 @@ keyword = _{
   | kw_if
   | kw_else
   | kw_while
+  | kw_set
 }
 
 bin_op = { "+" | "-" | "&&" | "||" }
@@ -35,6 +37,7 @@ statement = {
   if_statement
   | while_statement
   | let_statement
+  | set_statement
   | print_statement
   | paren_statement
 }
@@ -45,6 +48,7 @@ while_statement = { kw_while ~ expression ~ "{" ~ block ~ "}" }
 if_statement = {kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
 else_start = { kw_else }
 let_statement = { kw_let ~ variable ~ "=" ~ expression}
+set_statement = { kw_set ~ variable ~ "=" ~ expression} 
 print_statement = { kw_print ~ "(" ~ expression ~ ")" }
 
 expression = { prim_expression ~ left_rec_expression? }

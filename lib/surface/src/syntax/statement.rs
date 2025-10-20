@@ -36,6 +36,13 @@ impl Statement {
         }
     }
 
+    pub fn set(var: &str, bound: Expression) -> Statement {
+        Statement::Set {
+            var: var.to_owned(),
+            bound,
+        }
+    }
+
     pub fn cond(cond: Expression, then_block: Block, else_block: Block) -> Statement {
         Statement::If {
             cond_exp: cond,
