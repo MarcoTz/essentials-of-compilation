@@ -7,7 +7,6 @@ impl ExplicateControl for monadic::Block {
             stmt.explicate_control(accum)?;
         }
         if !accum.current_statements.is_empty() {
-            println!("finishing block from explicate block");
             accum.next_block(core::Continuation::Return(core::Atom::Unit));
         }
         Ok(())

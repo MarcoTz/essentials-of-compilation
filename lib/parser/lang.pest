@@ -45,7 +45,7 @@ statement = {
 paren_statement = { "(" ~ statement ~ ")" }
 
 while_statement = { kw_while ~ expression ~ "{" ~ block ~ "}" }
-if_statement = {kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
+if_statement = { kw_if ~ expression ~ "{" ~ block ~ "}" ~ else_start ~ "{" ~ block ~ "}" }
 else_start = { kw_else }
 let_statement = { kw_let ~ variable ~ "=" ~ expression}
 set_statement = { kw_set ~ variable ~ "=" ~ expression} 

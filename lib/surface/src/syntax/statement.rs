@@ -135,7 +135,7 @@ impl fmt::Display for Statement {
                 while_block,
             } => write!(
                 f,
-                "while {cond_exp} {{\n\t{}\n}}",
+                "while {cond_exp} {{\n\t{}\n}};",
                 while_block.to_string().replace("\n", "\n\t")
             ),
         }

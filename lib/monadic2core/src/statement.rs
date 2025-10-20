@@ -6,7 +6,6 @@ impl ExplicateControl for monadic::Statement {
         match self {
             monadic::Statement::Return(atm) => {
                 let cont = core::Continuation::Return(atm.explicate_control(state)?);
-                println!("finishing block from return statement");
                 state.next_block(cont);
                 Ok(())
             }

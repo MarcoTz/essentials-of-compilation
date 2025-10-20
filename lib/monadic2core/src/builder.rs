@@ -29,7 +29,6 @@ impl BlockAccum {
     pub fn next_block(&mut self, cont: core::Continuation) {
         let mut old = vec![];
         swap(&mut self.current_statements, &mut old);
-        println!("adding block with label {}", self.current_label);
         let block = core::Block {
             label: self.current_label.clone(),
             tail: core::Tail { stmts: old, cont },
