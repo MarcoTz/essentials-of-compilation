@@ -1,4 +1,4 @@
-use super::{BuildFlowGraph, Explicate, Pass};
+use super::{Explicate, Pass, UncoverLive};
 use crate::CompilerPaths;
 use core::Program;
 use core2asm::SelectInstructions;
@@ -9,7 +9,7 @@ pub struct SelectInstrs {
 }
 
 impl Pass for SelectInstrs {
-    type Next = BuildFlowGraph;
+    type Next = UncoverLive;
     type Prev = Explicate;
     type Error = Infallible;
 
@@ -23,6 +23,6 @@ impl Pass for SelectInstrs {
 
     fn run(self, _: &CompilerPaths) -> Result<Self::Next, Self::Error> {
         let prog = self.prog.select_instructions(());
-        Ok(BuildFlowGraph { prog })
+        Ok(UncoverLive { prog })
     }
 }

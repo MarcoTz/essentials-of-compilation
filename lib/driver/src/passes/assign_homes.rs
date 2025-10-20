@@ -1,9 +1,9 @@
 use super::{ColorGraph, Pass, PatchInstrs};
 use crate::CompilerPaths;
-use register_allocation::{AnnotProg, Coloring, assign_homes};
+use register_allocation::{Coloring, LiveProg, assign_homes};
 
 pub struct AssignHomes {
-    pub prog: AnnotProg,
+    pub prog: LiveProg,
     pub coloring: Coloring,
 }
 

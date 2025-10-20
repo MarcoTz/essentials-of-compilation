@@ -57,8 +57,7 @@ impl Driver {
         let removed = uniquified.run_debug(&self.paths, self.debug)?;
         let explicated = removed.run_debug(&self.paths, self.debug)?;
         let selected = explicated.run_debug(&self.paths, self.debug)?;
-        let flow_built = selected.run_debug(&self.paths, self.debug)?;
-        let uncovered = flow_built.run_debug(&self.paths, self.debug)?;
+        let uncovered = selected.run_debug(&self.paths, self.debug)?;
         let interference_built = uncovered.run_debug(&self.paths, self.debug)?;
         let colored = interference_built.run_debug(&self.paths, self.debug)?;
         let assigned = colored.run_debug(&self.paths, self.debug)?;

@@ -1,42 +1,46 @@
-use std::{collections::HashMap, fmt};
+use asm::VarProgram;
+use std::fmt;
 
+mod live_block;
 mod live_instruction;
 pub mod location;
+pub use live_block::LiveBlock;
 pub use live_instruction::LiveInstruction;
 pub use location::Location;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct AnnotProg {
-    pub blocks: HashMap<String, Vec<LiveInstruction>>,
+pub struct LiveProg {
+    pub blocks: Vec<LiveBlock>,
 }
 
-impl AnnotProg {
-    pub fn new() -> AnnotProg {
-        AnnotProg {
-            blocks: HashMap::new(),
-        }
-    }
-
-    pub fn add_block(&mut self, label: &str, instrs: Vec<LiveInstruction>) {
-        self.blocks.insert(label.to_owned(), instrs);
+impl LiveProg {
+    pub fn new() -> LiveProg {
+        LiveProg { blocks: vec![] }
     }
 }
 
-impl fmt::Display for AnnotProg {
+impl fmt::Display for LiveProg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (label, block) in self.blocks.iter() {
-            writeln!(f, "{label}: ")?;
-            for instr in block.iter() {
-                writeln!(f, "\t{instr}")?;
-            }
+        for block in self.blocks.iter() {
+            block.fmt(f)?;
             writeln!(f)?;
         }
         Ok(())
     }
 }
 
-impl Default for AnnotProg {
-    fn default() -> AnnotProg {
-        AnnotProg::new()
+impl Default for LiveProg {
+    fn default() -> LiveProg {
+        LiveProg::new()
+    }
+}
+
+impl From<VarProgram> for LiveProg {
+    fn from(prog: VarProgram) -> LiveProg {
+        let mut annot_prog = LiveProg::new();
+        for block in prog.blocks {
+            annot_prog.blocks.push(block.into())
+        }
+        annot_prog
     }
 }

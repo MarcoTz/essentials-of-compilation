@@ -1,76 +1,72 @@
 use crate::{
     errors::Error,
-    flow_graph::FlowGraph,
-    program::{AnnotProg, LiveInstruction, Location, location::arg_locations},
+    program::{LiveBlock, LiveInstruction, LiveProg, Location, location::arg_locations},
 };
-use asm::{Instruction, Reg, VarArg, VarProgram};
+use asm::{Instruction, Reg, VarProgram};
 use definitions::PRINT_CALL;
 use std::collections::{HashMap, HashSet};
 
-pub fn uncover_live(mut prog: VarProgram, flow_graph: FlowGraph) -> Result<AnnotProg, Error> {
-    let mut annot = AnnotProg::new();
+pub fn uncover_live(prog: VarProgram) -> Result<LiveProg, Error> {
+    let mut annot: LiveProg = prog.into();
     let mut label2live = HashMap::new();
     label2live.insert(
         "conclusion".to_owned(),
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
 
-    let mut block_order = flow_graph.topo_sort()?;
-    block_order.reverse();
-    for block_label in block_order {
-        if block_label == "conclusion" || block_label == "main" {
-            continue;
+    let mut done = true;
+    while !done {
+        for block in annot.blocks.iter_mut() {
+            if block.label == "conclusion" || block.label == "main" {
+                continue;
+            }
+            done = done && uncover_block(block, &label2live)?;
+            label2live.insert(block.label.clone(), (block.instrs[0]).live_before.clone());
         }
-        let block = prog
-            .remove_block(&block_label)
-            .ok_or(Error::MissingBlock(block_label.clone()))?;
-        let uncovered = uncover_block(block.instrs, &label2live)?;
-        label2live.insert(block.label.clone(), (uncovered[0]).live_before.clone());
-        annot.add_block(&block.label, uncovered);
     }
+
     Ok(annot)
 }
 
 fn uncover_block(
-    mut block: Vec<Instruction<VarArg>>,
+    block: &mut LiveBlock,
     label2live: &HashMap<String, HashSet<Location>>,
-) -> Result<Vec<LiveInstruction>, Error> {
-    let mut live_sets = vec![];
+) -> Result<bool, Error> {
     let mut last_after = HashSet::new();
 
-    let num_instrs = block.len();
-    for _ in 0..num_instrs {
-        let curr_instr = block.remove(block.len() - 1);
-        let current_live = live_before(&curr_instr, &last_after, label2live)?;
-        live_sets.push(LiveInstruction::new(
-            curr_instr,
-            current_live.clone(),
-            last_after,
-        ));
-        last_after = current_live;
+    block.instrs.reverse();
+    let mut done = true;
+    for instr in block.instrs.iter_mut() {
+        done = done && live_before(instr, &last_after, label2live)?;
+        last_after = instr.live_before.clone();
     }
-    live_sets.reverse();
-    Ok(live_sets)
+    block.instrs.reverse();
+    Ok(done)
 }
 
 fn live_before(
-    instr: &Instruction<VarArg>,
+    instr: &mut LiveInstruction,
     live_after: &HashSet<Location>,
     label2live: &HashMap<String, HashSet<Location>>,
-) -> Result<HashSet<Location>, Error> {
-    if let Instruction::Jump { label } = instr {
-        return Ok(label2live
+) -> Result<bool, Error> {
+    let old_live = instr.live_before.clone();
+    if let Instruction::Jump { label } = &instr.instr {
+        let live_before = label2live
             .get(label)
             .ok_or(Error::MissingLiveBefore(label.clone()))?
-            .clone());
+            .clone();
+        instr.live_before = &instr.live_before | &live_before;
+        return Ok(instr.live_before == old_live);
     }
     let written = written_locations(instr);
     let read = read_locations(instr);
-    Ok(&(live_after - &written) | &read)
+    let next_live_before = &(live_after - &written) | &read;
+    instr.live_before = &instr.live_before | &next_live_before;
+    Ok(instr.live_before == old_live)
 }
 
-pub fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
-    match instr {
+pub fn written_locations(instr: &LiveInstruction) -> HashSet<Location> {
+    match &instr.instr {
         Instruction::AddQ { dest, .. } => arg_locations(dest),
         Instruction::SubQ { dest, .. } => arg_locations(dest),
         Instruction::NegQ { arg } => arg_locations(arg),
@@ -93,8 +89,8 @@ pub fn written_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
     }
 }
 
-fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
-    match instr {
+fn read_locations(instr: &LiveInstruction) -> HashSet<Location> {
+    match &instr.instr {
         Instruction::AddQ { src, dest } => &arg_locations(src) | &arg_locations(dest),
         Instruction::SubQ { dest, src } => &arg_locations(src) | &arg_locations(dest),
         Instruction::NegQ { arg } => arg_locations(arg),
@@ -122,7 +118,7 @@ fn read_locations(instr: &Instruction<VarArg>) -> HashSet<Location> {
 
 #[cfg(test)]
 mod uncover_live_tests {
-    use super::{AnnotProg, FlowGraph, LiveInstruction, uncover_live};
+    use super::{LiveBlock, LiveInstruction, LiveProg, uncover_live};
     use asm::{Instruction, Reg, VarProgram};
     use std::collections::HashSet;
 
@@ -139,13 +135,11 @@ mod uncover_live_tests {
                 Instruction::add("b", "c"),
             ],
         );
-        let mut example_flow = FlowGraph::new();
-        example_flow.build(&example);
-        let result = uncover_live(example, example_flow).unwrap();
-        let mut expected = AnnotProg::new();
-        expected.add_block(
-            "start",
-            vec![
+        let result = uncover_live(example).unwrap();
+        let mut expected = LiveProg::new();
+        expected.blocks.push(LiveBlock {
+            label: "start".to_owned(),
+            instrs: vec![
                 LiveInstruction::new(
                     Instruction::mov(5, "a"),
                     HashSet::from([]),
@@ -172,7 +166,7 @@ mod uncover_live_tests {
                     HashSet::new(),
                 ),
             ],
-        );
+        });
         assert_eq!(result, expected)
     }
 
@@ -196,13 +190,11 @@ mod uncover_live_tests {
                 Instruction::jmp("conclusion"),
             ],
         );
-        let mut example_flow = FlowGraph::new();
-        example_flow.build(&example);
-        let result = uncover_live(example, example_flow).unwrap();
-        let mut expected = AnnotProg::new();
-        expected.add_block(
-            "start",
-            vec![
+        let result = uncover_live(example).unwrap();
+        let mut expected = LiveProg::new();
+        expected.blocks.push(LiveBlock {
+            label: "start".to_owned(),
+            instrs: vec![
                 LiveInstruction::new(
                     Instruction::mov(1, "v"),
                     HashSet::from([Reg::Rsp.into()]),
@@ -264,7 +256,7 @@ mod uncover_live_tests {
                     HashSet::new(),
                 ),
             ],
-        );
+        });
         assert_eq!(result, expected)
     }
 }

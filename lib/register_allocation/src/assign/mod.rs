@@ -1,7 +1,7 @@
 use crate::{
     colors::{Coloring, coloring_to_assignment},
     errors::Error,
-    program::AnnotProg,
+    program::LiveProg,
 };
 use asm::{Arg, Block, Instruction, Program, VarArg};
 use std::collections::HashMap;
@@ -11,18 +11,21 @@ mod collect_vars;
 use collect_callee::collect_callee;
 use collect_vars::collect_vars;
 
-pub fn assign_homes(prog: AnnotProg, coloring: Coloring) -> Result<Program, Error> {
+pub fn assign_homes(prog: LiveProg, coloring: Coloring) -> Result<Program, Error> {
     let used_callee = collect_callee(&prog);
     let vars = collect_vars(&prog);
     let stack_space = vars.len() as u64 * 8;
     let assignments = coloring_to_assignment(coloring);
     let mut assigned = Program::new(stack_space, used_callee);
-    for (label, instrs) in prog.blocks {
-        let assigned_instrs = instrs
+    for block in prog.blocks {
+        let assigned_instrs = block
+            .instrs
             .into_iter()
             .map(|instr| assign_instr(instr.instr, &assignments))
             .collect::<Result<Vec<_>, Error>>()?;
-        assigned.blocks.push(Block::new(&label, assigned_instrs));
+        assigned
+            .blocks
+            .push(Block::new(&block.label, assigned_instrs));
     }
     Ok(assigned)
 }
@@ -92,17 +95,17 @@ fn assign_arg(arg: VarArg, assignments: &HashMap<String, Arg>) -> Result<Arg, Er
 
 #[cfg(test)]
 mod assign_homes_tests {
-    use super::{Coloring, assign_homes};
-    use crate::program::{AnnotProg, LiveInstruction};
+    use super::{Coloring, LiveProg, assign_homes};
+    use crate::program::{LiveBlock, LiveInstruction};
     use asm::{Arg, Block, Instruction, Program, Reg, VarArg};
     use std::collections::{HashMap, HashSet};
 
     #[test]
     fn assign_ab() {
-        let mut prog = AnnotProg::new();
-        prog.add_block(
-            "start",
-            vec![
+        let mut prog = LiveProg::new();
+        prog.blocks.push(LiveBlock {
+            label: "start".to_owned(),
+            instrs: vec![
                 LiveInstruction {
                     instr: Instruction::MovQ {
                         src: Arg::Immediate(42).into(),
@@ -128,7 +131,7 @@ mod assign_homes_tests {
                     live_after: HashSet::new(),
                 },
             ],
-        );
+        });
         let result = assign_homes(
             prog,
             Coloring(HashMap::from([("a".into(), 11), ("b".into(), 12)])),

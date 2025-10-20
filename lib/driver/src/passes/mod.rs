@@ -44,7 +44,6 @@ impl Pass for Done {
 
 mod assemble;
 mod assign_homes;
-mod build_flow_graph;
 mod build_interference_graph;
 mod color_graph;
 mod explicate_control;
@@ -60,7 +59,6 @@ mod uniquify;
 
 pub use assemble::Assemble;
 pub use assign_homes::AssignHomes;
-pub use build_flow_graph::BuildFlowGraph;
 pub use build_interference_graph::BuildInterferenceGraph;
 pub use color_graph::ColorGraph;
 pub use explicate_control::Explicate;

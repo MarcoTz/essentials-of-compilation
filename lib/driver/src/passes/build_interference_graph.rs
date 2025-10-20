@@ -1,10 +1,10 @@
 use super::{ColorGraph, Pass, UncoverLive};
 use crate::CompilerPaths;
-use register_allocation::{AnnotProg, build_interference_graph, build_move_graph};
+use register_allocation::{LiveProg, build_interference_graph, build_move_graph};
 use std::convert::Infallible;
 
 pub struct BuildInterferenceGraph {
-    pub prog: AnnotProg,
+    pub prog: LiveProg,
 }
 
 impl Pass for BuildInterferenceGraph {

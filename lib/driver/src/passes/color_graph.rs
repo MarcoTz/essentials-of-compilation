@@ -1,9 +1,9 @@
 use super::{AssignHomes, BuildInterferenceGraph, Pass};
 use crate::CompilerPaths;
-use register_allocation::{AnnotProg, LocationGraph, color_graph};
+use register_allocation::{LiveProg, LocationGraph, color_graph};
 
 pub struct ColorGraph {
-    pub prog: AnnotProg,
+    pub prog: LiveProg,
     pub interference_graph: LocationGraph,
     pub move_graph: LocationGraph,
 }

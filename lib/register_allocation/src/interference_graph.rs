@@ -1,21 +1,21 @@
 use crate::{
     graph::LocationGraph,
-    program::{AnnotProg, LiveInstruction, Location},
+    program::{LiveBlock, LiveInstruction, LiveProg, Location},
     uncover_live::written_locations,
 };
 use asm::Instruction;
 use std::collections::HashSet;
 
-pub fn build_interference_graph(prog: &AnnotProg) -> LocationGraph {
+pub fn build_interference_graph(prog: &LiveProg) -> LocationGraph {
     let mut graph = LocationGraph::new();
-    for (_, block) in prog.blocks.iter() {
+    for block in prog.blocks.iter() {
         build_block(block, &mut graph);
     }
     graph
 }
 
-fn build_block(block: &[LiveInstruction], graph: &mut LocationGraph) {
-    for instr in block {
+fn build_block(block: &LiveBlock, graph: &mut LocationGraph) {
+    for instr in block.instrs.iter() {
         if let Instruction::MovQ { ref src, ref dest } = instr.instr {
             mov_edges(
                 Location::arg_loc(src.clone()),
@@ -25,7 +25,7 @@ fn build_block(block: &[LiveInstruction], graph: &mut LocationGraph) {
             );
             continue;
         }
-        let written = written_locations(&instr.instr);
+        let written = written_locations(&instr);
         for write_loc in written.iter() {
             if let Location::Variable(_) = write_loc {
                 graph.add_vert(write_loc.clone());
@@ -75,17 +75,16 @@ fn mov_edges(
 
 #[cfg(test)]
 mod interference_graph_tests {
-    use super::{LocationGraph, build_interference_graph};
-    use crate::program::{AnnotProg, LiveInstruction};
+    use super::{LiveBlock, LiveInstruction, LiveProg, LocationGraph, build_interference_graph};
     use asm::{Instruction, Reg};
     use std::collections::HashSet;
 
     #[test]
     fn build_example() {
-        let mut example = AnnotProg::new();
-        example.add_block(
-            "main",
-            vec![
+        let mut example = LiveProg::new();
+        example.blocks.push(LiveBlock {
+            label: "main".to_owned(),
+            instrs: vec![
                 LiveInstruction::new(
                     Instruction::mov(1, "v"),
                     HashSet::from([Reg::Rsp.into()]),
@@ -147,7 +146,7 @@ mod interference_graph_tests {
                     HashSet::new(),
                 ),
             ],
-        );
+        });
         let result = build_interference_graph(&example);
         let mut expected = LocationGraph::new();
         expected.add_edge("t".into(), Reg::Rax.into());

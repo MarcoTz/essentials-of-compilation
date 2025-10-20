@@ -1,19 +1,19 @@
 use crate::{
     graph::LocationGraph,
-    program::{AnnotProg, LiveInstruction, Location},
+    program::{LiveBlock, LiveInstruction, LiveProg, Location},
 };
 use asm::{Instruction, VarArg};
 
-pub fn build_move_graph(prog: &AnnotProg) -> LocationGraph {
+pub fn build_move_graph(prog: &LiveProg) -> LocationGraph {
     let mut graph = LocationGraph::new();
-    for (_, block) in prog.blocks.iter() {
+    for block in prog.blocks.iter() {
         build_block(block, &mut graph);
     }
     graph
 }
 
-fn build_block(block: &[LiveInstruction], graph: &mut LocationGraph) {
-    for instr in block.iter() {
+fn build_block(block: &LiveBlock, graph: &mut LocationGraph) {
+    for instr in block.instrs.iter() {
         build_instr(instr, graph);
     }
 }
@@ -33,16 +33,16 @@ fn build_instr(instr: &LiveInstruction, graph: &mut LocationGraph) {
 
 #[cfg(test)]
 mod move_graph_tests {
-    use super::{AnnotProg, LiveInstruction, LocationGraph, build_move_graph};
+    use super::{LiveBlock, LiveInstruction, LiveProg, LocationGraph, build_move_graph};
     use asm::{Instruction, Reg};
     use std::collections::HashSet;
 
     #[test]
     fn build_example() {
-        let mut prog = AnnotProg::new();
-        prog.add_block(
-            "main",
-            vec![
+        let mut prog = LiveProg::new();
+        prog.blocks.push(LiveBlock {
+            label: "main".to_owned(),
+            instrs: vec![
                 LiveInstruction {
                     live_before: HashSet::new(),
                     instr: Instruction::mov(1, "v"),
@@ -104,7 +104,7 @@ mod move_graph_tests {
                     live_after: HashSet::new(),
                 },
             ],
-        );
+        });
         let result = build_move_graph(&prog);
         let mut expected = LocationGraph::new();
         expected.add_edge("t".into(), "y".into());

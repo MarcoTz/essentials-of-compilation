@@ -17,5 +17,5 @@ pub use flow_graph::FlowGraph;
 pub use graph::LocationGraph;
 pub use interference_graph::build_interference_graph;
 pub use move_graph::build_move_graph;
-pub use program::AnnotProg;
+pub use program::LiveProg;
 pub use uncover_live::uncover_live;

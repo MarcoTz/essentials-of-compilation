@@ -1,11 +1,11 @@
-use crate::program::AnnotProg;
+use crate::program::LiveProg;
 use asm::{Arg, Instruction, Reg, VarArg};
 use std::collections::HashSet;
 
-pub fn collect_callee(prog: &AnnotProg) -> HashSet<Reg> {
+pub fn collect_callee(prog: &LiveProg) -> HashSet<Reg> {
     let mut callee = HashSet::new();
-    for (_, block) in prog.blocks.iter() {
-        for instr in block.iter() {
+    for block in prog.blocks.iter() {
+        for instr in block.instrs.iter() {
             callee = &callee | &collect_instr(&instr.instr);
         }
     }

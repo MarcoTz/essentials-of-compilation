@@ -1,11 +1,11 @@
-use crate::program::AnnotProg;
+use crate::program::LiveProg;
 use asm::{Instruction, VarArg};
 use std::collections::HashSet;
 
-pub fn collect_vars(prog: &AnnotProg) -> HashSet<String> {
+pub fn collect_vars(prog: &LiveProg) -> HashSet<String> {
     let mut vars = HashSet::new();
-    for (_, instrs) in prog.blocks.iter() {
-        for var_set in instrs.iter().map(|instr| collect_instr(&instr.instr)) {
+    for block in prog.blocks.iter() {
+        for var_set in block.instrs.iter().map(|instr| collect_instr(&instr.instr)) {
             vars.extend(var_set.into_iter());
         }
     }

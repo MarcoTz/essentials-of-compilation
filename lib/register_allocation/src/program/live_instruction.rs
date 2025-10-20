@@ -32,3 +32,13 @@ impl fmt::Display for LiveInstruction {
         )
     }
 }
+
+impl From<Instruction<VarArg>> for LiveInstruction {
+    fn from(instr: Instruction<VarArg>) -> LiveInstruction {
+        LiveInstruction {
+            instr,
+            live_before: HashSet::new(),
+            live_after: HashSet::new(),
+        }
+    }
+}
