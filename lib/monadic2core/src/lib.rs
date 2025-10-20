@@ -20,7 +20,7 @@ pub trait ExplicateControl {
 
 #[cfg(test)]
 mod explicate_tests {
-    use super::{ExplicateControl, explicate_control};
+    use super::explicate_control;
     use definitions::{BinaryOperation, Comparator};
 
     #[test]
