@@ -79,7 +79,7 @@ impl fmt::Display for Statement {
         match self {
             Statement::Return(atm) => write!(f, "{RETURN_CALL}({atm})"),
             Statement::Print(atm) => write!(f, "{PRINT_CALL}({atm})"),
-            Statement::Assign { var, bound } => write!(f, "let {var} = {bound}"),
+            Statement::Assign { var, bound } => write!(f, "let {var} = {bound};"),
             Statement::Set { var, bound } => write!(f, "set {var} = {bound};"),
             Statement::If {
                 cond,

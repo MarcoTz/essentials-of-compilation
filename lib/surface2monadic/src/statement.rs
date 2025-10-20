@@ -7,14 +7,14 @@ impl RemoveComplexOperands for surface::Statement {
         match self {
             surface::Statement::Return(exp) => {
                 let (mut stmts, exp) = exp.remove_complex_operands(used_vars);
-                let (assign, atm) = exp_to_atm(exp, used_vars);
+                let (assign, atm) = exp_to_atm(exp, used_vars, false);
                 stmts.push(assign);
                 stmts.push(monadic::Statement::Return(atm));
                 stmts
             }
             surface::Statement::Print(exp) => {
                 let (mut stmts, exp) = exp.remove_complex_operands(used_vars);
-                let (assign, atm) = exp_to_atm(exp, used_vars);
+                let (assign, atm) = exp_to_atm(exp, used_vars, false);
                 stmts.push(assign);
                 stmts.push(monadic::Statement::Print(atm));
                 stmts
@@ -35,7 +35,7 @@ impl RemoveComplexOperands for surface::Statement {
                 else_block,
             } => {
                 let (mut stmts, new_cond) = cond_exp.remove_complex_operands(used_vars);
-                let (assign, cond_atm) = exp_to_atm(new_cond, used_vars);
+                let (assign, cond_atm) = exp_to_atm(new_cond, used_vars, false);
                 stmts.push(assign);
                 let new_then = then_block.remove_complex_operands(used_vars);
                 let new_else = else_block.remove_complex_operands(used_vars);
@@ -47,9 +47,10 @@ impl RemoveComplexOperands for surface::Statement {
                 while_block,
             } => {
                 let (mut stmts, new_cond) = cond_exp.remove_complex_operands(used_vars);
-                let (assign, cond_atm) = exp_to_atm(new_cond, used_vars);
-                stmts.push(assign);
-                let new_while = while_block.remove_complex_operands(used_vars);
+                let (assign, cond_atm) = exp_to_atm(new_cond, used_vars, true);
+                stmts.push(assign.clone());
+                let mut new_while = while_block.remove_complex_operands(used_vars);
+                new_while.stmts.push(assign);
                 stmts.push(monadic::Statement::While {
                     cond: cond_atm,
                     while_block: new_while,

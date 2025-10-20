@@ -30,7 +30,7 @@ impl fmt::Display for Statement {
         match self {
             Statement::Assign { var, bound } => write!(f, "{var} = {bound};"),
             Statement::Set { var, bound } => write!(f, "{var} := {bound};"),
-            Statement::Print(exp) => write!(f, "{PRINT_CALL}({exp})"),
+            Statement::Print(exp) => write!(f, "{PRINT_CALL}({exp});"),
         }
     }
 }

@@ -14,9 +14,14 @@ pub trait RemoveComplexOperands {
 fn exp_to_atm(
     exp: monadic::Expression,
     used_vars: &mut HashSet<String>,
+    mutable: bool,
 ) -> (monadic::Statement, monadic::Atom) {
     let new_var = fresh_var(used_vars);
-    let let_exp = monadic::Statement::assign(&new_var, exp);
+    let let_exp = if mutable {
+        monadic::Statement::set(&new_var, exp)
+    } else {
+        monadic::Statement::assign(&new_var, exp)
+    };
     used_vars.insert(new_var.clone());
     let atm = monadic::Atom::Variable(new_var);
     (let_exp, atm)

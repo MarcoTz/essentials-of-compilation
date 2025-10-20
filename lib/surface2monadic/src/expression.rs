@@ -19,7 +19,7 @@ impl RemoveComplexOperands for surface::Expression {
                 let fst_atm = if let monadic::Expression::Atm(atm) = fst_last {
                     atm
                 } else {
-                    let (assignment, atm) = exp_to_atm(fst_last, used_vars);
+                    let (assignment, atm) = exp_to_atm(fst_last, used_vars, false);
                     exps.push(assignment);
                     atm
                 };
@@ -27,7 +27,7 @@ impl RemoveComplexOperands for surface::Expression {
                 let snd_atm = if let monadic::Expression::Atm(atm) = snd_last {
                     atm
                 } else {
-                    let (assignment, atm) = exp_to_atm(snd_last, used_vars);
+                    let (assignment, atm) = exp_to_atm(snd_last, used_vars, false);
                     exps.push(assignment);
                     atm
                 };
@@ -38,7 +38,7 @@ impl RemoveComplexOperands for surface::Expression {
                 if let monadic::Expression::Atm(atm) = last {
                     (exps, monadic::Expression::un(atm, op))
                 } else {
-                    let (assignment, atm) = exp_to_atm(last, used_vars);
+                    let (assignment, atm) = exp_to_atm(last, used_vars, false);
                     exps.push(assignment);
                     (exps, monadic::Expression::un(atm, op))
                 }
@@ -50,7 +50,7 @@ impl RemoveComplexOperands for surface::Expression {
                 let left_atm = if let monadic::Expression::Atm(atm) = left_last {
                     atm
                 } else {
-                    let (assignment, atm) = exp_to_atm(left_last, used_vars);
+                    let (assignment, atm) = exp_to_atm(left_last, used_vars, false);
                     exps.push(assignment);
                     atm
                 };
@@ -58,7 +58,7 @@ impl RemoveComplexOperands for surface::Expression {
                 let right_atm = if let monadic::Expression::Atm(atm) = right_last {
                     atm
                 } else {
-                    let (assignment, atm) = exp_to_atm(right_last, used_vars);
+                    let (assignment, atm) = exp_to_atm(right_last, used_vars, false);
                     exps.push(assignment);
                     atm
                 };
