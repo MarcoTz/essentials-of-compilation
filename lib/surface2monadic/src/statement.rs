@@ -24,6 +24,11 @@ impl RemoveComplexOperands for surface::Statement {
                 stmts.push(monadic::Statement::assign(&var, new_bind));
                 stmts
             }
+            surface::Statement::Set { var, bound } => {
+                let (mut stmts, new_bind) = bound.remove_complex_operands(used_vars);
+                stmts.push(monadic::Statement::set(&var, new_bind));
+                stmts
+            }
             surface::Statement::If {
                 cond_exp,
                 then_block,

@@ -10,6 +10,10 @@ pub enum Statement {
         var: String,
         bound: Expression,
     },
+    Set {
+        var: String,
+        bound: Expression,
+    },
     If {
         cond: Atom,
         then_block: Block,
@@ -24,6 +28,13 @@ pub enum Statement {
 impl Statement {
     pub fn assign(var: &str, bound_exp: Expression) -> Statement {
         Statement::Assign {
+            var: var.to_owned(),
+            bound: bound_exp,
+        }
+    }
+
+    pub fn set(var: &str, bound_exp: Expression) -> Statement {
+        Statement::Set {
             var: var.to_owned(),
             bound: bound_exp,
         }
@@ -48,6 +59,11 @@ impl UsedVars for Statement {
                 used.insert(var.clone());
                 used
             }
+            Statement::Set { var, bound } => {
+                let mut used = bound.used_vars();
+                used.insert(var.clone());
+                used
+            }
             Statement::If {
                 cond: cond_exp,
                 then_block,
@@ -64,6 +80,7 @@ impl fmt::Display for Statement {
             Statement::Return(atm) => write!(f, "{RETURN_CALL}({atm})"),
             Statement::Print(atm) => write!(f, "{PRINT_CALL}({atm})"),
             Statement::Assign { var, bound } => write!(f, "let {var} = {bound}"),
+            Statement::Set { var, bound } => write!(f, "set {var} = {bound};"),
             Statement::If {
                 cond,
                 then_block,

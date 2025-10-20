@@ -35,6 +35,13 @@ impl Uniquify for Statement {
                 substitutions.insert(var, new_var.clone());
                 Statement::assign(&new_var, new_bound)
             }
+            Statement::Set { var, bound } => {
+                let new_bound = bound.uniquify(substitutions);
+                Statement::Set {
+                    var,
+                    bound: new_bound,
+                }
+            }
             Statement::If {
                 cond_exp,
                 then_block,

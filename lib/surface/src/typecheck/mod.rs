@@ -43,6 +43,17 @@ impl Typecheck for Statement {
                 var_types.insert(var.clone(), bound_ty);
                 Ok(Type::Unit)
             }
+            Statement::Set { var, bound } => {
+                let bound_ty = bound.check(var_types)?;
+                match var_types.get(var) {
+                    None => {
+                        var_types.insert(var.clone(), bound_ty.clone());
+                        Ok(bound_ty)
+                    }
+                    Some(ty) if *ty == bound_ty => Ok(bound_ty),
+                    Some(ty) => Err(Error::mismatch(bound_ty, ty.clone())),
+                }
+            }
             Statement::If {
                 cond_exp,
                 then_block,

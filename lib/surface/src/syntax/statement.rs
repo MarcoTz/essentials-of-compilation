@@ -13,6 +13,10 @@ pub enum Statement {
         var: String,
         bound: Expression,
     },
+    Set {
+        var: String,
+        bound: Expression,
+    },
     If {
         cond_exp: Expression,
         then_block: Block,
@@ -49,6 +53,7 @@ impl UsedVars for Statement {
             Statement::Assignment { var, bound } => {
                 &HashSet::from([var.clone()]) | &bound.used_vars()
             }
+            Statement::Set { var, bound } => &HashSet::from([var.clone()]) | &bound.used_vars(),
             Statement::If {
                 cond_exp,
                 then_block,
@@ -70,6 +75,13 @@ impl SubstVar for Statement {
             Statement::Assignment { var, bound } => {
                 let bound_subst = bound.subst_var(old, new);
                 Statement::Assignment {
+                    var,
+                    bound: bound_subst,
+                }
+            }
+            Statement::Set { var, bound } => {
+                let bound_subst = bound.subst_var(old, new);
+                Statement::Set {
                     var,
                     bound: bound_subst,
                 }
@@ -100,6 +112,7 @@ impl fmt::Display for Statement {
             Statement::Return(exp) => write!(f, "{RETURN_CALL}({exp});"),
             Statement::Print(exp) => write!(f, "{PRINT_CALL}({exp});"),
             Statement::Assignment { var, bound } => write!(f, "let {var} = {bound};"),
+            Statement::Set { var, bound } => write!(f, "set {var} = {bound};"),
             Statement::If {
                 cond_exp,
                 then_block,

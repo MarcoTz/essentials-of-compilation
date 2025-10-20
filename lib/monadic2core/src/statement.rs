@@ -20,6 +20,11 @@ impl ExplicateControl for monadic::Statement {
                 state.push_stmt(core::Statement::assign(&var, bound_exp));
                 Ok(())
             }
+            monadic::Statement::Set { var, bound } => {
+                let bound_exp = bound.explicate_control(state)?;
+                state.push_stmt(core::Statement::set(&var, bound_exp));
+                Ok(())
+            }
             monadic::Statement::If {
                 cond: cond_exp,
                 then_block,

@@ -9,6 +9,7 @@ impl SelectInstructions for core::Statement {
             core::Statement::Assign { var, bound } => {
                 bound.select_instructions(asm::VarArg::Var(var))
             }
+            core::Statement::Set { var, bound } => bound.select_instructions(asm::VarArg::Var(var)),
             core::Statement::Print(atm) => {
                 let arg_loc = atm.select_instructions(());
                 let mov = asm::Instruction::MovQ {
