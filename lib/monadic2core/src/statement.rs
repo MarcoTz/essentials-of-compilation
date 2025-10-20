@@ -21,7 +21,7 @@ impl ExplicateControl for monadic::Statement {
                 Ok(())
             }
             monadic::Statement::If {
-                cond_exp,
+                cond: cond_exp,
                 then_block,
                 else_block,
             } => {
@@ -33,14 +33,26 @@ impl ExplicateControl for monadic::Statement {
                     then_label: then_label.clone(),
                     else_label: else_label.clone(),
                 };
-                println!("finishing block from if statement");
                 state.next_block(cont);
-                println!("explicating then block with label {then_label}");
                 state.current_label = then_label;
                 then_block.explicate_control(state)?;
-                println!("explicating else block with label {else_label}");
                 state.current_label = else_label;
                 else_block.explicate_control(state)?;
+                Ok(())
+            }
+            monadic::Statement::While { cond, while_block } => {
+                let cond = cond.explicate_control(state)?;
+                let while_label = state.fresh_label();
+                let next_label = state.fresh_label();
+                let cont = core::Continuation::While {
+                    cond,
+                    while_label: while_label.clone(),
+                    next_label: next_label.clone(),
+                };
+                state.next_block(cont);
+                state.current_label = while_label;
+                while_block.explicate_control(state)?;
+                state.current_label = next_label;
                 Ok(())
             }
         }

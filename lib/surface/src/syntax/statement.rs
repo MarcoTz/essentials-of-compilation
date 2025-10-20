@@ -18,6 +18,10 @@ pub enum Statement {
         then_block: Block,
         else_block: Block,
     },
+    While {
+        cond_exp: Expression,
+        while_block: Block,
+    },
 }
 
 impl Statement {
@@ -50,6 +54,10 @@ impl UsedVars for Statement {
                 then_block,
                 else_block,
             } => &(&cond_exp.used_vars() | &then_block.used_vars()) | &else_block.used_vars(),
+            Statement::While {
+                cond_exp,
+                while_block,
+            } => &cond_exp.used_vars() | &while_block.used_vars(),
         }
     }
 }
@@ -75,6 +83,13 @@ impl SubstVar for Statement {
                 then_block: then_block.subst_var(old, new),
                 else_block: else_block.subst_var(old, new),
             },
+            Statement::While {
+                cond_exp,
+                while_block,
+            } => Statement::While {
+                cond_exp: cond_exp.subst_var(old, new),
+                while_block: while_block.subst_var(old, new),
+            },
         }
     }
 }
@@ -94,6 +109,14 @@ impl fmt::Display for Statement {
                 "if {cond_exp} {{\n\t{}\n}} else {{\n\t{}\n}};",
                 then_block.to_string().replace("\n", "\n\t"),
                 else_block.to_string().replace("\n", "\n\t"),
+            ),
+            Statement::While {
+                cond_exp,
+                while_block,
+            } => write!(
+                f,
+                "while {cond_exp} {{\n\t{}\n}}",
+                while_block.to_string().replace("\n", "\n\t")
             ),
         }
     }

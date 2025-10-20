@@ -60,6 +60,17 @@ impl Typecheck for Statement {
                     Err(Error::mismatch(then_ty, else_ty))
                 }
             }
+            Statement::While {
+                cond_exp,
+                while_block,
+            } => {
+                let cond_ty = cond_exp.check(var_types)?;
+                if cond_ty != Type::Bool {
+                    return Err(Error::mismatch(cond_ty, Type::Bool));
+                }
+                while_block.check(var_types)?;
+                Ok(Type::Unit)
+            }
         }
     }
 }

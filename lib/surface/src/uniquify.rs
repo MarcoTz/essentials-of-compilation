@@ -45,6 +45,17 @@ impl Uniquify for Statement {
                 let new_else = else_block.uniquify(substitutions);
                 Statement::cond(new_cond, new_then, new_else)
             }
+            Statement::While {
+                cond_exp,
+                while_block,
+            } => {
+                let new_cond = cond_exp.uniquify(substitutions);
+                let new_while = while_block.uniquify(substitutions);
+                Statement::While {
+                    cond_exp: new_cond,
+                    while_block: new_while,
+                }
+            }
         }
     }
 }

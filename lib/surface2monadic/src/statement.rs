@@ -37,6 +37,20 @@ impl RemoveComplexOperands for surface::Statement {
                 stmts.push(monadic::Statement::cond(cond_atm, new_then, new_else));
                 stmts
             }
+            surface::Statement::While {
+                cond_exp,
+                while_block,
+            } => {
+                let (mut stmts, new_cond) = cond_exp.remove_complex_operands(used_vars);
+                let (assign, cond_atm) = exp_to_atm(new_cond, used_vars);
+                stmts.push(assign);
+                let new_while = while_block.remove_complex_operands(used_vars);
+                stmts.push(monadic::Statement::While {
+                    cond: cond_atm,
+                    while_block: new_while,
+                });
+                stmts
+            }
         }
     }
 }

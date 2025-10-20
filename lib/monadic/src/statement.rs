@@ -11,9 +11,13 @@ pub enum Statement {
         bound: Expression,
     },
     If {
-        cond_exp: Atom,
+        cond: Atom,
         then_block: Block,
         else_block: Block,
+    },
+    While {
+        cond: Atom,
+        while_block: Block,
     },
 }
 
@@ -27,7 +31,7 @@ impl Statement {
 
     pub fn cond(cond_exp: Atom, then_block: Block, else_block: Block) -> Statement {
         Statement::If {
-            cond_exp,
+            cond: cond_exp,
             then_block,
             else_block,
         }
@@ -45,10 +49,11 @@ impl UsedVars for Statement {
                 used
             }
             Statement::If {
-                cond_exp,
+                cond: cond_exp,
                 then_block,
                 else_block,
             } => &cond_exp.used_vars() | &(&then_block.used_vars() | &else_block.used_vars()),
+            Statement::While { cond, while_block } => &cond.used_vars() | &while_block.used_vars(),
         }
     }
 }
@@ -60,14 +65,19 @@ impl fmt::Display for Statement {
             Statement::Print(atm) => write!(f, "{PRINT_CALL}({atm})"),
             Statement::Assign { var, bound } => write!(f, "let {var} = {bound}"),
             Statement::If {
-                cond_exp,
+                cond,
                 then_block,
                 else_block,
             } => write!(
                 f,
-                "if {cond_exp} {{\n\t{}\n}} else {{\n\t{}\n}};",
+                "if {cond} {{\n\t{}\n}} else {{\n\t{}\n}};",
                 then_block.to_string().replace("\n", "\n\t"),
                 else_block.to_string().replace("\n", "\n\t"),
+            ),
+            Statement::While { cond, while_block } => write!(
+                f,
+                "while {cond} {{\n\t{}\n}}",
+                while_block.to_string().replace("\n", "\n\t")
             ),
         }
     }

@@ -9,6 +9,7 @@ pub fn parse_statement(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
             parse_statement(stmt_pair)
         }
         Rule::if_statement => parse_if(pair),
+        Rule::while_statement => parse_while(pair),
         Rule::print_statement => parse_print(pair),
         Rule::let_statement => parse_let(pair),
         r => Err(Error::unexpected(r, "Statement")),
@@ -45,6 +46,26 @@ fn parse_if(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
         Block::new(then_stmts),
         Block::new(else_stmts),
     ))
+}
+
+fn parse_while(pair: Pair<'_, Rule>) -> Result<Statement, Error> {
+    let mut inner = pair.into_inner();
+    let exp_pair = inner.next().ok_or(Error::missing(Rule::expression))?;
+    let cond_exp = parse_expression(exp_pair)?;
+    let mut stmts = vec![];
+    for next in inner {
+        let mut next_inner = next.into_inner();
+        let stmt_rule = next_inner.next().ok_or(Error::missing(Rule::statement))?;
+        if let Some(n) = next_inner.next() {
+            return Err(Error::remaining(n.as_rule()));
+        }
+        let stmt = parse_statement(stmt_rule)?;
+        stmts.push(stmt);
+    }
+    Ok(Statement::While {
+        cond_exp,
+        while_block: Block::new(stmts),
+    })
 }
 
 fn parse_print(pair: Pair<'_, Rule>) -> Result<Statement, Error> {

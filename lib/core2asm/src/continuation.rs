@@ -36,6 +36,23 @@ impl SelectInstructions for core::Continuation {
                 let jump_false = asm::Instruction::Jump { label: else_label };
                 vec![cmp, jump_true, jump_false]
             }
+            core::Continuation::While {
+                cond,
+                while_label,
+                next_label,
+            } => {
+                let cond_dest = cond.select_instructions(());
+                let cmp = asm::Instruction::CmpQ {
+                    left: cond_dest,
+                    right: 1.into(),
+                };
+                let jump_true = asm::Instruction::JumpCC {
+                    cc: asm::Cc::E,
+                    label: while_label,
+                };
+                let jump_false = asm::Instruction::Jump { label: next_label };
+                vec![cmp, jump_true, jump_false]
+            }
         }
     }
 }
