@@ -6,11 +6,16 @@ pub enum Error {
     FreeVar(String),
     TypeMismatch { fst: Type, snd: Type },
     EmptyBlock,
+    OutOfBounds { found: usize, len: usize },
 }
 
 impl Error {
     pub fn mismatch(fst: Type, snd: Type) -> Error {
         Error::TypeMismatch { fst, snd }
+    }
+
+    pub fn out_of_bounds(found: usize, len: usize) -> Error {
+        Error::OutOfBounds { found, len }
     }
 }
 
@@ -20,6 +25,9 @@ impl fmt::Display for Error {
             Error::FreeVar(v) => write!(f, "Free variable {v}"),
             Error::TypeMismatch { fst, snd } => write!(f, "Type mismatch {fst} != {snd}"),
             Error::EmptyBlock => write!(f, "Cannot have block with no expressions"),
+            Error::OutOfBounds { found, len } => {
+                write!(f, "Index {found} is out of Bounds for length {len}")
+            }
         }
     }
 }

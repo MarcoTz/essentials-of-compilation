@@ -17,6 +17,11 @@ pub enum Statement {
         var: String,
         bound: Expression,
     },
+    SetTuple {
+        var: String,
+        index: usize,
+        bound: Expression,
+    },
     If {
         cond_exp: Expression,
         then_block: Block,
@@ -61,6 +66,9 @@ impl UsedVars for Statement {
                 &HashSet::from([var.clone()]) | &bound.used_vars()
             }
             Statement::Set { var, bound } => &HashSet::from([var.clone()]) | &bound.used_vars(),
+            Statement::SetTuple { var, bound, .. } => {
+                &HashSet::from([var.clone()]) | &bound.used_vars()
+            }
             Statement::If {
                 cond_exp,
                 then_block,
@@ -86,6 +94,11 @@ impl SubstVar for Statement {
                     bound: bound_subst,
                 }
             }
+            Statement::SetTuple { var, index, bound } => Statement::SetTuple {
+                var,
+                index,
+                bound: bound.subst_var(old, new),
+            },
             Statement::Set { var, bound } => {
                 let bound_subst = bound.subst_var(old, new);
                 Statement::Set {
@@ -119,6 +132,7 @@ impl fmt::Display for Statement {
             Statement::Return(exp) => write!(f, "{RETURN_CALL}({exp});"),
             Statement::Print(exp) => write!(f, "{PRINT_CALL}({exp});"),
             Statement::Assignment { var, bound } => write!(f, "let {var} = {bound};"),
+            Statement::SetTuple { var, index, bound } => write!(f, "{var}[{index}] = {bound};"),
             Statement::Set { var, bound } => write!(f, "set {var} = {bound};"),
             Statement::If {
                 cond_exp,

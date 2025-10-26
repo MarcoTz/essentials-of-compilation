@@ -24,6 +24,19 @@ pub enum Expression {
         cmp: Comparator,
         right: Box<Expression>,
     },
+    Tuple {
+        inner: Vec<Expression>,
+    },
+    TupleAccess {
+        tup: Box<Expression>,
+        index: usize,
+    },
+    Reference {
+        inner: Box<Expression>,
+    },
+    Dereference {
+        inner: Box<Expression>,
+    },
 }
 
 impl Expression {
@@ -73,6 +86,12 @@ impl UsedVars for Expression {
             Expression::BinOp { fst, snd, .. } => &fst.used_vars() | &snd.used_vars(),
             Expression::UnOp { arg, .. } => arg.used_vars(),
             Expression::Cmp { left, right, .. } => &left.used_vars() | &right.used_vars(),
+            Expression::Tuple { inner } => inner
+                .iter()
+                .fold(HashSet::new(), |vars, exp| &vars | &exp.used_vars()),
+            Expression::TupleAccess { tup, .. } => tup.used_vars(),
+            Expression::Reference { inner } => inner.used_vars(),
+            Expression::Dereference { inner } => inner.used_vars(),
         }
     }
 }
@@ -99,6 +118,22 @@ impl SubstVar for Expression {
             Expression::Cmp { left, cmp, right } => {
                 Expression::cmp(left.subst_var(old, new), cmp, right.subst_var(old, new))
             }
+            Expression::Tuple { inner } => Expression::Tuple {
+                inner: inner
+                    .into_iter()
+                    .map(|exp| exp.subst_var(old, new))
+                    .collect(),
+            },
+            Expression::TupleAccess { tup, index } => Expression::TupleAccess {
+                tup: Box::new(tup.subst_var(old, new)),
+                index,
+            },
+            Expression::Reference { inner } => Expression::Reference {
+                inner: Box::new(inner.subst_var(old, new)),
+            },
+            Expression::Dereference { inner } => Expression::Dereference {
+                inner: Box::new(inner.subst_var(old, new)),
+            },
         }
     }
 }
@@ -113,6 +148,18 @@ impl fmt::Display for Expression {
             Expression::BinOp { fst, op, snd } => write!(f, "{fst} {op} {snd}"),
             Expression::UnOp { arg, op } => write!(f, "{op}{arg}"),
             Expression::Cmp { left, cmp, right } => write!(f, "{left}{cmp}{right}"),
+            Expression::Tuple { inner } => write!(
+                f,
+                "({})",
+                inner
+                    .iter()
+                    .map(|exp| exp.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            ),
+            Expression::TupleAccess { tup, index } => write!(f, "{tup}[{index}]"),
+            Expression::Reference { inner } => write!(f, "&{inner}"),
+            Expression::Dereference { inner } => write!(f, "*{inner}"),
         }
     }
 }

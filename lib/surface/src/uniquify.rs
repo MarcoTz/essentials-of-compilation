@@ -35,6 +35,11 @@ impl Uniquify for Statement {
                 substitutions.insert(var, new_var.clone());
                 Statement::assign(&new_var, new_bound)
             }
+            Statement::SetTuple { var, index, bound } => Statement::SetTuple {
+                var,
+                index,
+                bound: bound.uniquify(substitutions),
+            },
             Statement::Set { var, bound } => {
                 let new_bound = bound.uniquify(substitutions);
                 Statement::Set {
@@ -91,6 +96,22 @@ impl Uniquify for Expression {
                 let right_unique = right.uniquify(substitutions);
                 Expression::cmp(left_unique, cmp, right_unique)
             }
+            Expression::Tuple { inner } => Expression::Tuple {
+                inner: inner
+                    .into_iter()
+                    .map(|exp| exp.uniquify(substitutions))
+                    .collect(),
+            },
+            Expression::TupleAccess { tup, index } => Expression::TupleAccess {
+                tup: Box::new(tup.uniquify(substitutions)),
+                index,
+            },
+            Expression::Reference { inner } => Expression::Reference {
+                inner: Box::new(inner.uniquify(substitutions)),
+            },
+            Expression::Dereference { inner } => Expression::Dereference {
+                inner: Box::new(inner.uniquify(substitutions)),
+            },
         }
     }
 }

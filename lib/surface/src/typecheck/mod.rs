@@ -5,7 +5,11 @@ use std::collections::HashMap;
 mod errors;
 pub use errors::Error;
 
+/// trait used for type checking the language
+/// implemented for all kinds of expressions (expression,statement,etc)
 pub trait Typecheck {
+    /// check self returning the type if successful
+    /// var_types contains types of variables in scope
     fn check(&self, var_types: &mut HashMap<String, Type>) -> Result<Type, Error>;
 }
 
@@ -43,6 +47,19 @@ impl Typecheck for Statement {
                 var_types.insert(var.clone(), bound_ty);
                 Ok(Type::Unit)
             }
+            Statement::SetTuple { var, index, bound } => {
+                let var_ty = var_types.get(var).ok_or(Error::FreeVar(var.clone()))?;
+                let tuple_tys = var_ty.clone().as_tuple()?;
+                let indiced_type = tuple_tys
+                    .get(*index)
+                    .ok_or(Error::out_of_bounds(*index, tuple_tys.len()))?;
+                let bound_ty = bound.check(var_types)?;
+                if *indiced_type != bound_ty {
+                    Err(Error::mismatch(bound_ty, indiced_type.clone()))
+                } else {
+                    Ok(Type::Unit)
+                }
+            }
             Statement::Set { var, bound } => {
                 let bound_ty = bound.check(var_types)?;
                 match var_types.get(var) {
@@ -79,7 +96,9 @@ impl Typecheck for Statement {
                 if cond_ty != Type::Bool {
                     return Err(Error::mismatch(cond_ty, Type::Bool));
                 }
+                let old_vars = var_types.clone();
                 while_block.check(var_types)?;
+                *var_types = old_vars;
                 Ok(Type::Unit)
             }
         }
@@ -145,6 +164,30 @@ impl Typecheck for Expression {
                     return Err(Error::mismatch(left_ty, Type::Integer));
                 }
                 Ok(Type::Bool)
+            }
+            Expression::Tuple { inner } => {
+                let mut inner_tys = vec![];
+                for exp in inner.iter() {
+                    inner_tys.push(exp.check(var_types)?);
+                }
+                Ok(Type::Tuple(inner_tys))
+            }
+            Expression::TupleAccess { tup, index } => {
+                let tup_ty = tup.check(var_types)?;
+                let inner_tys = tup_ty.as_tuple()?;
+                let indiced = inner_tys
+                    .get(*index)
+                    .ok_or(Error::out_of_bounds(*index, inner_tys.len()))?;
+                Ok(indiced.clone())
+            }
+            Expression::Reference { inner } => {
+                let inner_ty = inner.check(var_types)?;
+                Ok(Type::Reference(Box::new(inner_ty)))
+            }
+            Expression::Dereference { inner } => {
+                let ref_ty = inner.check(var_types)?;
+                let ref_inner = ref_ty.as_ref()?;
+                Ok(ref_inner)
             }
         }
     }
