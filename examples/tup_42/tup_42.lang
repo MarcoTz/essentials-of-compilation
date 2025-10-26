@@ -1,0 +1,3 @@
+let v = (40,2);
+let x = v[0] + v[1];
+print_int(x);

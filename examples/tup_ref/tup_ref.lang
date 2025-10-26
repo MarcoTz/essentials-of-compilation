@@ -1,0 +1,3 @@
+let tup = (1,2);
+let ref = &tup;
+print_int(*ref[0]);
