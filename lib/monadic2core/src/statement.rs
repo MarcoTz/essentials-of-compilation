@@ -46,13 +46,15 @@ impl ExplicateControl for monadic::Statement {
             }
             monadic::Statement::While { cond, while_block } => {
                 let cond = cond.explicate_control(state)?;
+                let block_label = state.fresh_label();
                 let next_label = state.fresh_label();
                 let cont = core::Continuation::If {
                     cond,
-                    then_label: state.current_label.clone(),
+                    then_label: block_label.clone(),
                     else_label: next_label.clone(),
                 };
                 state.next_block(cont);
+                state.current_label = block_label;
                 while_block.explicate_control(state)?;
                 state.current_label = next_label;
                 Ok(())
