@@ -48,23 +48,23 @@ impl Driver {
     }
 
     pub fn run(self) -> Result<(), Error> {
-        let parsed = Parse {
+        let parse = Parse {
             source: self.source.clone(),
-        }
-        .run_debug(&self.paths, self.debug)?;
-        let checked = parsed.run_debug(&self.paths, self.debug)?;
-        let uniquified = checked.run_debug(&self.paths, self.debug)?;
-        let removed = uniquified.run_debug(&self.paths, self.debug)?;
-        let explicated = removed.run_debug(&self.paths, self.debug)?;
-        let selected = explicated.run_debug(&self.paths, self.debug)?;
-        let uncovered = selected.run_debug(&self.paths, self.debug)?;
-        let interference_built = uncovered.run_debug(&self.paths, self.debug)?;
-        let colored = interference_built.run_debug(&self.paths, self.debug)?;
-        let assigned = colored.run_debug(&self.paths, self.debug)?;
-        let patched = assigned.run_debug(&self.paths, self.debug)?;
-        let finalized = patched.run_debug(&self.paths, self.debug)?;
-        let assembled = finalized.run_debug(&self.paths, self.debug)?;
-        assembled.run_debug(&self.paths, self.debug)?;
+        };
+        let check_types = parse.run_debug(&self.paths, self.debug)?;
+        let uniquify = check_types.run_debug(&self.paths, self.debug)?;
+        let rco = uniquify.run_debug(&self.paths, self.debug)?;
+        let explicate = rco.run_debug(&self.paths, self.debug)?;
+        let select_instrs = explicate.run_debug(&self.paths, self.debug)?;
+        let uncover = select_instrs.run_debug(&self.paths, self.debug)?;
+        let build_interference = uncover.run_debug(&self.paths, self.debug)?;
+        let color_graph = build_interference.run_debug(&self.paths, self.debug)?;
+        let assign_hoems = color_graph.run_debug(&self.paths, self.debug)?;
+        let patch_instrs = assign_hoems.run_debug(&self.paths, self.debug)?;
+        let generate_prelude_conclusion = patch_instrs.run_debug(&self.paths, self.debug)?;
+        let assemble = generate_prelude_conclusion.run_debug(&self.paths, self.debug)?;
+        let link = assemble.run_debug(&self.paths, self.debug)?;
+        link.run_debug(&self.paths, self.debug)?;
         Ok(())
     }
 }

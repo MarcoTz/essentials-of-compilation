@@ -4,7 +4,7 @@ use std::{convert::Infallible, fmt, path::PathBuf};
 pub enum Error {
     Infallible,
     Parse(parser::Error),
-    AssignHomes(register_allocation::Error),
+    RegisterAllocation(register_allocation::Error),
     Typecheck(surface::typecheck::Error),
     ExplicateControl(monadic2core::Error),
     ReadFile(PathBuf),
@@ -22,7 +22,7 @@ impl fmt::Display for Error {
         match self {
             Error::Infallible => f.write_str(""),
             Error::Parse(err) => write!(f, "Error during parsing:\n{err}"),
-            Error::AssignHomes(err) => write!(f, "Error during assign homes:\n{err}"),
+            Error::RegisterAllocation(err) => write!(f, "Error during register allocation:\n{err}"),
             Error::Typecheck(err) => write!(f, "Error during typechecking:\n{err}"),
             Error::ExplicateControl(err) => write!(f, "Error in explicate control:\n{err}"),
             Error::ReadFile(path) => write!(f, "Could not read source file {path:?}"),
@@ -53,7 +53,7 @@ impl From<parser::Error> for Error {
 
 impl From<register_allocation::Error> for Error {
     fn from(err: register_allocation::Error) -> Error {
-        Error::AssignHomes(err)
+        Error::RegisterAllocation(err)
     }
 }
 

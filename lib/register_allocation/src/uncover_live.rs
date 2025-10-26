@@ -13,6 +13,9 @@ pub fn uncover_live(prog: VarProgram) -> Result<LiveProg, Error> {
         "conclusion".to_owned(),
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
+    for label in annot.blocks.iter().map(|bl| &bl.label) {
+        label2live.insert(label.clone(), HashSet::new());
+    }
 
     let mut changing = true;
     while changing {

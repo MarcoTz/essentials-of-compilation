@@ -15,7 +15,7 @@ struct Args {
     verbose: bool,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let compiler = Driver::new(
         args.verbose,
@@ -26,4 +26,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     compiler.run()?;
     Ok(())
+}
+
+fn main() {
+    match run_cli() {
+        Ok(_) => (),
+        Err(err) => eprintln!("Driver encountered an error\n{err}"),
+    }
 }
