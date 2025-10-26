@@ -14,13 +14,14 @@ pub fn uncover_live(prog: VarProgram) -> Result<LiveProg, Error> {
         HashSet::from([Reg::Rax.into(), Reg::Rsp.into()]),
     );
 
-    let mut done = true;
-    while !done {
+    let mut changing = true;
+    while changing {
+        changing = false;
         for block in annot.blocks.iter_mut() {
             if block.label == "conclusion" || block.label == "main" {
                 continue;
             }
-            done = done && uncover_block(block, &label2live)?;
+            changing = changing || uncover_block(block, &label2live)?;
             label2live.insert(block.label.clone(), (block.instrs[0]).live_before.clone());
         }
     }
@@ -35,13 +36,14 @@ fn uncover_block(
     let mut last_after = HashSet::new();
 
     block.instrs.reverse();
-    let mut done = true;
+    let mut changing = false;
     for instr in block.instrs.iter_mut() {
-        done = done && live_before(instr, &last_after, label2live)?;
+        changing = changing || live_before(instr, &last_after, label2live)?;
+        instr.live_after = last_after;
         last_after = instr.live_before.clone();
     }
     block.instrs.reverse();
-    Ok(done)
+    Ok(changing)
 }
 
 fn live_before(
@@ -49,20 +51,21 @@ fn live_before(
     live_after: &HashSet<Location>,
     label2live: &HashMap<String, HashSet<Location>>,
 ) -> Result<bool, Error> {
-    let old_live = instr.live_before.clone();
     if let Instruction::Jump { label } = &instr.instr {
         let live_before = label2live
             .get(label)
             .ok_or(Error::MissingLiveBefore(label.clone()))?
             .clone();
+        let changed = live_before != instr.live_before;
         instr.live_before = &instr.live_before | &live_before;
-        return Ok(instr.live_before == old_live);
+        return Ok(changed);
     }
     let written = written_locations(instr);
     let read = read_locations(instr);
     let next_live_before = &(live_after - &written) | &read;
+    let changed = next_live_before != instr.live_before;
     instr.live_before = &instr.live_before | &next_live_before;
-    Ok(instr.live_before == old_live)
+    Ok(changed)
 }
 
 pub fn written_locations(instr: &LiveInstruction) -> HashSet<Location> {
