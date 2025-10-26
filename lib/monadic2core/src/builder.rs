@@ -4,6 +4,7 @@ pub struct BlockAccum {
     blocks: Vec<core::Block>,
     pub current_statements: Vec<core::Statement>,
     pub current_label: String,
+    pub next_cont: Option<core::Continuation>,
     used_labels: HashSet<String>,
 }
 
@@ -14,6 +15,7 @@ impl BlockAccum {
             current_statements: vec![],
             current_label: "start".to_owned(),
             used_labels: HashSet::from(["start".to_owned()]),
+            next_cont: None,
         }
     }
 

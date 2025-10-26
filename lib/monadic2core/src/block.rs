@@ -7,7 +7,11 @@ impl ExplicateControl for monadic::Block {
             stmt.explicate_control(accum)?;
         }
         if !accum.current_statements.is_empty() {
-            accum.next_block(core::Continuation::Return(core::Atom::Unit));
+            let cont = accum
+                .next_cont
+                .clone()
+                .unwrap_or(core::Continuation::Return(core::Atom::Unit));
+            accum.next_block(cont);
         }
         Ok(())
     }

@@ -53,9 +53,11 @@ impl ExplicateControl for monadic::Statement {
                     then_label: block_label.clone(),
                     else_label: next_label.clone(),
                 };
-                state.next_block(cont);
+                state.next_block(cont.clone());
                 state.current_label = block_label;
+                state.next_cont = Some(cont);
                 while_block.explicate_control(state)?;
+                state.next_cont = None;
                 state.current_label = next_label;
                 Ok(())
             }
